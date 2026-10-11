@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1546 (beta):** **Smoother scrolling in Firefox:** the sky and hills now ride on their own layers that Firefox slides by itself, so the game draws about half as much each frame and Firefox no longer drops frames (Ice Cream Parlor and every other stage). Chrome, Edge and phones draw exactly as before. The Test Lab can switch it back for comparison.
 - **2026.10.11.1537 (beta):** **Test Lab, for Firefox smoothness:** a new 'Background: slid by the browser' switch makes the sky and hills separate layers that the browser moves by itself, so the game draws about half as much each frame (measured 9 to 4 ms in Firefox). It looks the same. It is off unless you switch it on. Two new rows in the smoothness report compare it.
 - **2026.10.11.1505 (beta):** **Test Lab:** the 'Drawing sharpness' buttons now include lighter choices (1x and 0.8x, drawn smaller and stretched by the browser, like a phone does), and the smoothness test no longer lets the automatic quality control change things between rows. The game itself is unchanged.
 - **2026.10.11.1455 (beta):** **Test Lab:** new 'Drawing sharpness' buttons draw the game at 2x or 2.5x and let the browser shrink it (this is what makes a phone look smooth), so you can judge by eye whether it fixes the laptop. Two new rows in the smoothness report compare it. The game itself is unchanged.

@@ -2634,7 +2634,7 @@ return { layersOf: layersOf, get tlast() { return TLAST; },  tbmax: TBMAX, arena
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1537';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1546';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -4911,8 +4911,8 @@ function outlinedC(text, x, y, size, fill, align, base, lazy) {   // text that c
   for (i = 0; i < text.length; i++) { e = pics[i]; if (e) ctx.drawImage(e.c, Math.round((cx - e.pad * s) * kk) / kk, Math.round((y - e.h / 2 * s) * kk) / kk, e.c.width / kk * s, e.c.height / kk * s); cx += ws[i]; }
 }
 function shownTheme() { return bgT < 0.5 ? bgFrom : bgTheme; }   // stage change = a quick fade through white, so only ONE scene is drawn per frame (two at once was the big hitch)
-/* Test Lab (Firefox): the sky and the hills as separate page layers that the browser slides by itself, so the page thread draws only the foreground. Off unless switched on. */
-var BKMODE = false, bkEl = $('bk'), bkTh = -1, bkOn = false, bkBands = [], bkXf = '', bkLast = [];
+/* Firefox: the sky and the hills are separate page layers that the browser slides by itself, so the page thread draws only the foreground (Firefox drew about twice as long per frame as it can show: the compositor then dropped one frame in seven; measured on a laptop, 2026-10-11). Other browsers draw everything on the canvas. */
+var BKDEF = /Firefox\//.test(navigator.userAgent), BKMODE = BKDEF, bkEl = $('bk'), bkTh = -1, bkOn = false, bkBands = [], bkXf = '', bkLast = [];
 function bkHide() { if (bkOn) { bkOn = false; bkEl.hidden = true; } }
 function bkReset() { bkTh = -1; bkLast = []; }
 function bkBuild(th) {
