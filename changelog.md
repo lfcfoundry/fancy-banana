@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1444 (beta):** **Test Lab:** Fancy now bobs up and down with real flaps during the smoothness test (he used to hang still), and three new switches let the canvas ride on its own browser layer, to see whether that makes forward stages as smooth as backward ones. Two new rows in the smoothness report compare them. The game itself is unchanged.
 - **2026.10.11.1428 (beta):** **Backward stages are much smoother in Chrome and other non-Firefox browsers:** the whole picture is now turned over in one step instead of picture by picture (it was dropping to about 30 frames a second). **Test Lab:** an automatic Smoothness test measures every stage setting on your own device and writes a report.
 - **2026.10.11.1352 (beta):** **Test Lab:** jumping to a stage no longer carries the launcher's speed boost, so the stage starts calmly with its first gate a couple of seconds away. The game itself is unchanged.
 - **2026.10.11.1344 (beta):** **Test Lab:** jumping to a stage now works at once (Stage 1 to 5 buttons), with a switch to make the stage backward always, never or random, and Fancy cannot be hurt while you test. The game itself is unchanged.

@@ -2625,7 +2625,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1428';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1444';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -5199,7 +5199,7 @@ function render() {
   var tk = state === 'title' && !opt('noticker'); if (tk !== barTk) { barTk = tk; bar.classList.toggle('tk', tk); }   // the buttons on the title screen sit below the news ticker
   TXF++; if (PR) prT = performance.now(); if (TKS && state !== 'title') TKS = null; if (CFC.length && TXF - CFC[CFC.length - 1].f > 120) { CFC = []; CFP = ''; }   // the news strip is a big picture only the title screen uses
   ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1;
-  var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF) { cssF = cw; cv.style.transform = cw ? 'scaleX(-1)' : ''; }
+  var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
   if (state === 'mini' && MG) { renderMini(); return; }
   var i, pe = punchT > 0 && !calmOn() ? punchT / CFG.punchSecs : 0;
   if (pe > 0) { var sh = pe * pe * 6 * Math.sin(time * 90); ctx.save(); ctx.translate(Math.round(sh * k) / k, Math.round(sh * 0.6 * k) / k); }   // camera shake at the blast off: a plain slide (a zoom would re-scale every picture on screen, which stalled Firefox and phones)
@@ -5444,6 +5444,7 @@ function drawGap() {   // how long to leave the picture alone: under an opaque w
   if (state !== 'play' && coverOpen()) g = Math.max(g, 120); else if (state === 'dead' && deadT > 1.5) g = Math.max(g, 66);
   return g;
 }
+var LAYER = '', LAYERD = false;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
 function frame(t) {
   requestAnimationFrame(frame);
