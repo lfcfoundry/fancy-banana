@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1344 (beta):** **Test Lab:** jumping to a stage now works at once (Stage 1 to 5 buttons), with a switch to make the stage backward always, never or random, and Fancy cannot be hurt while you test. The game itself is unchanged.
 - **2026.10.11.1333 (beta):** **Costumes spin with Fancy:** the bow tie, crown, top hat and cool shades now roll around with him in his spirals. **Gorilla Guard's hands** now have their thumbs toward his body. **The big crown** after the Crown Duel is drawn crisper, with a golden glow and twinkling stars, and floats up to Fancy's head. **Test Lab:** a new Motion smoothness block lets you switch the stepping mode, pillar movement, how backward stages are flipped and baked pictures, and shows your screen's refresh rate and how evenly the game steps.
 - **2026.10.11.1317 (beta):** **Space bar flaps during a run no matter what was clicked before:** if a button still had the keyboard, Space used to press it (in the Test Lab, it reopened the menu). Now Space always flaps in a run.
 - **2026.10.11.1310 (beta):** **Space bar fixed after clicking buttons:** a button you clicked used to keep the keyboard, so Space pressed it again instead of flapping (in the Test Lab it just reopened the test menu). Buttons now let go after a click or tap.
