@@ -14,7 +14,9 @@ body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(saf
 @supports (height:100dvh){html,body{height:100dvh}}
 [hidden]{display:none!important}
 #stage{contain:layout paint;position:relative;--u:1px;font-size:calc(16*var(--u));overflow:hidden;border-radius:calc(14*var(--u));background:#ffe3b8}
-#c{display:block;width:100%;height:100%;touch-action:none}
+#c{display:block;position:relative;width:100%;height:100%;touch-action:none}
+#bk{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;pointer-events:none}
+#bk canvas{position:absolute;left:0;display:block;pointer-events:none;will-change:transform}
 #bar{position:absolute;top:calc(10*var(--u));right:calc(10*var(--u));max-width:calc(100% - 20*var(--u));display:flex;flex-direction:column;align-items:flex-end;gap:calc(8*var(--u))}
 .brow{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:calc(8*var(--u))}
 .brow:empty,.brow:not(:has(button:not([hidden]))){display:none}
@@ -121,6 +123,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 </head>
 <body>
 <div id="stage">
+<div id="bk" hidden></div>
 <canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
 <div id="bar">
 <div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
@@ -1920,6 +1923,12 @@ function layerJ(g, L, off) {   // the garden's long journey pictures: screen-wid
   g.save(); g.beginPath(); g.rect(-20, y - 2, q + 20, h + 4); g.clip(); putX(g, a, x, L.y); g.restore();
   g.save(); g.beginPath(); g.rect(q, y - 2, W + 20 - q, h + 4); g.clip(); putX(g, b, x + W, L.y); g.restore();
 }   // the garden's long journey pictures
+function layersOf(th) {   // the sky and the three hill bands as plain pictures (for a browser that slides them itself); null where the stage is built differently
+  if (th === JT) return null;
+  var s = scenery(th), f = s.far, m = s.mid, t = s.top;
+  if (!s.sky || !s.sky.c || !f || !f.c || !m || !m.c || !t || !t.c) return null;
+  return { K: K, sky: s.sky.c, bands: [{ L: f, f: .27 }, { L: m, f: .56 }, { L: t, f: .56 }] };
+}
 function back(g, th, dist) { var s = scenery(th); put(g, s.sky.c, 0, 0); if (th === JT) { layerJ(g, s.far, dist * .27); layerJ(g, s.mid, dist * .56); layerJ(g, s.top, dist * .56); return; } layer(g, s.far, dist * .27); layer(g, s.mid, dist * .56); layer(g, s.top, dist * .56); }
 function ground(g, th, off) { var s = scenery(th), P = GP[th]; if (th === JT) { s.ground.y = GY; layerJ(g, s.ground, off); return; } for (var x = -(off % P); x < W; x += P) putX(g, s.ground.c, x, GY); }
 function edgeRows(o) {   // which pixel rows of a finished tile hold the picture (the first and the last): needed to close the one-pixel gaps that rounding can leave between stacked tiles
@@ -2619,13 +2628,13 @@ function balBack(g, off) { var P = party(); put(g, P.sky.c, 0, 0); layer(g, P.cl
 function balGround(g, off) { var F = party().floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
 function balWarm() { var i; if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1505';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1537';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -4902,7 +4911,33 @@ function outlinedC(text, x, y, size, fill, align, base, lazy) {   // text that c
   for (i = 0; i < text.length; i++) { e = pics[i]; if (e) ctx.drawImage(e.c, Math.round((cx - e.pad * s) * kk) / kk, Math.round((y - e.h / 2 * s) * kk) / kk, e.c.width / kk * s, e.c.height / kk * s); cx += ws[i]; }
 }
 function shownTheme() { return bgT < 0.5 ? bgFrom : bgTheme; }   // stage change = a quick fade through white, so only ONE scene is drawn per frame (two at once was the big hitch)
-function drawBack() { if (BAL) { ART.bal.back(ctx, dist); return; } if (ftStill >= 0.5) { crowd.time = time; if (ART.arena.draw(ctx, crowd)) return; } var th = shownTheme(); ART.back(ctx, th, bd(th)); }
+/* Test Lab (Firefox): the sky and the hills as separate page layers that the browser slides by itself, so the page thread draws only the foreground. Off unless switched on. */
+var BKMODE = false, bkEl = $('bk'), bkTh = -1, bkOn = false, bkBands = [], bkXf = '', bkLast = [];
+function bkHide() { if (bkOn) { bkOn = false; bkEl.hidden = true; } }
+function bkReset() { bkTh = -1; bkLast = []; }
+function bkBuild(th) {
+  var li = ART.layersOf(th), cpl = stageEl.clientWidth / W, i, c, n, j, b, e, K = li ? li.K : 1;
+  if (!li) return false;
+  bkEl.textContent = ''; bkBands = [];
+  e = document.createElement('canvas'); e.width = li.sky.width; e.height = li.sky.height; e.getContext('2d').drawImage(li.sky, 0, 0); e.style.top = '0px'; e.style.width = (li.sky.width / K * cpl) + 'px'; e.style.height = (li.sky.height / K * cpl) + 'px'; e.style.willChange = 'auto'; bkEl.appendChild(e);
+  for (i = 0; i < li.bands.length; i++) {
+    b = li.bands[i]; c = b.L.c; n = Math.ceil(W * K / c.width) + 1;
+    e = document.createElement('canvas'); e.width = c.width * n; e.height = c.height; for (j = 0; j < n; j++) e.getContext('2d').drawImage(c, j * c.width, 0);
+    e.style.top = (Math.round(b.L.y * K) / K * cpl) + 'px'; e.style.width = (e.width / K * cpl) + 'px'; e.style.height = (c.height / K * cpl) + 'px'; bkEl.appendChild(e);
+    bkBands.push({ el: e, pc: c.width / K, f: b.f });
+  }
+  bkTh = th; bkLast = []; bkXf = ''; return true;
+}
+function bkWant(th) { return BKMODE && state === 'play' && !BAL && !FT && ftStill < 0.01 && !mirOn() && nightA <= 0.01 && zoomK <= 1.001 && punchT <= 0 && !flipOff() && th !== ART.journeyTheme; }
+function bkDraw(th, d) {
+  var i, o, cpl, x;
+  if (th !== bkTh && !bkBuild(th)) { bkHide(); return false; }
+  if (!bkOn) { bkOn = true; bkEl.hidden = false; bkLast = []; }
+  cpl = stageEl.clientWidth / W;
+  for (i = 0; i < bkBands.length; i++) { o = (d * bkBands[i].f) % bkBands[i].pc; x = (-o * cpl).toFixed(3); if (bkLast[i] !== x) { bkLast[i] = x; bkBands[i].el.style.transform = 'translate3d(' + x + 'px,0,0)'; } }
+  ctx.clearRect(0, 0, W, H); return true;
+}
+function drawBack() { if (BAL) { bkHide(); ART.bal.back(ctx, dist); return; } if (ftStill >= 0.5) { bkHide(); crowd.time = time; if (ART.arena.draw(ctx, crowd)) return; } var th = shownTheme(); if (bkWant(th) && bkDraw(th, bd(th))) return; bkHide(); ART.back(ctx, th, bd(th)); }
 function drawGround() { if (BAL) { ART.bal.ground(ctx, dist); return; } var th = shownTheme(); ART.ground(ctx, th, bd(th)); }
 function spinPhase() { return (1 - spinT / CFG.spinSecs) * CFG.spinRolls * 6.2832; }
 function drawFancy(x, y, rot, sc) {   // a little squash and stretch: taller on a flap, long and thin in the launch
@@ -5199,8 +5234,8 @@ function render() {
   var tk = state === 'title' && !opt('noticker'); if (tk !== barTk) { barTk = tk; bar.classList.toggle('tk', tk); }   // the buttons on the title screen sit below the news ticker
   TXF++; if (PR) prT = performance.now(); if (TKS && state !== 'title') TKS = null; if (CFC.length && TXF - CFC[CFC.length - 1].f > 120) { CFC = []; CFP = ''; }   // the news strip is a big picture only the title screen uses
   ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1;
-  var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
-  if (state === 'mini' && MG) { renderMini(); return; }
+  var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = bkEl.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
+  if (state === 'mini' && MG) { bkHide(); renderMini(); return; }
   var i, pe = punchT > 0 && !calmOn() ? punchT / CFG.punchSecs : 0;
   if (pe > 0) { var sh = pe * pe * 6 * Math.sin(time * 90); ctx.save(); ctx.translate(Math.round(sh * k) / k, Math.round(sh * 0.6 * k) / k); }   // camera shake at the blast off: a plain slide (a zoom would re-scale every picture on screen, which stalled Firefox and phones)
   var mir = mirOn(); if (mir) { ctx.save(); ctx.translate(0, H); ctx.scale(1, -1); }
@@ -5293,11 +5328,12 @@ function resize() {
   stageEl.style.width = cssW + 'px'; stageEl.style.height = cssH + 'px'; stageEl.style.setProperty('--u', s + 'px');
   dpr = DPRFORCE || Math.min(devicePixelRatio || 1, dprMax || 2);   // dprMax is lowered by the quality governor
   var nw = Math.max(1, Math.round(cssW * dpr)), nh = Math.max(1, Math.round(cssH * dpr)); if (nw !== cv.width || nh !== cv.height) { cv.width = nw; cv.height = nh; TXC = {}; TXN = 0; FXS = {}; CFC = []; CFP = ''; } k = cv.width / W;   // a resize that changes nothing (a phone's address bar) must not throw away every word picture
+  bkReset();
   var ak = Math.min(k, CFG.artScaleMax);   // art pictures are built at most this sharp, to save memory on big screens
   if (ak !== artK) { artK = ak; ART.init(ak); }
 }
 var rzT = 0, rzRaf = 0;   // phones fire many resize events while the address bar slides: fit the box now (cheap), rebuild the picture once things are quiet
-function fitStage() { var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0)), s = Math.min(aw / W, ah / H); stageEl.style.width = Math.floor(W * s) + 'px'; stageEl.style.height = Math.floor(H * s) + 'px'; stageEl.style.setProperty('--u', s + 'px'); }
+function fitStage() { bkReset(); var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0)), s = Math.min(aw / W, ah / H); stageEl.style.width = Math.floor(W * s) + 'px'; stageEl.style.height = Math.floor(H * s) + 'px'; stageEl.style.setProperty('--u', s + 'px'); }
 addEventListener('resize', function () {
   if (!rzRaf) rzRaf = requestAnimationFrame(function () { rzRaf = 0; fitStage(); });
   clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { render(); } catch (e) { logError('render', e); } }, 140);
