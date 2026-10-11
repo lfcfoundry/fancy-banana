@@ -2635,7 +2635,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1703';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1730';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -3891,10 +3891,18 @@ function die() {
   
 }
 var pumpCr = 0;
-function pumpPlan() {   // [steps, ms] to build this frame when the next stage's pictures (or the water level's) are behind schedule, else null. The build must finish before the next look's first gate is drawn: a stage that is not ready is built in ONE frame then, which on a slow laptop is a long freeze.
+function pumpPlan() {
+  var n;   // [steps, ms] to build this frame when the next stage's pictures (or the water level's) are behind schedule, else null. The build must finish before the next look's first gate is drawn: a stage that is not ready is built in ONE frame then, which on a slow laptop is a long freeze.
   
+  if (state === 'mini' && MG && !MG.practice && !pracN) {   // the water bonus game: the look of the stage that follows (the garden's long picture is about 370 small steps) is built an even share each frame over the seconds left, and quickly once the game is over, so nothing is left to build in one go when the flight resumes
+    var lf = ART.pend(themeOf(stage), false), tm;
+    if (!lf) { pumpCr = 0; return null; }
+    if (MG.ph === 'win' || MG.ph === 'lose') return [4, 8];
+    tm = Math.max(0.5, CFG.mgSecs - (MG.ph === 'play' ? mgLT(MG) : 0));
+    pumpCr += Math.min(3, lf / Math.max(0.25, tm * 36) * 1.35); n = Math.min(4, Math.floor(pumpCr)); pumpCr -= n; return n > 0 ? [n, 0] : null;
+  }
   if (state !== 'play' || pracN || BAL || FT) { pumpCr = 0; return null; }
-  var mgs = themeOf(stage) === CFG.miniAfter, left = ART.pend(mgs ? -1 : themeOf(stage + 1), mgs), g, tl, n;
+  var mgs = themeOf(stage) === CFG.miniAfter, left = ART.pend(mgs ? -1 : themeOf(stage + 1), mgs), g, tl;
   if (!left || (!mgs && themeOf(stage + 1) === themeOf(stage))) { pumpCr = 0; return null; }
   g = Math.max(1, gateStart(stage + 1) - score); tl = (g * CFG.spacing) / Math.max(80, speedFor(stage));
   pumpCr += Math.min(3, left / Math.max(0.25, tl * 36) * 1.35); n = Math.min(4, Math.floor(pumpCr)); pumpCr -= n;   // an even trickle over the time that is left (about 36 frames a second assumed)

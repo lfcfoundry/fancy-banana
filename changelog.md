@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1730 (beta):** **No pause after the water bonus game:** the Fruit Garden's backdrop is now built a little each frame while you play the bonus game (and quickly if it ends early), so the flight resumes without the 200 to 300 ms hitch.
 - **2026.10.11.1703 (beta):** **Boss fights are part of the main game:** after your second win, the last two gates of the jungle finale now give way to Prince Chimp's fights on their own, in the same order as before. The "Prince Chimp fight" button in Challenges now turns them off (and back on).
 - **2026.10.11.1650 (beta):** **The rainbow trail is announced:** when you land your 10th perfect gate in a row, the game now says "RAINBOW TRAIL unlocked!" and the trail switches on right away (it used to turn on silently after the run). Turn it off in Settings.
 - **2026.10.11.1618 (beta):** **Fixed the freeze on the mirror flip in Firefox:** going into a backward stage (like the Ice Cream Parlor after the Jam Jar Pantry) could lock the picture upside-down-backwards. The Firefox sky-and-hills layers now switch off on backward stages, which use the same drawing as before. Test Lab: the hitch report no longer counts a paused game's rests as hitches.
