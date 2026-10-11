@@ -55,18 +55,19 @@ button.pf,button:focus-visible,textarea:focus-visible{outline:calc(3*var(--u)) s
 .opt.wo.r{--c:#ff7a5a;min-height:calc(46*var(--u))}
 .opt.wo.r.armed{background:#ffe3d6}
 #pWin #winMsg{min-height:calc(16*var(--u));font-size:calc(12*var(--u));text-align:center}
-#pUp{display:flex;flex-direction:column;overflow:hidden;padding:calc(12*var(--u)) calc(10*var(--u)) calc(8*var(--u));background:linear-gradient(180deg,#fff3c4,#fff9e8 30%)}
-#pUp h2{margin:0;font-size:calc(24*var(--u));padding-right:calc(48*var(--u))}
-#pUp .bal{margin:calc(2*var(--u)) 0 calc(4*var(--u));font-size:calc(14*var(--u));display:flex;align-items:center;gap:calc(6*var(--u))}
-#upBal{display:inline-block;background:#3a2a4d;color:#ffd93b;border-radius:calc(12*var(--u));padding:calc(2*var(--u)) calc(10*var(--u));font-weight:800}
-#upMsg{min-height:calc(17*var(--u));margin:0;font-size:calc(12.5*var(--u));font-weight:700;color:#2f8f4a}
-#upList{flex:1 1 auto;overflow:auto;touch-action:pan-y;display:grid;grid-template-columns:1fr 1fr;gap:calc(7*var(--u));align-content:start;padding:calc(2*var(--u)) calc(2*var(--u)) calc(6*var(--u))}
-#upList h3{grid-column:1/-1;margin:calc(4*var(--u)) 0 0;font-size:calc(13*var(--u));color:#6b5a85}
-#upList p{grid-column:1/-1}
+#pUp,#pEmp{display:flex;flex-direction:column;overflow:hidden;padding:calc(12*var(--u)) calc(10*var(--u)) calc(8*var(--u));background:linear-gradient(180deg,#fff3c4,#fff9e8 30%)}
+#pUp h2,#pEmp h2{margin:0;font-size:calc(24*var(--u));padding-right:calc(48*var(--u))}
+#pUp .bal,#pEmp .bal{margin:calc(2*var(--u)) 0 calc(4*var(--u));font-size:calc(14*var(--u));display:flex;align-items:center;gap:calc(6*var(--u))}
+#upBal,#epBal{display:inline-block;background:#3a2a4d;color:#ffd93b;border-radius:calc(12*var(--u));padding:calc(2*var(--u)) calc(10*var(--u));font-weight:800}
+#upMsg,#epMsg{min-height:calc(17*var(--u));margin:0;font-size:calc(12.5*var(--u));font-weight:700;color:#2f8f4a}
+#upList,#epList{flex:1 1 auto;overflow:auto;touch-action:pan-y;display:grid;grid-template-columns:1fr 1fr;gap:calc(7*var(--u));align-content:start;padding:calc(2*var(--u)) calc(2*var(--u)) calc(6*var(--u))}
+#upList h3,#epList h3{grid-column:1/-1;margin:calc(4*var(--u)) 0 0;font-size:calc(13*var(--u));color:#6b5a85}
+#upList p,#epList p{grid-column:1/-1}
 .ut{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:calc(2*var(--u));min-height:calc(104*var(--u));padding:calc(7*var(--u)) calc(8*var(--u));min-width:0;line-height:1.15;background:#fff;box-shadow:0 calc(3*var(--u)) 0 #b6aecb,inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.9)}
 .ut b{font-size:calc(14*var(--u))}
 .ut small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-weight:600;font-size:calc(11*var(--u));color:#4a3a63}
 .ut em{margin-top:auto;font-style:normal;align-self:flex-start;background:#46c261;color:#fff;border-radius:calc(10*var(--u));padding:calc(1*var(--u)) calc(8*var(--u));font-size:calc(12.5*var(--u));text-shadow:0 calc(1*var(--u)) 0 rgba(0,0,0,.25)}
+.ut.done{cursor:default;background:#fff8d6}
 .ut.off{min-height:calc(66*var(--u));background:#f1edf9;box-shadow:none;opacity:.85;cursor:default}
 .ut.off em{background:#b6aecb}
 .pips{display:flex;gap:calc(3*var(--u))}
@@ -75,8 +76,8 @@ button.pf,button:focus-visible,textarea:focus-visible{outline:calc(3*var(--u)) s
 .pclw{position:sticky;top:0;height:0;z-index:4;text-align:right;overflow:visible}
 .pcl{position:relative;top:calc(-4*var(--u));right:calc(-4*var(--u));width:calc(36*var(--u));height:calc(36*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(22*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
 body.big .pcl{width:calc(48*var(--u));height:calc(48*var(--u))}
-#uClose{position:absolute;top:calc(8*var(--u));right:calc(8*var(--u));z-index:3;width:calc(40*var(--u));height:calc(40*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(24*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
-body.big #uClose{width:calc(52*var(--u));height:calc(52*var(--u));min-width:0;min-height:0}
+#uClose,#eClose{position:absolute;top:calc(8*var(--u));right:calc(8*var(--u));z-index:3;width:calc(40*var(--u));height:calc(40*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(24*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
+body.big #uClose,#eClose{width:calc(52*var(--u));height:calc(52*var(--u));min-width:0;min-height:0}
 body.big .ut{min-height:calc(120*var(--u))}
 #pSet h2{margin:0 0 calc(4*var(--u));font-size:calc(22*var(--u))}
 .opt.cmp{min-height:calc(50*var(--u));margin:calc(4*var(--u)) 0;padding:calc(4*var(--u)) calc(10*var(--u));font-size:calc(15*var(--u));line-height:1.15}
@@ -123,7 +124,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
 <div id="bar">
 <div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
-<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bUp" class="alt sm">Upgrades</button></div>
+<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bUp" class="alt sm">Upgrades</button></div>
 </div>
 <div id="bar2" hidden></div>
 <button id="bCont" hidden>Continue</button>
@@ -228,6 +229,13 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <p class="bal">Your banana credits: <span id="upBal"></span></p>
 <p id="upMsg" role="status" aria-live="polite"></p>
 <div id="upList"></div>
+</section>
+<section id="pEmp" class="panel" hidden aria-label="Emporium">
+<button id="eClose" aria-label="Close">&times;</button>
+<h2>Emporium</h2>
+<p class="bal">Your banana credits: <span id="epBal"></span></p>
+<p id="epMsg" role="status" aria-live="polite"></p>
+<div id="epList"></div>
 </section>
 <section id="pSave" class="panel" hidden aria-label="Save and load">
 <div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
@@ -532,6 +540,20 @@ function banana(g, x, y, rot, sc, flap, t, bow, vy, up, gaze, roll, face) {
   if (e < 2 && !spin) { gy = 1.5 * Math.max(-1, Math.min(1, gaze || 0)); g.drawImage(BAN.iris.c, EYES[0][0] - 10 + .4, EYES[0][1] - 10 + gy + .4, 20, 20); g.drawImage(BAN.iris.c, EYES[1][0] - 10 + .4, EYES[1][1] - 10 + gy + .4, 20, 20); }   // eyes: the pupils follow the gaze
   if ((bow & 1) && !spin) bowTie(g, BOWP[0], BOWP[1], .85);
   if ((bow & 2) && !spin) { g.save(); g.translate((EYES[0][0] + EYES[1][0]) / 2 - 2, EYES[0][1] - 17); g.rotate(-.2); crownDraw(g, .72); g.restore(); }
+  else if ((bow & 4) && !spin) {   // Emporium top hat (drawn live as vectors; the crown wins when both are worn)
+    g.save(); g.translate((EYES[0][0] + EYES[1][0]) / 2 - 2, EYES[0][1] - 15); g.rotate(-.2); g.lineJoin = 'round'; g.strokeStyle = OUTK; g.lineWidth = 2;
+    g.fillStyle = '#23212e'; g.beginPath(); g.ellipse(0, 0, 21, 5, 0, 0, PI2); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11, -25); g.quadraticCurveTo(0, -28, 11, -25); g.lineTo(12, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#c8243a'; g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11.6, -7); g.lineTo(11.6, -7); g.lineTo(12, 0); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(-7, -22, 3, 13); g.restore();
+  }
+  if ((bow & 8) && !spin && e < 2) {   // Emporium cool shades
+    g.save(); g.fillStyle = '#14121c'; g.strokeStyle = '#14121c'; g.lineWidth = 3; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(EYES[0][0] + 6, EYES[0][1] - 2); g.lineTo(EYES[1][0] - 6, EYES[1][1] - 2); g.stroke();
+    for (si = 0; si < 2; si++) { g.beginPath(); g.ellipse(EYES[si][0], EYES[si][1], 8.2, 7.2, 0, 0, PI2); g.fill(); }
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.8; for (si = 0; si < 2; si++) { g.beginPath(); g.moveTo(EYES[si][0] - 5, EYES[si][1] - 2); g.lineTo(EYES[si][0] - 1, EYES[si][1] - 5); g.stroke(); }
+    g.restore();
+  }
   g.restore();
 }
 /* banana friends: same body, a plain face, and small accessories so each one is different */
@@ -1836,7 +1858,8 @@ function pend(th, mg) {   // how many build steps are still waiting before theme
 function px(x) { return Math.round(x * K) / K; }
 /* Every cached picture is stamped at its own pixel size, on whole device pixels: a 1:1 copy. (Stretching a picture by even 0.1% makes Firefox resample it, which was 15x slower.) */
 function put(g, c, x, y) { g.drawImage(c, Math.round(x * K) / K, Math.round(y * K) / K, c.width / K, c.height / K); }
-function putX(g, c, x, y) { g.drawImage(c, x, Math.round(y * K) / K, c.width / K, c.height / K); }   // slides sideways by fractions of a pixel (so a gate glides instead of stepping), still on whole rows
+var OBSNAP = false;   // Test Lab switch: pillars on whole device pixels instead of sliding by fractions
+function putX(g, c, x, y) { g.drawImage(c, OBSNAP ? Math.round(x * K) / K : x, Math.round(y * K) / K, c.width / K, c.height / K); }   // slides sideways by fractions of a pixel (so a gate glides instead of stepping), still on whole rows
 function putS(g, c, x, y) { g.drawImage(c, x, y, c.width / K, c.height / K); }   // a lone moving picture: any fraction, both ways
 function subpx() { return K < 1.75; }   // on a sharp screen (two or more device pixels to a unit) a whole-device-pixel step is already finer than the eye can follow; only a plainer screen gets the sliding-by-fractions drawing, which costs more in Firefox
 function layer(g, L, off) {   // a repeating hill band: one pattern fill that slides by fractions of a pixel, so it glides instead of stepping (a pattern has no seams, even when the band is see-through)
@@ -2589,7 +2612,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1234';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1300';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2600,7 +2623,7 @@ var CFG = {
   speed0: 140, speedStep: 7, speedMax: 210,   // pixels per second, grows each stage
   contCost: 100, gap0: 178, gapStep: 3, gapMin: 150,          // opening size between obstacles
   spacing: 215, obW: 58, maxShift: 150, minObH: 95,
-  gatesPerStage: 10, longAfter: 5, gatesLong: 15, plusStep: 0.1, plusMax: 10, waferWins: 2,   // speed-up per kept victory and its cap; wafers fly from the third playthrough on
+  gatesPerStage: 10, longAfter: 5, gatesLong: 15, plusStep: 0.1, plusMax: 10, waferWins: 2, empClears: 2,   // speed-up per kept victory and its cap; wafers fly from the third playthrough on
   bananaX: 100, bananaR: 12,
   cardSecs: 2.1, breathSecs: 4.4,         // stage card time; seconds of empty flying after the last gate of a stage (long enough for the card and Ready, Set, Go)
   rsgBeat: 0.5, rsgY: 290, celSecs: 0.75,   // celSecs: the one celebration roll after a stage clear
@@ -2647,7 +2670,7 @@ function isObj(o) { return o && typeof o === 'object' && !Array.isArray(o); }
 function num(v, def, max) { v = Number(v); return (isFinite(v) && v >= 0) ? Math.min(Math.floor(v), max) : def; }
 function boostObj(o) { var r = {}; if (isObj(o)) Object.keys(o).slice(0, 20).forEach(function (k) { r[k] = num(o[k], 0, 1e6); }); return r; }
 function flatObj(o) { var r = {}; if (isObj(o)) Object.keys(o).slice(0, 50).forEach(function (k) { var v = o[k]; if (typeof v === 'boolean' || (typeof v === 'number' && isFinite(v))) r[k] = v; }); return r; }
-function defaultSave() { return { game: 'bananafly', v: 1, best: 0, bestR: 0, bestS: {}, cont: {}, bestStage: 1, opts: {}, stats: { runs: 0, gates: 0, flaps: 0, secs: 0, friends: 0, wins: 0, coins: 0, streak: 0, plus: 0, bestWin: 0, bestPz: 0 }, unlocks: {}, boosts: {}, savedAt: 0 }; }
+function defaultSave() { return { game: 'bananafly', v: 1, best: 0, bestR: 0, bestS: {}, cont: {}, bestStage: 1, opts: {}, stats: { runs: 0, gates: 0, flaps: 0, secs: 0, friends: 0, wins: 0, coins: 0, streak: 0, plus: 0, bestWin: 0, bestPz: 0, balClears: 0 }, unlocks: {}, boosts: {}, savedAt: 0 }; }
 // One damaged number never erases everything: each field falls back on its own.
 function cleanSave(o) {
   if (!isObj(o) || o.game !== 'bananafly') return null;
@@ -2656,7 +2679,7 @@ function cleanSave(o) {
   return {
     game: 'bananafly', v: 1,
     best: num(o.best, 0, 1e6), bestR: num(o.bestR, 0, 1e6), bestS: flatObj(o.bestS), cont: flatObj(o.cont), opts: flatObj(o.opts), bestStage: Math.max(1, num(o.bestStage, 1, 1e5)),
-    stats: { runs: num(s.runs, 0, 1e9), gates: num(s.gates, 0, 1e9), flaps: num(s.flaps, 0, 1e9), secs: num(s.secs, 0, 1e9), friends: fr, wins: num(s.wins, 0, 1e9), coins: num(s.coins, 0, 1e9), streak: num(s.streak, 0, 1e9), plus: num(s.plus, 0, 1000), bestWin: num(s.bestWin, 0, 1e7), bestPz: num(s.bestPz, 0, 1e6) },
+    stats: { runs: num(s.runs, 0, 1e9), gates: num(s.gates, 0, 1e9), flaps: num(s.flaps, 0, 1e9), secs: num(s.secs, 0, 1e9), friends: fr, wins: num(s.wins, 0, 1e9), coins: num(s.coins, 0, 1e9), streak: num(s.streak, 0, 1e9), plus: num(s.plus, 0, 1000), bestWin: num(s.bestWin, 0, 1e7), bestPz: num(s.bestPz, 0, 1e6), balClears: num(s.balClears, 0, 1e6) },
     unlocks: flatObj(o.unlocks), boosts: bo, savedAt: num(o.savedAt, 0, 9e15)
   };
 }
@@ -2736,12 +2759,12 @@ function readText(text) {
 /* ===== Page parts ===== */
 var stageEl = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
 var bar = $('bar'), toastEl = $('toast');
-var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
+var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pEmp = $('pEmp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
 var toastTimer = 0;
 function toast(t, ms) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 3200); }
-function coverOpen() { return !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }   // a window that hides the picture (the win window sits at the bottom and leaves the victory card in view)
-function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }
-function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pending = null; bConfirm.hidden = true; }
+function coverOpen() { return !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }   // a window that hides the picture (the win window sits at the bottom and leaves the victory card in view)
+function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }
+function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pEmp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pending = null; bConfirm.hidden = true; }
 function fmtTime(s) { var m = Math.floor(s / 60); return m < 1 ? s + ' s' : m + ' min ' + (s % 60) + ' s'; }
 function refreshHelp() {
   var r = $('recs'); r.textContent = '';
@@ -2790,7 +2813,7 @@ function refreshCode() {
   $('storeWarn').hidden = storageOK;
   makeCode().then(function (c) { codeEl.value = c; }, function (e) { logError('code', e); });
 }
-function openPanel(p) { closePanels(); p.hidden = false; saveMsg.textContent = ''; if (p === pSave) refreshCode(); else if (p === pWear) refreshWear(); else if (p === pUp) refreshUp(); else if (p === pSet) refreshSet(); else if (p === pPrac) refreshPrac(); else if (p === pChal) refreshChal(); else if (p === pMuse) refreshMuse(); else refreshHelp(); }
+function openPanel(p) { closePanels(); p.hidden = false; saveMsg.textContent = ''; if (p === pSave) refreshCode(); else if (p === pWear) refreshWear(); else if (p === pUp) refreshUp(); else if (p === pEmp) refreshEmp(); else if (p === pSet) refreshSet(); else if (p === pPrac) refreshPrac(); else if (p === pChal) refreshChal(); else if (p === pMuse) refreshMuse(); else refreshHelp(); }
 function describe(c) { return 'best score ' + c.best + ', best stage ' + c.bestStage + ', ' + c.stats.runs + ' runs, ' + c.stats.friends + ' friends freed'; }
 
 var pending = null;
@@ -2879,7 +2902,7 @@ function refreshMuse() {
   rows.push(['bunch', 'Banana Bunch', 'Find all six lost friends.']);
   rows.forEach(function (r) { var f = r[0] === 'bunch' ? bunchOk() : !!save.unlocks[r[0]], p = document.createElement('p'), b = document.createElement('b'), sm = document.createElement('small'); p.className = 'mrow'; b.textContent = r[1] + (f ? ': found' : ': not yet'); sm.textContent = r[2]; p.appendChild(b); p.appendChild(sm); sec.appendChild(p); });
 }
-function wearFlags() { return (wearsBow() ? 1 : 0) | (wearsCrown() ? 2 : 0); }
+function wearFlags() { return (wearsBow() ? 1 : 0) | (wearsCrown() ? 2 : 0) | (empWorn(E.hat) ? 4 : 0) | (empWorn(E.shades) ? 8 : 0); }
 function wearsBow() { var u = save.unlocks; return !!u.bow && u.wear !== 0; }
 function refreshWear() {
   var bow = !!save.unlocks.bow, on = wearsBow();
@@ -2913,11 +2936,11 @@ var UPS = [
   { id: 'limes', name: 'Lime defense', desc: 'In boss fights, little rocket limes shoot down a coconut that is about to hit you (2 per fight, per level)', costs: [150, 300] },
   { id: 'practice', name: 'Practice Chimp\'s Navy', desc: 'Play the water level any time from the title screen (nothing is earned)', costs: [40] }
 ];
-function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet')); }
+function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet') + (empOwn(E.mega) ? 1 : 0)); }
 function nextCost(u) { var l = lvl(u.id); return l < u.costs.length ? u.costs[l] : 0; }
 function canBuy(u) { var c = nextCost(u); return c > 0 && bal() >= c; }
 function anyBuy() { return UPS.some(canBuy); }
-function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
+function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
 function lvl(id) { return save.boosts[id] || 0; }
 function bal() { return save.stats.friends + save.stats.coins - (save.boosts.spent || 0); }
 function refreshUp() {
@@ -2938,8 +2961,77 @@ function buy(u) {
   var l = lvl(u.id); if (l >= u.costs.length || bal() < u.costs[l]) return;
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
+/* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var EMP = [
+  { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
+  { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
+  { id: 'mega', k: 'up', g: 1, name: 'Mega magnet', desc: 'Gold bananas fly to Fancy from twice as far, on top of the magnet upgrade.', cost: 250 },
+  { id: 'gheart', k: 'up', g: 1, name: 'Golden heart', desc: 'One more heart in Chimp\'s Navy, for good.', cost: 300 },
+  { id: 'stars', k: 'trail', g: 2, tr: 1, name: 'Star trail', desc: 'Little gold stars twinkle behind Fancy.', cost: 80 },
+  { id: 'hearts', k: 'trail', g: 2, tr: 2, name: 'Heart trail', desc: 'Pink hearts float behind Fancy.', cost: 80 },
+  { id: 'confetti', k: 'spark', g: 2, name: 'Confetti flaps', desc: 'Every flap pops a puff of confetti.', cost: 90 },
+  { id: 'perkB', k: 'perk', g: 3, name: 'Spare bounce', desc: 'One extra free bounce for your next run.', cost: 25 },
+  { id: 'perkH', k: 'perk', g: 3, name: 'Spare heart', desc: 'One extra heart in Chimp\'s Navy for your next run.', cost: 20 },
+  { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 }
+], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks'];
+function empOn() { return save.stats.balClears >= CFG.empClears; }
+function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
+function empWorn(i) { return empOwn(i) && ((save.unlocks.empOff | 0) >> i & 1) === 0; }
+function empTrail() { var t = save.unlocks.empTr | 0; return t && empOwn(t === 1 ? E.stars : E.hearts) ? t : 0; }
+function empNow(i) { var e = EMP[i]; return e.k === 'trail' ? empTrail() === e.tr : empWorn(i); }
+function usePerks() {   // a new run spends the one-run perks that were bought
+  runPB = runPH = 0; if (pracN) return;
+  if (lvl('perkB') > 0) { runPB = 1; shield += 1; save.boosts.perkB--; }
+  if (lvl('perkH') > 0) { runPH = 1; save.boosts.perkH--; }
+  if (runPB || runPH) { persist(); toast(runPB && runPH ? 'Perks ready: a spare bounce and a spare heart!' : runPB ? 'Perk ready: a spare bounce!' : 'Perk ready: a spare heart for Chimp\'s Navy!'); }
+}
+function refreshEmp() {
+  $('epBal').textContent = bal(); var box = $('epList'), g, i;
+  box.textContent = '';
+  for (g = 0; g < 4; g++) {
+    var h = document.createElement('h3'); h.textContent = EMP_H[g]; box.appendChild(h);
+    for (i = 0; i < EMP.length; i++) if (EMP[i].g === g) empTile(box, i);
+  }
+}
+function empTile(box, i) {
+  var e = EMP[i], b = document.createElement('button'), nm = document.createElement('b'), sm = document.createElement('small'), em = document.createElement('em'), stock = e.k === 'perk' ? lvl(e.id) : 0,
+    own = e.k !== 'perk' && e.k !== 'gift' && empOwn(i), can = bal() >= e.cost && !(e.k === 'perk' && stock >= 9);
+  b.className = 'ut' + (!own && !can ? ' off' : ''); nm.textContent = e.name; b.appendChild(nm);
+  sm.textContent = e.desc + (stock ? ' You have ' + stock + '.' : ''); b.appendChild(sm);
+  if (own) { em.textContent = e.k === 'up' ? 'Yours!' : empNow(i) ? (e.k === 'wear' ? 'Wearing it' : 'Using it') : (e.k === 'wear' ? 'Tap to wear' : 'Tap to use'); if (e.k !== 'up') b.addEventListener('click', function () { empToggle(i); }); else b.classList.add('done'); }
+  else { em.textContent = can ? 'Buy for ' + e.cost : bal() < e.cost ? e.cost - bal() + ' more to go' : 'Stock is full'; if (can) b.addEventListener('click', function () { empBuy(i); }); else b.disabled = true; }
+  b.appendChild(em); box.appendChild(b);
+}
+function empRedo(msg) { persist(); var sc = $('epList').scrollTop; refreshEmp(); $('epList').scrollTop = sc; syncUp(); $('epMsg').textContent = msg; }
+function empToggle(i) {
+  var e = EMP[i]; if (e.k === 'trail') save.unlocks.empTr = empTrail() === e.tr ? 0 : e.tr; else save.unlocks.empOff = (save.unlocks.empOff | 0) ^ (1 << i);
+  empRedo(e.name + (empNow(i) ? ' is on.' : ' is off.'));
+}
+function empBuy(i) {
+  var e = EMP[i], m, a, b; if (bal() < e.cost) return;
+  if (e.k === 'perk') { if (lvl(e.id) >= 9) return; save.boosts[e.id] = lvl(e.id) + 1; m = e.name + ' is packed for your next run!'; }
+  else if (e.k === 'gift') {
+    a = Math.random() < 0.5 ? 'perkB' : 'perkH'; b = Math.random() < 0.5 ? 'perkB' : 'perkH';
+    save.boosts[a] = Math.min(9, lvl(a) + 1); save.boosts[b] = Math.min(9, lvl(b) + 1);
+    m = a === b ? 'Surprise! Two ' + (a === 'perkB' ? 'spare bounces' : 'spare hearts') + '!' : 'Surprise! A spare bounce and a spare heart!';
+  } else { if (empOwn(i)) return; save.unlocks.emp = (save.unlocks.emp | 0) | (1 << i); save.unlocks.empOff = (save.unlocks.empOff | 0) & ~(1 << i); if (e.k === 'trail') save.unlocks.empTr = e.tr; m = 'Yay! ' + e.name + ' is yours!'; }
+  save.boosts.spent = (save.boosts.spent || 0) + e.cost; empRedo(m);
+}
+function drawEmpTrail(pw) {   // little stars or hearts along the trail
+  var t = empTrail(), n = trail.length, i, q, a, s;
+  if (!t || n < 3 || pw <= 0) return;
+  ctx.fillStyle = t === 1 ? '#ffe45c' : '#ff5d8f'; ctx.beginPath();
+  for (i = 2; i < n; i += 3) {
+    q = trail[i]; a = 1 - q.t / 0.5; if (a <= 0) continue; s = (3 + a * 6) * (0.4 + 0.6 * pw);
+    if (t === 1) { for (var k = 0; k < 10; k++) { var r = k % 2 ? s * 0.45 : s, an = -1.5708 + k * 0.62832; ctx[k ? 'lineTo' : 'moveTo'](q.x + Math.cos(an) * r, q.y + Math.sin(an) * r); } ctx.closePath(); }
+    else { ctx.moveTo(q.x, q.y + s * 0.9); ctx.bezierCurveTo(q.x - s * 1.6, q.y - s * 0.2, q.x - s * 0.7, q.y - s * 1.3, q.x, q.y - s * 0.5); ctx.bezierCurveTo(q.x + s * 0.7, q.y - s * 1.3, q.x + s * 1.6, q.y - s * 0.2, q.x, q.y + s * 0.9); }
+  }
+  ctx.fill();
+}
 $('bWear').addEventListener('click', function () { openPanel(pWear); });
 $('bUp').addEventListener('click', function () { openPanel(pUp); });
+$('bEmp').addEventListener('click', function () { if (state === 'title') openPanel(pEmp); });
 $('bCont').addEventListener('click', continueRun);
 $('bPractice').addEventListener('click', function () { if (state === 'title') openPanel(pPrac); });
 $('pracClose').addEventListener('click', closePanels);
@@ -2983,7 +3075,7 @@ function refreshPrac() {
   for (i = 1; i <= clearedStages(); i++) (function (n) { add('Stage ' + n + ': ' + ART.names[n - 1], gpsOf(n) + ' gates', function () { startPracticeStage(n); }); })(i);
   add("Chimp's Navy", 'The water level', function () { closePanels(); startPractice(); });
 }
-$('wClose').addEventListener('click', closePanels); $('uClose').addEventListener('click', closePanels); document.querySelectorAll('.pcl').forEach(function (b) { b.addEventListener('click', closePanels); });
+$('wClose').addEventListener('click', closePanels); $('uClose').addEventListener('click', closePanels); $('eClose').addEventListener('click', closePanels); document.querySelectorAll('.pcl').forEach(function (b) { b.addEventListener('click', closePanels); });
 $('wPlain').addEventListener('click', function () { pickWear(0); }); $('wBow').addEventListener('click', function () { pickWear(1); });
 $('wRain').addEventListener('click', function () { if (rainOk()) { save.unlocks.rainOff = rainOn() ? 1 : 0; persist(); refreshWear(); } });
 $('wCrown').addEventListener('click', function () { if (save.unlocks.crown) { save.unlocks.crownOff = wearsCrown() ? 1 : 0; persist(); refreshWear(); } });
@@ -3174,7 +3266,7 @@ function spawnOb(x) {
 function bd(th) { return th === ART.journeyTheme ? Math.max(0, dist - gardenD0) : dist; }   // the garden's backdrop is one long journey from the beach to the jungle, so it counts from where that stage began
 function boingV(mid) { var d = mid - by; return d < 0 ? -Math.min(560, Math.sqrt(2 * CFG.gravity * -d) + 40) : -120; }   // the free bounce springs Fancy just far enough to reach the middle of the gap (a hit from the top pillar used to fire him down at 520 px/s, through the gap and into the floor)
 function boing(v) { bngT = 1; runHurts++; invuln = 1.3; hurtT = 0.9; fallD = 0; vy = v; flapAnim = 0.18; burst(CFG.bananaX, by, 28, ['#8ae28a', '#ffffff', '#ffd93b'], 240, 200); pop('BOING!', '#7be07b', 26); }
-function flap() { vy = CFG.flapV; flapAnim = 0.18; runFlaps++; fallD = 0; }
+function flap() { vy = CFG.flapV; flapAnim = 0.18; runFlaps++; fallD = 0; if (empWorn(E.confetti)) burst(bx - 10, by + 8, 7, ['#ff6b81', '#ffd93b', '#7ad8ff', '#8ae28a', '#c9a0ff'], 150, 220); }
 
 /* ===== Potassium Power! (upgrade). Hold Space or the mouse while 3+ gates line up (their openings within 40 px of each other): Fancy charges up, glides straight through
    the lane and flies up to 25% faster, leaving fading echoes of himself. Not in the water level, boss fights, the balloon stage or the vault. */
@@ -3247,7 +3339,7 @@ function drawKHint() {
 }
 var fWarmed = 0;
 function warmFight() { if (!runFight || fWarmed === runFight) return; fWarmed = runFight; ART.fightWarm(runFight); ART.mg.sprite('wafer'); }   // the boss's pictures (and the gorilla's arena) are only built once the player reaches the last stage: most runs end long before
-function toReady() { resetWorld(); backStage = pracN ? 0 : 2 + Math.floor(Math.random() * 3); flipV = flipWant(); state = 'ready'; setBar(false); if (runChal === 'storm') ART.mg.sprite('wafer'); }
+function toReady() { resetWorld(); usePerks(); backStage = pracN ? 0 : 2 + Math.floor(Math.random() * 3); flipV = flipWant(); state = 'ready'; setBar(false); if (runChal === 'storm') ART.mg.sprite('wafer'); }
 function rsgGoAt() { return CFG.cardSecs + CFG.rsgBeat * 2; }   // seconds after the stage clear when control comes back
 function rsgHold() { return (rsgT >= 0 && rsgT < rsgGoAt()) || !!(FT && FT.hold > 0); }
 function startLaunch() { state = 'launch'; launchT = -CFG.countSecs; if (stage === 1 && save.cont.st) { save.cont = {}; persist(); } }   // a 3-2-1 countdown first, then the run
@@ -3972,7 +4064,7 @@ var MG_PB = [318, 30];   // where the pause button sits
 var MG_INTRO = 2.6;   // seconds the title and instructions show before Ready, Set, Go
 var mgDn = null;      // where the finger went down, relative to Fancy: a tap only leaps, a drag steers
 function startMini(practice) {
-  flipV = 0; if (!practice) split('Water'); CFG.mgSpeed = MG_V0 * relaxK() * plusK(); var h = CFG.mgHearts + lvl('heart'); state = 'mini'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; ART.warm(themeOf(stage));
+  flipV = 0; if (!practice) split('Water'); CFG.mgSpeed = MG_V0 * relaxK() * plusK(); var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH; state = 'mini'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; ART.warm(themeOf(stage));
   MG = { ph: 'intro', pt: 0, t: 0, scroll: 0, x: W / 2, y: CFG.mgY0, tx: W / 2, ty: CFG.mgY0, leap: -1, buf: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: null, pi: 0, saved: 0, leaps: 0, slow: 0, practice: !!practice, wcd: 1.4, wc: 0, bonus: 0, wsh: lvl('wshield'), pl: 0, lh: h, lid: 0, lw: 0, lb: 0, pay: null, off: 0, boss: null, bossDone: false, cove: 70 + rng() * 220, coveHit: false, life: [], lifeAt: 0 };
   MG.plan = mgPlan();
 }
@@ -4002,7 +4094,7 @@ function mgPlan() {
   add('buoy', 0, { x: 70 + rng() * 220, vo: 0, at: half - trav });
   p.sort(function (a, b) { return a.t - b.t; }); return p;
 }
-/* From the third playthrough on, submarines and barrel chimps throw vanilla wafers at Fancy */
+/* From the third playthrough on, the chimps on the barrels throw vanilla wafers at Fancy (submarines never do) */
 function mgThrowStep(e, dt) {
   var m = MG, ox, oy, i, n = 0, dx, dy, d, a, sw = 175, w;
   if (e.tt === undefined) e.tt = 0.6 + rng() * 1.1;
@@ -4011,7 +4103,7 @@ function mgThrowStep(e, dt) {
   if (e.tw < e.tt || m.wcd > 0) return;
   for (i = 0; i < m.ents.length; i++) if (m.ents[i].k === 'wafer') n++;
   if (n >= 2) return;
-  if (e.k === 'sub') { ox = e.x; oy = e.y - 2; } else { w = Math.floor(rng() * e.n); ox = e.vert ? e.x : e.x - e.w / 2 + 22 + w * 36; oy = e.vert ? e.y - e.h / 2 + 22 + w * 36 - 6 : e.y - 6; }
+  { w = Math.floor(rng() * e.n); ox = e.vert ? e.x : e.x - e.w / 2 + 22 + w * 36; oy = e.vert ? e.y - e.h / 2 + 22 + w * 36 - 6 : e.y - 6; }
   dx = m.x - ox; dy = m.y - oy; d = Math.sqrt(dx * dx + dy * dy) || 1; a = Math.atan2(dy, dx) + (rng() - 0.5) * 0.12;
   mgAddEnt({ k: 'wafer', x: ox, y: oy, vx: Math.cos(a) * sw, vo: Math.sin(a) * sw - CFG.mgSpeed });
   e.tdone = 1; m.wcd = 1.5 + rng() * 0.6; burst(ox, oy, 6, ['#ebc98f', '#ffffff'], 90, 100);
@@ -4088,7 +4180,7 @@ function updateMini(dt) {
     if (e.y > H + 100 || e.x < -150 || e.x > W + 150) { m.ents.splice(i, 1); continue; }
     if (e.sink >= 0) continue;
     if (e.k === 'wafer') { dx = m.x - e.x; dy = m.y - e.y; if (m.ph === 'play' && dx * dx + dy * dy < (CFG.mgHitR + 12) * (CFG.mgHitR + 12)) { if (mgOver(m)) { if (!e.cl) { e.cl = 1; m.lw++; } } else if (m.wsh > 0 && m.inv <= 0) { m.wsh--; pop('Blocked!', '#7ad8ff', 22); burst(e.x, e.y, 14, ['#7ad8ff', '#ffffff'], 170, 160); m.ents.splice(i, 1); } else { mgHurt(); burst(e.x, e.y, 14, ['#ebc98f', '#c99a58', '#ffffff'], 170, 160); m.ents.splice(i, 1); } } continue; }   // a thrown wafer: leap over it (a clean leap pays a bonus), block it with the shield, or steer around   // a thrown wafer: leap over it or steer around
-    if (waferOn() && m.ph === 'play' && (e.k === 'sub' || e.k === 'barrels')) mgThrowStep(e, dt);
+    if (waferOn() && m.ph === 'play' && e.k === 'barrels') mgThrowStep(e, dt);   // only the chimps on the barrels throw wafers, never a submarine
     if (e.k === 'gull') { dx = m.x - e.x; dy = m.y - e.y; if (dx * dx + dy * dy < (CFG.mgHitR + 14) * (CFG.mgHitR + 14) && !(lvl('superleap') > 0 && mgOver(m))) mgHurt(); continue; }   // a gull cannot be leapt, unless Fancy has bought Super Leap
     if (e.k === 'raft') { dx = m.x - e.x; dy = m.y - e.y; if (m.ph === 'play' && Math.abs(dx) < 46 && Math.abs(dy) < 30) { m.bonus += 8; m.ents.splice(i, 1); burst(e.x, e.y, 30, ['#ffd93b', '#fff2a0', '#ffffff'], 240, 220); pop('TREASURE! +8', '#ffd93b', 26); secretFound('raft', 'Secret found: the Treasure Raft!'); } continue; }
     if (e.k === 'buoy') { dx = m.x - e.x; dy = m.y - e.y; if (m.ph === 'play' && m.hearts < m.maxH && dx * dx + dy * dy < (CFG.mgHitR + 22) * (CFG.mgHitR + 22)) { m.hearts++; m.ents.splice(i, 1); burst(e.x, e.y, 22, ['#ff6b81', '#ffffff', '#ffd93b'], 220, 180); pop('Heart back!', '#ff8aa0', 22); } continue; }   // the heart buoy: a heart back, if one has been lost
@@ -4498,6 +4590,7 @@ function updateBalloons(dt, sp) {
 function balFinish() {
   var B = BAL, perfect = B.popped === B.total, bonus = perfect ? 15 : B.popped >= B.total * 0.7 ? 5 : 0;
   if (bonus) giveCoins(bonus, bx + 20, by);
+  save.stats.balClears = Math.min(999, save.stats.balClears + 1); if (save.stats.balClears === CFG.empClears) toast('A secret door appeared! Tap it to enter the Emporium.', 5200); persist();
   BALR = { popped: B.popped, total: B.total, coins: B.coins + bonus, perfect: perfect, bonus: bonus }; runPopsOf += B.total;
   BAL = null; rsgT = 0; rsgGo = false; rsgTap = false; celT = CFG.celSecs; vy = 0; grace = 0; invuln = 0; lastAfter = 0;
   bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist;
@@ -4542,12 +4635,22 @@ function balIntro() {   // the title and the one rule, before Ready, Set, Go
   var a = clamp(Math.min(rsgT / 0.3, (CFG.cardSecs - rsgT) / 0.3), 0, 1);
   ctx.globalAlpha = a; outlined('Balloon Party!', W / 2, 168, 40, '#ffd93b'); outlined('Prince Chimp is sorry. Pop his balloons!', W / 2, 212, 16, '#ffffff'); outlined('Nothing can hurt you up here. Only the floor.', W / 2, 236, 16, '#ffffff'); ctx.globalAlpha = 1;
 }
+function drawEmpDoor(cx, by0) {   // the Emporium door on the Balloon Party card: an arched wooden door with a gold star
+  var w = 34, h = 48, x = cx - w / 2, y = by0 - h, lit = 0.5 + 0.5 * Math.sin(time * 4);
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = '#3a2a4d'; ctx.fillStyle = '#8a4b2a';
+  ctx.beginPath(); ctx.moveTo(x, by0); ctx.lineTo(x, y + w / 2); ctx.arc(cx, y + w / 2, w / 2, Math.PI, 0); ctx.lineTo(x + w, by0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,217,59,' + (0.55 + 0.45 * lit) + ')'; ctx.beginPath();
+  for (var k = 0; k < 10; k++) { var r = k % 2 ? 4 : 9, an = -1.5708 + k * 0.62832; ctx[k ? 'lineTo' : 'moveTo'](cx + Math.cos(an) * r, y + 17 + Math.sin(an) * r); }
+  ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(x + w - 7, y + 33, 2.6, 0, 6.2832); ctx.fill(); ctx.restore();
+}
 function balResultCard() {
   var t = rsgT, a = clamp(Math.min(t / 0.3, (CFG.cardSecs - t) / 0.3), 0, 1), e = a * a * (3 - 2 * a), dx = (t < CFG.cardSecs / 2 ? 1 : -1) * (1 - e) * 400, y = 336, R = BALR, i;
   ctx.save(); ctx.translate(dx, 0); cardFrame(30, y, 300, 200, '#ff7aa8', 'Balloon Party!', 28, 46);
   for (i = 0; i < 5; i++) ART.bal.draw(ctx, (i * 2 + 1) % 8, 62 + i * 59, y + 84 + Math.sin(time * 3 + i) * 4, 0.5);
+  if (empOn()) drawEmpDoor(EMP_DOOR[0] + 28, EMP_DOOR[1] + 62);
   outlined('You popped ' + R.popped + ' of ' + R.total + '!', W / 2, y + 128, 20, '#ffffff');
   ART.coin(ctx, 104, y + 166, time); outlined('+' + R.coins + ' banana credits' + (R.perfect ? '  PERFECT!' : ''), 212, y + 168, 16, R.perfect ? '#ffd93b' : '#ffffff');
+  if (empOn()) outlined('Tap the door: the Emporium!', W / 2, y + 190, 13, '#ffd93b');
   ctx.restore();
 }
 
@@ -4886,7 +4989,7 @@ function drawTrail() {
     ctx.strokeStyle = rb ? RB[(i * 2 + Math.floor(time * 30)) % 36] : TRC1[qa]; ctx.lineWidth = 4 + a * 22 * pw; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
     ctx.strokeStyle = TRC2[qa]; ctx.lineWidth = 2 + a * 8 * pw; ctx.stroke();
   }
-  ctx.lineCap = 'butt';
+  ctx.lineCap = 'butt'; drawEmpTrail(pw);
 }
 function drawCoins() {
   var i, j, o, c, x;
@@ -5180,7 +5283,7 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && museHit(pl)) return; if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && museHit(pl)) return; if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
 addEventListener('keydown', function (e) {
@@ -5206,7 +5309,7 @@ addEventListener('gamepadconnected', function () { if (!padOn) toast('Controller
 addEventListener('blur', function (e) { if (e.target && e.target.classList) e.target.classList.remove('pf'); }, true);
 function padList() { return padTest || (navigator.getGamepads ? navigator.getGamepads() : []); }
 function padB(g, n) { return !!(g.buttons[n] && g.buttons[n].pressed); }
-function padPanel() { var a = [pWin, pHelp, pSave, pWear, pUp, pSet, pPrac, pMuse, pChal], i; for (i = 0; i < a.length; i++) if (!a[i].hidden) return a[i]; return null; }
+function padPanel() { var a = [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal], i; for (i = 0; i < a.length; i++) if (!a[i].hidden) return a[i]; return null; }
 function padCands(root) {   // the buttons a controller can reach right now: the open panel's, or the title screen's own buttons
   var L = (root === stageEl ? stageEl : root).querySelectorAll('button'), o = [], i, b;
   for (i = 0; i < L.length; i++) { b = L[i]; if (b.disabled || b.classList.contains('pcl') || !b.getClientRects().length) continue; if (root === stageEl && !bar.contains(b) && b.id !== 'bCont') continue; o.push(b); }
