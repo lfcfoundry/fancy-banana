@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1703 (beta):** **Boss fights are part of the main game:** after your second win, the last two gates of the jungle finale now give way to Prince Chimp's fights on their own, in the same order as before. The "Prince Chimp fight" button in Challenges now turns them off (and back on).
 - **2026.10.11.1650 (beta):** **The rainbow trail is announced:** when you land your 10th perfect gate in a row, the game now says "RAINBOW TRAIL unlocked!" and the trail switches on right away (it used to turn on silently after the run). Turn it off in Settings.
 - **2026.10.11.1618 (beta):** **Fixed the freeze on the mirror flip in Firefox:** going into a backward stage (like the Ice Cream Parlor after the Jam Jar Pantry) could lock the picture upside-down-backwards. The Firefox sky-and-hills layers now switch off on backward stages, which use the same drawing as before. Test Lab: the hitch report no longer counts a paused game's rests as hitches.
 - **2026.10.11.1603 (beta):** **Firefox layers get ready ahead of time:** the next stage's sky and hills are prepared a piece at a time while you play, so a stage change adds no extra pause. Title, pause, death card and every other screen look as before (checked against the old drawing).

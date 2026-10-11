@@ -2635,7 +2635,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1650';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1703';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2829,7 +2829,7 @@ function helpSecrets() {   // before the first win: a teaser; after it: a rumor 
   add('friend', 'Psst! The game is full of secrets now: shimmering edges, glowing gates, and a little door on the title screen. Five quick taps on Fancy there open the Banana Museum.');
   add('friend', huntOn() ? 'Six banana friends are lost in the stages: ' + frCount() + ' of 6 found. Look in the top and bottom corners, halfway between two gates.' : 'Rumor: six banana friends got lost around the stages. They only start hiding once the game has been beaten twice.');
   add('star', 'Challenges: a Challenges button on the title screen turns on Night flashlight, Tiny gaps, Wafer storm or Mirror for your next run. Reach the end in one to earn its badge and a new scarf and mask color for Costume.');
-  if (save.stats.wins >= 2) add('balloon', 'Prince Chimp fights: turn on "Prince Chimp fight" in Challenges. The last two gates of the final stage become a boss with three rounds, and a hit only repeats the round. Beat the first three for crown pieces, then the Crown Duel.');
+  if (save.stats.wins >= 2) add('balloon', 'Prince Chimp fights: after your second win the last two gates of the final stage become a boss with three rounds, and a hit only repeats the round. Beat the first three for crown pieces, then the Crown Duel. You can turn the fights off with "Prince Chimp fight" in Challenges.');
   MUSE.forEach(function (r) { if (!save.unlocks[r[0]]) add(SEC_ICON[r[0]] || 'star', 'Rumor: ' + r[1] + '. ' + r[2]); });
 }
 function refreshCode() {
@@ -3075,7 +3075,7 @@ function refreshChal() {
   var pb = $('pcFight'), nx = fightNext(), fo = fightOn(), need = 0, n, np = 0;
   for (n = 1; n <= 4; n++) { if (!pcBeaten(n) && !need) need = n + 1 - save.stats.wins; if (n < 4 && pcBeaten(n)) np++; }
   pb.disabled = !nx; pb.setAttribute('aria-pressed', fo ? 'true' : 'false'); pb.classList.toggle('on', fo); $('pcN').textContent = fo ? 'ON' : '';
-  $('pcNote').textContent = nx ? 'Next: ' + FIGHTS[nx - 1][0] + (pcBeaten(nx) ? ' (rematch)' : '') + '. Crown pieces: ' + np + ' of 3.' : 'Win ' + Math.max(1, need) + ' more time' + (need > 1 ? 's' : '') + ' to meet the next fight.';
+  $('pcNote').textContent = nx ? (fo ? 'Next: ' : 'Off. Next would be: ') + FIGHTS[nx - 1][0] + (pcBeaten(nx) ? ' (rematch)' : '') + '. Crown pieces: ' + np + ' of 3. Tap to turn ' + (fo ? 'off' : 'on') + '.' : 'Win ' + Math.max(1, need) + ' more time' + (need > 1 ? 's' : '') + ' to meet the next fight.';
   var pcv = $('pcPieces').getContext('2d'); pcv.setTransform(2, 0, 0, 2, 0, 0); pcv.clearRect(0, 0, 150, 46); drawPieces(pcv, 75, 24, 1);
   $('chNote').textContent = cur ? 'Your next run is in ' + CHAL[cur - 1][1] + '. Tap it again to turn it off.' : 'No challenge is on, so runs are normal.';
 }
@@ -3103,7 +3103,7 @@ $('wPlain').addEventListener('click', function () { pickWear(0); }); $('wBow').a
 $('wRain').addEventListener('click', function () { if (rainOk()) { save.unlocks.rainOff = rainOn() ? 1 : 0; persist(); refreshWear(); } });
 $('wCrown').addEventListener('click', function () { if (save.unlocks.crown) { save.unlocks.crownOff = wearsCrown() ? 1 : 0; persist(); refreshWear(); } });
 $('wBunch').addEventListener('click', function () { if (bunchOk()) { save.unlocks.bunchOff = bunchOn() ? 1 : 0; persist(); refreshWear(); } });
-$('mClose').addEventListener('click', closePanels); $('pcFight').addEventListener('click', function () { if (fightNext()) { save.unlocks.pcf = save.unlocks.pcf ? 0 : 1; persist(); refreshChal(); } });
+$('mClose').addEventListener('click', closePanels); $('pcFight').addEventListener('click', function () { if (fightNext()) { save.unlocks.pcfOff = save.unlocks.pcfOff ? 0 : 1; persist(); refreshChal(); } });
 $('chClose').addEventListener('click', closePanels); $('bChal').addEventListener('click', function () { if (state === 'title') openPanel(pChal); });
 $('wFlags').addEventListener('click', function () { if (save.unlocks.flags) { save.unlocks.flagsOff = flagsOn() ? 1 : 0; persist(); refreshWear(); } });
 
@@ -3441,7 +3441,7 @@ var FIGHTS = [['Wafer Cannon', 'Prince Chimp rolls in with a wafer cannon!', 'Do
 var FT = null, runFight = 0, fightNew = '', FT_ROUND = 12, FT_BX = 280;
 function pcBeaten(n) { return !!save.unlocks['pc' + n]; }
 function fightNext() { if (!secretsOn()) return 0; for (var n = 1; n <= 4; n++) if (!pcBeaten(n)) return save.stats.wins >= n + 1 ? n : 0; return 4; }
-function fightOn() { return !!save.unlocks.pcf && fightNext() > 0; }
+function fightOn() { return !save.unlocks.pcfOff && fightNext() > 0; }   // part of the main game: the fights come on their own once earned (two wins for the first); the Challenges switch only turns them off
 function wearsCrown() { var u = save.unlocks; return !!u.crown && !u.crownOff; }
 function fightDue() { var gs = stageOfGate(spawned); return themeOf(gs) === CFG.finalTheme && spawned === gateStart(gs + 1) - 2; }
 function ftNew() { return { n: runFight, ph: 'wait', r: 0, rt: 0, t: 0, hold: 0, nx: 0, list: [], hits: 0, cc: 0, h0: 0, c0: 0, blast: null, lm: 2 * lvl('limes'), lt: 0, limes: [], zaps: 0, by: runFight === 3 ? GROUND_Y - 92 : 300, pc: 0, slide: 0, shake: 0, hop: 0, kick: 0, rc: 9, rw: 9, rf: 9, rcl: 9, rerun: runFight === 4 && pcBeaten(4), hp: null, pose: null }; }
