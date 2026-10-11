@@ -529,6 +529,33 @@ function bowTie(g, x, y, s) {
 }
 
 /* Fancy. rot tilts him; up draws him upright for the shoot-'em-up (scarf streaming down). flap, vy and t pick the expression and move the scarf */
+/* Costume pieces ride the roll: a piece on the head or face sits on the body at some height and depth around the roll axis (YC), so as Fancy rolls it swings round with him, squashes as it turns edge-on, flips over underneath and goes behind the body on the far side. Without a roll (phi 0) every piece is drawn exactly where it always was. */
+function decor(g, bow, e, spin, phi, front) {
+  var sn = spin ? Math.sin(phi) : 0, cs = spin ? Math.cos(phi) : 1, hx = (EYES[0][0] + EYES[1][0]) / 2 - 2, hy, y, z, dy;
+  function top(ay, dz) { dy = ay - YC; y = YC + dy * cs + dz * sn; z = dz * cs - dy * sn; }
+  function face(ay, dz) { dy = ay - YC; y = YC + dy * cs + dz * sn; z = dz * cs - dy * sn; }
+  if (front && (bow & 1) && (!spin || (cs > .06 && (face(BOWP[1], 8), z > 0)))) { g.save(); if (spin) { g.translate(0, y - BOWP[1]); g.translate(BOWP[0], BOWP[1]); g.scale(1, cs); g.translate(-BOWP[0], -BOWP[1]); } bowTie(g, BOWP[0], BOWP[1], .85); g.restore(); }
+  hy = EYES[0][1] - 17;
+  if (bow & 2) { top(hy, 12); if (!spin || (z > 0) === front) { g.save(); g.translate(hx, spin ? y : hy); if (spin) g.scale(1, cs); g.rotate(-.2); crownDraw(g, .72); g.restore(); } }
+  else if (bow & 4) {   // Emporium top hat (drawn live as vectors; the crown wins when both are worn)
+    hy = EYES[0][1] - 15; top(hy, 12);
+    if (!spin || (z > 0) === front) {
+      g.save(); g.translate(hx, spin ? y : hy); if (spin) g.scale(1, cs); g.rotate(-.2); g.lineJoin = 'round'; g.strokeStyle = OUTK; g.lineWidth = 2;
+      g.fillStyle = '#23212e'; g.beginPath(); g.ellipse(0, 0, 21, 5, 0, 0, PI2); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11, -25); g.quadraticCurveTo(0, -28, 11, -25); g.lineTo(12, 0); g.closePath(); g.fill(); g.stroke();
+      g.fillStyle = '#c8243a'; g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11.6, -7); g.lineTo(11.6, -7); g.lineTo(12, 0); g.closePath(); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(-7, -22, 3, 13); g.restore();
+    }
+  }
+  if (front && (bow & 8) && e < 2 && (!spin || (cs > .06 && (face(EYES[0][1], 17.5), z > 0)))) {   // Emporium cool shades
+    g.save(); if (spin) { g.translate(0, y - EYES[0][1]); g.translate(0, EYES[0][1]); g.scale(1, cs); g.translate(0, -EYES[0][1]); }
+    g.fillStyle = '#14121c'; g.strokeStyle = '#14121c'; g.lineWidth = 3; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(EYES[0][0] + 6, EYES[0][1] - 2); g.lineTo(EYES[1][0] - 6, EYES[1][1] - 2); g.stroke();
+    for (dy = 0; dy < 2; dy++) { g.beginPath(); g.ellipse(EYES[dy][0], EYES[dy][1], 8.2, 7.2, 0, 0, PI2); g.fill(); }
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.8; for (dy = 0; dy < 2; dy++) { g.beginPath(); g.moveTo(EYES[dy][0] - 5, EYES[dy][1] - 2); g.lineTo(EYES[dy][0] - 1, EYES[dy][1] - 5); g.stroke(); }
+    g.restore();
+  }
+}
 function banana(g, x, y, rot, sc, flap, t, bow, vy, up, gaze, roll, face) {
   var e = face === 2 ? 2 : face === 4 ? 4 : (t % 3.7) < .13 ? 3 : 0, spin = roll >= 0, pic, kn = KNOT, si, gy;
   sc *= .66;
@@ -536,24 +563,10 @@ function banana(g, x, y, rot, sc, flap, t, bow, vy, up, gaze, roll, face) {
   KX = kn[0]; KY = kn[1];
   g.save(); g.translate(x, y); g.rotate(rot); g.scale(sc, sc);
   g.save(); if (up) { g.translate(KX, KY); g.rotate(-1.45); g.translate(-KX, -KY); } g.beginPath(); tailPath(g, t, flap, vy, 40, 13, 0, 7); tailPath(g, t, flap, vy, 31, 11.5, 2.1, -3); g.fillStyle = PAL.s; g.fill(); g.strokeStyle = OUTK; g.lineWidth = 2.4; g.stroke(); g.restore();
+  if (spin && bow) decor(g, bow, e, spin, si / SPINN * PI2, false);   // pieces that have rolled round behind the body
   g.drawImage(pic.c, -BOX, -BOY, BW, BH);
   if (e < 2 && !spin) { gy = 1.5 * Math.max(-1, Math.min(1, gaze || 0)); g.drawImage(BAN.iris.c, EYES[0][0] - 10 + .4, EYES[0][1] - 10 + gy + .4, 20, 20); g.drawImage(BAN.iris.c, EYES[1][0] - 10 + .4, EYES[1][1] - 10 + gy + .4, 20, 20); }   // eyes: the pupils follow the gaze
-  if ((bow & 1) && !spin) bowTie(g, BOWP[0], BOWP[1], .85);
-  if ((bow & 2) && !spin) { g.save(); g.translate((EYES[0][0] + EYES[1][0]) / 2 - 2, EYES[0][1] - 17); g.rotate(-.2); crownDraw(g, .72); g.restore(); }
-  else if ((bow & 4) && !spin) {   // Emporium top hat (drawn live as vectors; the crown wins when both are worn)
-    g.save(); g.translate((EYES[0][0] + EYES[1][0]) / 2 - 2, EYES[0][1] - 15); g.rotate(-.2); g.lineJoin = 'round'; g.strokeStyle = OUTK; g.lineWidth = 2;
-    g.fillStyle = '#23212e'; g.beginPath(); g.ellipse(0, 0, 21, 5, 0, 0, PI2); g.fill(); g.stroke();
-    g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11, -25); g.quadraticCurveTo(0, -28, 11, -25); g.lineTo(12, 0); g.closePath(); g.fill(); g.stroke();
-    g.fillStyle = '#c8243a'; g.beginPath(); g.moveTo(-12, 0); g.lineTo(-11.6, -7); g.lineTo(11.6, -7); g.lineTo(12, 0); g.closePath(); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(-7, -22, 3, 13); g.restore();
-  }
-  if ((bow & 8) && !spin && e < 2) {   // Emporium cool shades
-    g.save(); g.fillStyle = '#14121c'; g.strokeStyle = '#14121c'; g.lineWidth = 3; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(EYES[0][0] + 6, EYES[0][1] - 2); g.lineTo(EYES[1][0] - 6, EYES[1][1] - 2); g.stroke();
-    for (si = 0; si < 2; si++) { g.beginPath(); g.ellipse(EYES[si][0], EYES[si][1], 8.2, 7.2, 0, 0, PI2); g.fill(); }
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.8; for (si = 0; si < 2; si++) { g.beginPath(); g.moveTo(EYES[si][0] - 5, EYES[si][1] - 2); g.lineTo(EYES[si][0] - 1, EYES[si][1] - 5); g.stroke(); }
-    g.restore();
-  }
+  decor(g, bow, e, spin, spin ? si / SPINN * PI2 : 0, true);
   g.restore();
 }
 /* banana friends: same body, a plain face, and small accessories so each one is different */
@@ -645,7 +658,7 @@ function limb(g, x0, y0, x1, y1, r0, r1) {   // a tapered, round-ended limb as t
 }
 function gHand(g, x, y, sc, rot, fist, FUR, SKIN, O) {   // a gorilla hand drawn pointing up: an open mitten (four fingers and a thumb) or, rotated, a fist whose knuckles rest on the floor
   var i, fx;
-  g.save(); g.translate(x, y); g.rotate(rot); g.scale(sc, sc);
+  g.save(); g.translate(x, y); g.rotate(rot); g.scale(-sc, sc);   // mirrored: the thumb sits on the side toward the body for both hands
   if (fist) {   // knuckles: a row of round bumps under a wide palm
     ell(g, 0, 0, 15, 12); fb(g, FUR(0, 0, 15), O, 3);
     [-9.5, -3.2, 3.2, 9.5].forEach(function (kx) { circ(g, kx, -9, 5); fb(g, FUR(kx, -9, 6), O, 2); });
@@ -2612,7 +2625,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1317';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1333';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -4676,6 +4689,15 @@ function drawBunch(x, y, t, s, up) {   // a bunch of balloons held at (x, y), th
   for (i = 0; i < offs.length; i++) { px2 = x + offs[i][0] * s + Math.sin(t * 1.3 + i) * 3; py2 = y + offs[i][1] * s - up + Math.cos(t * 1.1 + i * 2) * 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(px2, py2 + 36 * s); ctx.stroke(); }
   for (i = 0; i < offs.length; i++) { px2 = x + offs[i][0] * s + Math.sin(t * 1.3 + i) * 3; py2 = y + offs[i][1] * s - up + Math.cos(t * 1.1 + i * 2) * 2; ART.bal.draw(ctx, (i + 3) % 9, px2, py2, 0.78 * s, undefined, true); }
 }
+function bigCrown(x, y, sc) {   // the Banana Crown offered to Fancy: floating in a soft golden glow with a few twinkling stars (the crown picture itself is drawn no larger than 1.5x so it stays crisp)
+  var i, a, r = 58 * sc / 1.5, sx, sy, q, gr;
+  ctx.save(); ctx.translate(x, y);
+  gr = ctx.createRadialGradient(0, 0, 4, 0, 0, r * 1.5); gr.addColorStop(0, 'rgba(255,238,150,.7)'); gr.addColorStop(.5, 'rgba(255,214,80,.25)'); gr.addColorStop(1, 'rgba(255,214,80,0)');
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, r * 1.5, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = '#fffbe0'; ctx.beginPath();
+  for (i = 0; i < 6; i++) { a = time * 0.9 + i * 1.0472; sx = Math.cos(a) * r * 1.05; sy = Math.sin(a) * r * 0.62; q = (3.5 + 2.2 * Math.sin(time * 5 + i * 2)) * sc; ctx.moveTo(sx, sy - q); ctx.lineTo(sx + q * .28, sy - q * .28); ctx.lineTo(sx + q, sy); ctx.lineTo(sx + q * .28, sy + q * .28); ctx.lineTo(sx, sy + q); ctx.lineTo(sx - q * .28, sy + q * .28); ctx.lineTo(sx - q, sy); ctx.lineTo(sx - q * .28, sy - q * .28); ctx.closePath(); }
+  ctx.fill(); ctx.rotate(Math.sin(time * 2) * 0.06); ART.crown(ctx, sc); ctx.restore();
+}
 function drawGift() {
   var S = giftS, st = giftSt, cx, cy = 452, lean = 0, up = 0, hx, hy, line = S === 1 ? (giftK ? CROWN_LINES[0] : GIFT_LINES[0]) : S === 2 ? GIFT_LINES[1] : '', u;
   cx = S === 0 ? W + 90 - (W + 90 - 262) * easeOutBack(clamp(st / 1.4, 0, 1)) : S === 4 ? 262 + st * st * 90 : 262;
@@ -4687,7 +4709,7 @@ function drawGift() {
     var fx0 = cx + 46, fy0 = cy + 40; ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(fx0, fy0 + 40); ctx.lineTo(fx0, fy0 - 60); ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = '#d8c8a0'; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(fx0, fy0 - 58); ctx.quadraticCurveTo(fx0 + 16, fy0 - 62 + Math.sin(time * 7) * 5, fx0 + 32, fy0 - 52 + Math.sin(time * 7 + 1) * 4); ctx.quadraticCurveTo(fx0 + 16, fy0 - 38 + Math.sin(time * 7 + 2) * 5, fx0, fy0 - 34); ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.stroke();
   }
-  if (giftK) { if (S < 4) { ctx.save(); ctx.translate(hx, hy - 28 + Math.sin(time * 3) * 3); ART.crown(ctx, 2.3); ctx.restore(); } } else drawBunch(hx, hy, time, 1, 0);
+  if (giftK) { if (S < 4) { var gu = S === 3 ? u : 0, k0x = cx - 112, k0y = cy - 56; bigCrown(k0x + (bx + 8 - k0x) * gu, k0y + Math.sin(time * 3) * 4 * (1 - gu) + (by - 26 - k0y) * gu, 1.5 - 0.65 * gu); } } else drawBunch(hx, hy, time, 1, 0);
   if (line) {
     var ba = clamp(st / 0.25, 0, 1); ctx.globalAlpha = ba; ctx.lineWidth = 3; ctx.strokeStyle = INK; rrect(20, 90, 320, 92, 20); ctx.fillStyle = 'rgba(58,42,77,0.9)'; ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(cx - 28, 182); ctx.lineTo(cx - 6, 182); ctx.lineTo(cx - 14, 214); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -5422,11 +5444,12 @@ function drawGap() {   // how long to leave the picture alone: under an opaque w
   if (state !== 'play' && coverOpen()) g = Math.max(g, 120); else if (state === 'dead' && deadT > 1.5) g = Math.max(g, 66);
   return g;
 }
+var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
 function frame(t) {
   requestAnimationFrame(frame);
   if (!autoRun) { last = t; return; }
   var fs = performance.now(), ri = t - last, dt = Math.min(0.05, evenDt(ri) / 1000 || 0), p0 = REC ? fs : 0; last = t; acc += dt; wlSync(); govStep(ri, t); if (padOn || padTest) padStep();
-  try { while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
+  var sn = 0; try { if (STEPMODE) { sn = Math.ceil(acc / 0.0167 - 1e-6); if (sn > 0) { var sd = acc / sn; for (var si = 0; si < sn; si++) update(sd); acc = 0; } } else while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; sn++; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
 }
 requestAnimationFrame(frame);
 
