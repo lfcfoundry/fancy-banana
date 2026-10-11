@@ -1923,6 +1923,7 @@ function layerJ(g, L, off) {   // the garden's long journey pictures: screen-wid
   g.save(); g.beginPath(); g.rect(-20, y - 2, q + 20, h + 4); g.clip(); putX(g, a, x, L.y); g.restore();
   g.save(); g.beginPath(); g.rect(q, y - 2, W + 20 - q, h + 4); g.clip(); putX(g, b, x + W, L.y); g.restore();
 }   // the garden's long journey pictures
+function sceneReady(th) { return !!SET[th] || !!(PLAN[th] && PLAN[th].i >= PLAN[th].sc); }   // the sky, hills and ground of this stage are built (asking for layersOf then costs nothing)
 function layersOf(th) {   // the sky and the three hill bands as plain pictures (for a browser that slides them itself); null where the stage is built differently
   if (th === JT) return null;
   var s = scenery(th), f = s.far, m = s.mid, t = s.top;
@@ -2628,13 +2629,13 @@ function balBack(g, off) { var P = party(); put(g, P.sky.c, 0, 0); layer(g, P.cl
 function balGround(g, off) { var F = party().floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
 function balWarm() { var i; if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { layersOf: layersOf, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1546';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1603';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -4912,28 +4913,38 @@ function outlinedC(text, x, y, size, fill, align, base, lazy) {   // text that c
 }
 function shownTheme() { return bgT < 0.5 ? bgFrom : bgTheme; }   // stage change = a quick fade through white, so only ONE scene is drawn per frame (two at once was the big hitch)
 /* Firefox: the sky and the hills are separate page layers that the browser slides by itself, so the page thread draws only the foreground (Firefox drew about twice as long per frame as it can show: the compositor then dropped one frame in seven; measured on a laptop, 2026-10-11). Other browsers draw everything on the canvas. */
-var BKDEF = /Firefox\//.test(navigator.userAgent), BKMODE = BKDEF, bkEl = $('bk'), bkTh = -1, bkOn = false, bkBands = [], bkXf = '', bkLast = [];
+var BKDEF = /Firefox\//.test(navigator.userAgent), BKMODE = BKDEF, bkEl = $('bk'), bkTh = -1, bkOn = false, bkBands = [], bkLast = [], bkCache = {};   // bkCache: the finished layers of a stage (the one on screen and the next), kept so a stage change does not build them in one frame
 function bkHide() { if (bkOn) { bkOn = false; bkEl.hidden = true; } }
-function bkReset() { bkTh = -1; bkLast = []; }
-function bkBuild(th) {
-  var li = ART.layersOf(th), cpl = stageEl.clientWidth / W, i, c, n, j, b, e, K = li ? li.K : 1;
-  if (!li) return false;
-  bkEl.textContent = ''; bkBands = [];
-  e = document.createElement('canvas'); e.width = li.sky.width; e.height = li.sky.height; e.getContext('2d').drawImage(li.sky, 0, 0); e.style.top = '0px'; e.style.width = (li.sky.width / K * cpl) + 'px'; e.style.height = (li.sky.height / K * cpl) + 'px'; e.style.willChange = 'auto'; bkEl.appendChild(e);
-  for (i = 0; i < li.bands.length; i++) {
-    b = li.bands[i]; c = b.L.c; n = Math.ceil(W * K / c.width) + 1;
-    e = document.createElement('canvas'); e.width = c.width * n; e.height = c.height; for (j = 0; j < n; j++) e.getContext('2d').drawImage(c, j * c.width, 0);
-    e.style.top = (Math.round(b.L.y * K) / K * cpl) + 'px'; e.style.width = (e.width / K * cpl) + 'px'; e.style.height = (c.height / K * cpl) + 'px'; bkEl.appendChild(e);
-    bkBands.push({ el: e, pc: c.width / K, f: b.f });
-  }
-  bkTh = th; bkLast = []; bkXf = ''; return true;
+function bkReset() { bkTh = -1; bkLast = []; bkCache = {}; bkEl.textContent = ''; }
+function bkPart(th, i) {   // one picture of a stage's layers per call (0 the sky, 1 to 3 the hill bands), built into the cache
+  var li = ART.layersOf(th), cpl = stageEl.clientWidth / W, K, r = bkCache[th] || (bkCache[th] = { els: [], bands: [] }), e, c, n, j, b;
+  if (!li || r.els[i]) return !!li; K = li.K;
+  if (i === 0) { e = document.createElement('canvas'); e.width = li.sky.width; e.height = li.sky.height; e.getContext('2d').drawImage(li.sky, 0, 0); e.style.top = '0px'; e.style.width = (li.sky.width / K * cpl) + 'px'; e.style.height = (li.sky.height / K * cpl) + 'px'; e.style.willChange = 'auto'; r.els[0] = e; return true; }
+  b = li.bands[i - 1]; c = b.L.c; n = Math.ceil(W * K / c.width) + 1;
+  e = document.createElement('canvas'); e.width = c.width * n; e.height = c.height; for (j = 0; j < n; j++) e.getContext('2d').drawImage(c, j * c.width, 0);
+  e.style.top = (Math.round(b.L.y * K) / K * cpl) + 'px'; e.style.width = (e.width / K * cpl) + 'px'; e.style.height = (c.height / K * cpl) + 'px';
+  r.els[i] = e; r.bands[i - 1] = { el: e, pc: c.width / K, f: b.f }; return true;
+}
+function bkBuild(th) {   // put this stage's layers on the page (building what the cache does not hold yet)
+  var i, r, k;
+  for (i = 0; i < 4; i++) if (!bkPart(th, i)) return false;
+  r = bkCache[th]; bkEl.textContent = ''; for (i = 0; i < 4; i++) bkEl.appendChild(r.els[i]);
+  bkBands = r.bands; bkTh = th; bkLast = []; for (k in bkCache) if (+k !== th && +k !== bkNext()) delete bkCache[k];
+  return true;
+}
+function bkNext() { return themeOf(stage + 1); }
+function bkPre() {   // between frames of play: build the next stage's layers one picture per frame, once its scenery exists
+  var th = bkNext(), r, i;
+  if (th === bkTh || th === ART.journeyTheme || !ART.sceneReady(th)) return;
+  r = bkCache[th]; if (r && r.els.length >= 4 && r.els[3]) return;
+  for (i = 0; i < 4; i++) if (!(bkCache[th] && bkCache[th].els[i])) { bkPart(th, i); return; }
 }
 function bkWant(th) { return BKMODE && state === 'play' && !BAL && !FT && ftStill < 0.01 && !mirOn() && nightA <= 0.01 && zoomK <= 1.001 && punchT <= 0 && !flipOff() && th !== ART.journeyTheme; }
 function bkDraw(th, d) {
   var i, o, cpl, x;
   if (th !== bkTh && !bkBuild(th)) { bkHide(); return false; }
   if (!bkOn) { bkOn = true; bkEl.hidden = false; bkLast = []; }
-  cpl = stageEl.clientWidth / W;
+  cpl = stageEl.clientWidth / W; bkPre();
   for (i = 0; i < bkBands.length; i++) { o = (d * bkBands[i].f) % bkBands[i].pc; x = (-o * cpl).toFixed(3); if (bkLast[i] !== x) { bkLast[i] = x; bkBands[i].el.style.transform = 'translate3d(' + x + 'px,0,0)'; } }
   ctx.clearRect(0, 0, W, H); return true;
 }

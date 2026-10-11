@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1603 (beta):** **Firefox layers get ready ahead of time:** the next stage's sky and hills are prepared a piece at a time while you play, so a stage change adds no extra pause. Title, pause, death card and every other screen look as before (checked against the old drawing).
 - **2026.10.11.1546 (beta):** **Smoother scrolling in Firefox:** the sky and hills now ride on their own layers that Firefox slides by itself, so the game draws about half as much each frame and Firefox no longer drops frames (Ice Cream Parlor and every other stage). Chrome, Edge and phones draw exactly as before. The Test Lab can switch it back for comparison.
 - **2026.10.11.1537 (beta):** **Test Lab, for Firefox smoothness:** a new 'Background: slid by the browser' switch makes the sky and hills separate layers that the browser moves by itself, so the game draws about half as much each frame (measured 9 to 4 ms in Firefox). It looks the same. It is off unless you switch it on. Two new rows in the smoothness report compare it.
 - **2026.10.11.1505 (beta):** **Test Lab:** the 'Drawing sharpness' buttons now include lighter choices (1x and 0.8x, drawn smaller and stretched by the browser, like a phone does), and the smoothness test no longer lets the automatic quality control change things between rows. The game itself is unchanged.
