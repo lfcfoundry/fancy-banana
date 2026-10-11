@@ -2625,7 +2625,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1444';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1455';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -5291,7 +5291,7 @@ function resize() {
   var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0));   // the body keeps clear of notches and rounded corners (safe-area padding)
   var s = Math.min(aw / W, ah / H), cssW = Math.floor(W * s), cssH = Math.floor(H * s);
   stageEl.style.width = cssW + 'px'; stageEl.style.height = cssH + 'px'; stageEl.style.setProperty('--u', s + 'px');
-  dpr = Math.min(devicePixelRatio || 1, dprMax || 2);   // dprMax is lowered by the quality governor
+  dpr = DPRFORCE || Math.min(devicePixelRatio || 1, dprMax || 2);   // dprMax is lowered by the quality governor
   var nw = Math.max(1, Math.round(cssW * dpr)), nh = Math.max(1, Math.round(cssH * dpr)); if (nw !== cv.width || nh !== cv.height) { cv.width = nw; cv.height = nh; TXC = {}; TXN = 0; FXS = {}; CFC = []; CFP = ''; } k = cv.width / W;   // a resize that changes nothing (a phone's address bar) must not throw away every word picture
   var ak = Math.min(k, CFG.artScaleMax);   // art pictures are built at most this sharp, to save memory on big screens
   if (ak !== artK) { artK = ak; ART.init(ak); }
@@ -5444,7 +5444,7 @@ function drawGap() {   // how long to leave the picture alone: under an opaque w
   if (state !== 'play' && coverOpen()) g = Math.max(g, 120); else if (state === 'dead' && deadT > 1.5) g = Math.max(g, 66);
   return g;
 }
-var LAYER = '', LAYERD = false;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
+var LAYER = '', LAYERD = false, DPRFORCE = 0;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
 function frame(t) {
   requestAnimationFrame(frame);
