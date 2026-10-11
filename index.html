@@ -2612,7 +2612,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1310';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1317';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -5294,8 +5294,9 @@ addEventListener('keydown', function (e) {
   if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
   if ((e.key === 'c' || e.key === 'C') && contCan() && !panelOpen()) { payContinue(); return; }
   if (e.key !== ' ' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
-  var t = document.activeElement && document.activeElement.tagName;
-  if (t === 'BUTTON' || t === 'TEXTAREA' || t === 'INPUT') return;
+  var ae = document.activeElement, t = ae && ae.tagName;
+  if (t === 'BUTTON' && e.key === ' ' && state !== 'title' && !panelOpen()) ae.blur();   // in a run the space bar flaps even if some button still has the focus (a focused button would swallow it and press itself)
+  else if (t === 'BUTTON' || t === 'TEXTAREA' || t === 'INPUT') return;
   e.preventDefault(); if (!e.repeat) { if (state === 'play' || state === 'launch') tapRipple(mx(bx), mirY(by), tapIgnored()); onAction(); }
 });
 // A button that was clicked or tapped lets go of the keyboard focus, so the space bar flaps instead of pressing that same button again (a focused button swallows Space). A keyboard press (detail 0) keeps its focus.
