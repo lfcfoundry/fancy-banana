@@ -2635,7 +2635,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1618';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1650';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -3227,6 +3227,7 @@ function rateGate(o) {   // called as Fancy clears a gate: perfect (through the 
   var cy = (o.gt + o.gb) / 2, gap = o.gb - o.gt, y = by;
   if (o.mid && Math.abs(o.yAt - cy) < gap * CFG.perfectFrac * (1 + 0.25 * lvl('sweet'))) {
     streak++; if (streak > bestStreak) bestStreak = streak; giveCoins(1 + lvl('golden'), CFG.bananaX, y);
+    if (streak === 10 && !pracN && !rainOk()) { save.stats.streak = 10; persist(); refreshWear(); pop('RAINBOW TRAIL unlocked!', '#ff8ad8', 24); pop('Turn it off in Settings', '#ffffff', 16); burst(CFG.bananaX + 30, y, 30, ['#ff6b81', '#ffd93b', '#7be07b', '#7ad8ff', '#b78cff'], 280, 280); }   // the secret is announced the moment it is earned (it used to switch on silently at the end of the run)
     if (streak % CFG.streakEvery === 0) { giveCoins(CFG.streakBonus + lvl('golden'), CFG.bananaX, y); burst(CFG.bananaX + 30, y, 26, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 260, 260); pop('STREAK x' + streak + '!', '#ff8ad8', 26); }
     else pop(streak > 1 ? 'PERFECT x' + streak : 'PERFECT!', '#ffd93b', 22);
   } else {
