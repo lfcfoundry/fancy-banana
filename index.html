@@ -2338,6 +2338,10 @@ var MGW = null;
 var MGQ = [], MGSH = null;
 function mgwarm() { MGQ = [['sub'], ['barrels', 1], ['barrels', 2], ['barrels', 3], ['barrelsV', 2], ['barrelsV', 3], ['gull', 0], ['gull', 1], ['gull', 2], ['gull', 3], ['gull', 4], ['gull', 5], ['gull', 6], ['gull', 7], ['sub', 'r'], ['buoy'], ['glow'], ['shadowSub'], ['gullShadow', 0], ['gullShadow', 1], ['gullShadow', 2], ['gullShadow', 3], ['whirl'], ['whirlArms'], ['bubble'], ['wake'], ['ripple'], ['heart', true], ['heart', false], ['wafer']].map(function (a) { return function () { mgs(a[0], a[1]); }; }); MGQ.push(function () { if (!MGW) { MGW = mk(W, 320); waterTile(MGW.g, 320); } }); [0, 1, 2, 3, 4].forEach(function (n) { MGQ.push(function () { if (MGCP === n) mgCausticPart(MGCP++); }); }); SHORE.forEach(function (st, n) { MGQ.push(function () { if (MGC.shore) return; if (n === 0) MGSH = mk(W, SHH); if (!MGSH) return; st(MGSH.g); if (n === SHORE.length - 1) { MGC.shore = MGSH; MGSH = null; } }); }); }
 function mgdone() { while (MGQ.length) MGQ.shift()(); }
+function mgfree() {   // after the water bonus game: let go of its big pictures (the sea tile, the sunlight net, the beach, the boats and gulls, about 8 to 12 MB); the next run builds them again at the first gate of the Silverware Drawer. The small shared ones (wafer, heart, bubble) stay.
+  var k; MGW = null; MGCA = null; MGCP = 0; MGSH = null; MGQ = [];
+  for (k in MGC) if (/^(shore|sub|barrels|barrelsV|gull|gullShadow|shadowSub)/.test(k)) delete MGC[k];
+}
 function mgcol(a, b, w) { return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * w) + ',' + Math.round(a[1] + (b[1] - a[1]) * w) + ',' + Math.round(a[2] + (b[2] - a[2]) * w) + ')'; }
 /* The sea is light and teal at the start and the end of the level and deep blue in the middle. The color is a gradient up the screen (what is ahead is at the top), so a change is seen traveling toward Fancy instead of switching in steps. p0 = the level's progress at the bottom, p1 = at the top (0..1). */
 function mgbell(p) { p = Math.max(0, Math.min(1, p)); var a = Math.min(1, p / 0.3), b = Math.max(0, Math.min(1, (p - 0.7) / 0.3)); return (a * a * (3 - 2 * a)) * (1 - b * b * (3 - 2 * b)); }
@@ -2629,13 +2633,13 @@ function balBack(g, off) { var P = party(); put(g, P.sky.c, 0, 0); layer(g, P.cl
 function balGround(g, off) { var F = party().floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
 function balWarm() { var i; if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1730';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1815';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -3419,7 +3423,8 @@ function mirY(y) { return mirOn() ? H - y : y; }
 /* The backward level: in one stage after the first and before the water level (Jam Jar Pantry, Ice Cream Parlor or Silverware Drawer, drawn by lot at the start of every run) the whole picture is turned left to right: Fancy flies at the right of the screen and everything comes toward him from the left. Only the drawing is turned, so the rules, the hit boxes and the controls do not change. When the stage changes the picture flips over like a card. */
 var backStage = 0, flipV = 0;
 function flipWant() { return backStage > 0 && stage === backStage && !pracN ? 1 : 0; }
-function flipSX() { if (!(state === 'play' || state === 'paused' || state === 'dead') || flipV <= 0) return 1; if (flipV >= 1) return -1; var u = flipV * flipV * (3 - 2 * flipV); return Math.cos(Math.PI * u); }
+// flipSX: the ready and launch screens of a backward stage are turned round too (the launcher used to shoot Fancy the wrong way and he flipped in mid air)
+function flipSX() { if (!(state === 'play' || state === 'paused' || state === 'dead' || ((state === 'ready' || state === 'launch') && flipV >= 1)) || flipV <= 0) return 1; if (flipV >= 1) return -1; var u = flipV * flipV * (3 - 2 * flipV); return Math.cos(Math.PI * u); }
 function mx(x) { var f = flipSX(); return f === 1 ? x : W / 2 + (x - W / 2) * f; }   // where a point of the world is on the screen right now
 var FB = null, FBg = null, FBmain = null;
 var FBff = true, FBdir = false, FBforce = '', cssF = false;   // cssF: Firefox turns a settled backward level over with a CSS flip of the whole canvas (free), so it costs no more than a forward level; the words and counters are drawn turned round to come out right
@@ -4246,7 +4251,7 @@ function updateMini(dt) {
   if (lt >= CFG.mgSecs && !m.boss) { m.ph = 'win'; m.pt = 0; if (!m.practice) { save.stats.friends += CFG.friendsPerStage + m.saved + m.bonus; persist(); } burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); }
 }
 function finishMini() {   // back to the side-scrolling flight: the next stage starts with a calm stretch
-  state = 'play'; obs = []; by = CFG.rsgY; bx = CFG.bananaX; vy = 0; angle = 0; grace = 0; rsgT = CFG.cardSecs; rsgGo = false; rsgTap = false; boost = 0; boostT = 99; trackOn = false; cardT = -1; topT = 0; MG = null;
+  ART.mg.free(); state = 'play'; obs = []; by = CFG.rsgY; bx = CFG.bananaX; vy = 0; angle = 0; grace = 0; rsgT = CFG.cardSecs; rsgGo = false; rsgTap = false; boost = 0; boostT = 99; trackOn = false; cardT = -1; topT = 0; MG = null;
   bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist; washA = 0; nextX = W + CFG.obW + speedFor(stage) * (rsgGoAt() - rsgT + 0.4); fx.length = 0; invuln = 0; lastAfter = 0; trail.length = 0;
 }
 /* practice (bought in the shop, played from the title screen): the same level, nothing earned; when it ends or Fancy is out, a card offers Try again or Back to title */
@@ -4689,10 +4694,11 @@ function balResultCard() {
 /* --- Prince Chimp gives up his balloons (the first time the game is beaten) --- */
 var GIFT_LINES = ['Fine! You win, Banana!', 'Take every balloon I own... and please leave me alone!'];
 var giftK = 0, giftTitle = false, CROWN_LINES = ['Fair and square, Banana!', 'Take my crown...', 'it looks better on you!'];
-function startGift(k, toTitle) { giftK = k || 0; giftTitle = !!toTitle; state = 'gift'; giftT = 0; giftS = 0; giftSt = 0; setBar(false); ART.bal.warm(); }
+function startGift(k, toTitle) { giftK = k || 0; giftTitle = !!toTitle; bx = CFG.bananaX; by = 330; vy = 0; angle = 0; trackOn = false; state = 'gift';   // Fancy hovers up in the open for the gift scene (he used to sit down on the launcher)
+  giftT = 0; giftS = 0; giftSt = 0; setBar(false); ART.bal.warm(); }
 function giftTap() { if ((giftS === 1 || giftS === 2) && giftSt > 0.45) { giftS++; giftSt = 0; } }
 function giftUpdate(dt) {
-  giftT += dt; giftSt += dt;
+  giftT += dt; giftSt += dt; by = 330 + Math.sin(time * 2.4) * 7; angle = Math.sin(time * 1.7) * 0.05; flapAnim = time % 0.6 < 0.18 ? 0.18 - time % 0.6 : 0;
   if (giftS === 0 && giftSt > 1.6) { giftS = 1; giftSt = 0; }
   else if ((giftS === 1 || giftS === 2) && giftSt > 9) { giftS++; giftSt = 0; }
   else if (giftS === 3 && giftSt > 2.4) {
@@ -5271,7 +5277,7 @@ function render() {
   if (BAL || shd.length) drawBalloons(); if (FT && FT.ph !== 'wait') drawFight();
   lap('obstacles'); drawCoins(); lap('coins'); if (ex) for (i = 0; i < obs.length; i++) obs[i].x += ex;
   var zm = zoomOn();
-  if (state === 'ready' || state === 'gift' || state === 'launch' || (state === 'play' && trackOn)) ART.track(ctx, trackX, calmOn() ? time * 0.15 : time, state === 'launch' ? Math.max(0, launchT) / CFG.launchSecs : 0, bgTheme, state === 'ready');
+  if (state === 'ready' || state === 'launch' || (state === 'play' && trackOn)) ART.track(ctx, trackX, calmOn() ? time * 0.15 : time, state === 'launch' ? Math.max(0, launchT) / CFG.launchSecs : 0, bgTheme, state === 'ready');
   if (zm) ctx.restore();
   lap('track'); drawGround(); lap('ground'); if (fl1) flipBlit(); if (ex) dist -= ex;
   if (bgT < 1) { ctx.globalAlpha = Math.min(calmOn() ? 0.4 : 0.92, (bgT < 0.5 ? bgT : 1 - bgT) * 2.6); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }   // the fade through white washes the scene only: the card, Fancy and the confetti stay clear

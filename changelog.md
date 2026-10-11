@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1815 (beta):** **Mirror launcher and a better gift scene:** on a mirror stage the launcher is now turned round too (after a paid retry it used to shoot Fancy the wrong way and flip him in mid air), and in the balloon gift scene Fancy now hovers in the open instead of sitting on the launcher. The water bonus game also lets go of its big pictures afterward, saving about 9 MB.
 - **2026.10.11.1730 (beta):** **No pause after the water bonus game:** the Fruit Garden's backdrop is now built a little each frame while you play the bonus game (and quickly if it ends early), so the flight resumes without the 200 to 300 ms hitch.
 - **2026.10.11.1703 (beta):** **Boss fights are part of the main game:** after your second win, the last two gates of the jungle finale now give way to Prince Chimp's fights on their own, in the same order as before. The "Prince Chimp fight" button in Challenges now turns them off (and back on).
 - **2026.10.11.1650 (beta):** **The rainbow trail is announced:** when you land your 10th perfect gate in a row, the game now says "RAINBOW TRAIL unlocked!" and the trail switches on right away (it used to turn on silently after the run). Turn it off in Settings.
