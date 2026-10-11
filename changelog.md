@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1428 (beta):** **Backward stages are much smoother in Chrome and other non-Firefox browsers:** the whole picture is now turned over in one step instead of picture by picture (it was dropping to about 30 frames a second). **Test Lab:** an automatic Smoothness test measures every stage setting on your own device and writes a report.
 - **2026.10.11.1352 (beta):** **Test Lab:** jumping to a stage no longer carries the launcher's speed boost, so the stage starts calmly with its first gate a couple of seconds away. The game itself is unchanged.
 - **2026.10.11.1344 (beta):** **Test Lab:** jumping to a stage now works at once (Stage 1 to 5 buttons), with a switch to make the stage backward always, never or random, and Fancy cannot be hurt while you test. The game itself is unchanged.
 - **2026.10.11.1333 (beta):** **Costumes spin with Fancy:** the bow tie, crown, top hat and cool shades now roll around with him in his spirals. **Gorilla Guard's hands** now have their thumbs toward his body. **The big crown** after the Crown Duel is drawn crisper, with a golden glow and twinkling stars, and floats up to Fancy's head. **Test Lab:** a new Motion smoothness block lets you switch the stepping mode, pillar movement, how backward stages are flipped and baked pictures, and shows your screen's refresh rate and how evenly the game steps.

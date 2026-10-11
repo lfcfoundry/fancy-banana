@@ -2625,7 +2625,7 @@ return { get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw,
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1352';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1428';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -3411,7 +3411,7 @@ function flipWant() { return backStage > 0 && stage === backStage && !pracN ? 1 
 function flipSX() { if (!(state === 'play' || state === 'paused' || state === 'dead') || flipV <= 0) return 1; if (flipV >= 1) return -1; var u = flipV * flipV * (3 - 2 * flipV); return Math.cos(Math.PI * u); }
 function mx(x) { var f = flipSX(); return f === 1 ? x : W / 2 + (x - W / 2) * f; }   // where a point of the world is on the screen right now
 var FB = null, FBg = null, FBmain = null;
-var FBff = /Firefox\//.test(navigator.userAgent), FBdir = false, FBforce = '', cssF = false;   // cssF: Firefox turns a settled backward level over with a CSS flip of the whole canvas (free), so it costs no more than a forward level; the words and counters are drawn turned round to come out right
+var FBff = true, FBdir = false, FBforce = '', cssF = false;   // cssF: Firefox turns a settled backward level over with a CSS flip of the whole canvas (free), so it costs no more than a forward level; the words and counters are drawn turned round to come out right
 function hudM(open) { if (!cssF) return; if (open) { ctx.save(); ctx.translate(W, 0); ctx.scale(-1, 1); } else ctx.restore(); }   // Firefox is slow at many turned-over pictures; every other browser turns the scenery over with one plain transform, with no spare picture to clear and copy each frame
 function flipOff() {   // the scenery of a backward stage is drawn the right way round on a spare picture first and then turned over in one go: many small turned-over pictures were four times slower in Firefox
   var fx = flipSX(); if (fx === 1 || cssF) return false;
