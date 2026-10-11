@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.11.1505 (beta):** **Test Lab:** the 'Drawing sharpness' buttons now include lighter choices (1x and 0.8x, drawn smaller and stretched by the browser, like a phone does), and the smoothness test no longer lets the automatic quality control change things between rows. The game itself is unchanged.
 - **2026.10.11.1455 (beta):** **Test Lab:** new 'Drawing sharpness' buttons draw the game at 2x or 2.5x and let the browser shrink it (this is what makes a phone look smooth), so you can judge by eye whether it fixes the laptop. Two new rows in the smoothness report compare it. The game itself is unchanged.
 - **2026.10.11.1444 (beta):** **Test Lab:** Fancy now bobs up and down with real flaps during the smoothness test (he used to hang still), and three new switches let the canvas ride on its own browser layer, to see whether that makes forward stages as smooth as backward ones. Two new rows in the smoothness report compare them. The game itself is unchanged.
 - **2026.10.11.1428 (beta):** **Backward stages are much smoother in Chrome and other non-Firefox browsers:** the whole picture is now turned over in one step instead of picture by picture (it was dropping to about 30 frames a second). **Test Lab:** an automatic Smoothness test measures every stage setting on your own device and writes a report.
