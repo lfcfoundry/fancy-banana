@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.12.1017';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.12.1106';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2796,7 +2796,6 @@ var bar = $('bar'), toastEl = $('toast');
 var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pEmp = $('pEmp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
 var toastTimer = 0;
 function toast(t, ms) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 3200); }
-function coverOpen() { return !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }   // a window that hides the picture (the win window sits at the bottom and leaves the victory card in view)
 function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }
 function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pEmp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pending = null; bConfirm.hidden = true; }
 function fmtTime(s) { var m = Math.floor(s / 60); return m < 1 ? s + ' s' : m + ' min ' + (s % 60) + ' s'; }
@@ -5649,9 +5648,10 @@ var BUNCH = null, BUNCH_S = 0.42;
 function bunchDraw(g, s) {   // the Banana Bunch: a little brown rucksack with banana friends poking out of the top (origin: the middle of the pack)
   var i, bx0, by0, a, tipx, tipy;
   g.save(); g.scale(s, s); g.lineCap = 'round'; g.lineJoin = 'round';
-  for (i = 0; i < 3; i++) {   // three bananas, fanned, behind the flap
-    a = (i - 1) * 0.42; bx0 = (i - 1) * 8; by0 = -12; tipx = bx0 + Math.sin(a) * 21 + (i - 1) * 2; tipy = by0 - Math.cos(a) * 21;
-    g.beginPath(); g.moveTo(bx0, by0); g.quadraticCurveTo(bx0 + Math.sin(a) * 22 + (i - 1) * 6, by0 - Math.cos(a) * 14, tipx, tipy); g.strokeStyle = INK; g.lineWidth = 14; g.stroke(); g.strokeStyle = i === 1 ? '#ffdf4a' : '#f6cd33'; g.lineWidth = 10; g.stroke();
+  for (var j = 0; j < 3; j++) {   // three bananas packed tight, barely fanned (the outer two first, the middle one on top), behind the flap
+    i = j === 0 ? 0 : j === 1 ? 2 : 1;
+    a = (i - 1) * 0.2; bx0 = (i - 1) * 5.5; by0 = -12; tipx = bx0 + Math.sin(a) * 21 + (i - 1) * 1; tipy = by0 - Math.cos(a) * 21;
+    g.beginPath(); g.moveTo(bx0, by0); g.quadraticCurveTo(bx0 + Math.sin(a) * 22 + (i - 1) * 2.5, by0 - Math.cos(a) * 14, tipx, tipy); g.strokeStyle = INK; g.lineWidth = 14; g.stroke(); g.strokeStyle = i === 1 ? '#ffdf4a' : '#f6cd33'; g.lineWidth = 10; g.stroke();
     g.fillStyle = '#5a3a14'; g.beginPath(); g.arc(tipx, tipy, 3.2, 0, 6.2832); g.fill();
     g.fillStyle = INK; g.beginPath(); g.arc(bx0 + Math.sin(a) * 12 - 2.6, by0 - Math.cos(a) * 12, 1.5, 0, 6.2832); g.arc(bx0 + Math.sin(a) * 12 + 2.6, by0 - Math.cos(a) * 12, 1.5, 0, 6.2832); g.fill();
   }
@@ -5663,8 +5663,9 @@ function bunchDraw(g, s) {   // the Banana Bunch: a little brown rucksack with b
   g.restore();
 }
 function bunchPic() { if (!BUNCH || BUNCH.kk !== k) { var c = document.createElement('canvas'), g; c.width = Math.round(60 * BUNCH_S * k); c.height = Math.round(80 * BUNCH_S * k); g = c.getContext('2d', CRF); g.scale(k, k); g.translate(30 * BUNCH_S, 46 * BUNCH_S); bunchDraw(g, BUNCH_S); c.kk = k; BUNCH = c; } return BUNCH; }
-function drawBuddies(ey) { var sw = clamp(-vy / 3000, -0.2, 0.2) + Math.sin(time * 3.2) * 0.04, ca = Math.cos(angle), sa = Math.sin(angle); ctx.save(); ctx.translate(bx - 30 * ca + 4 * sa, by + ey - 30 * sa - 4 * ca); ctx.rotate(angle - 0.3 + sw); ctx.drawImage(bunchPic(), -30 * BUNCH_S, -46 * BUNCH_S, 60 * BUNCH_S, 80 * BUNCH_S); ctx.restore(); }   // worn like a rucksack on his back
-function bunchStrap(ey) { ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-19, -9); ctx.quadraticCurveTo(-9, 3, -13, 13); ctx.strokeStyle = INK; ctx.lineWidth = 3.8; ctx.stroke(); ctx.strokeStyle = '#8a4e20'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }   // the strap across his middle
+function rollNow() { return state === 'play' && spinT > 0 ? spinPhase() : state === 'play' && celT > 0 ? (1 - celT / CFG.celSecs) * 6.2832 : -1; }   // Fancy's roll about his long axis (the football spiral and the win roll), or -1
+function drawBuddies(ey, pass) { var sw = clamp(-vy / 3000, -0.2, 0.2) + Math.sin(time * 3.2) * 0.04, ph = rollNow(), c = ph >= 0 ? Math.cos(ph) : 1; if ((ph >= 0 && Math.sin(ph) > 0 ? 1 : 0) !== pass) return; ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); ctx.translate(-30, -4); if (ph >= 0) ctx.scale(1, Math.abs(c) < 0.04 ? 0.04 : c); ctx.rotate(-0.3 + sw); ctx.drawImage(bunchPic(), -30 * BUNCH_S, -46 * BUNCH_S, 60 * BUNCH_S, 80 * BUNCH_S); ctx.restore(); }   // worn like a rucksack on his back; in a roll the whole pack turns about Fancy's long axis with him (squashing edge-on, flipping over, passing behind and in front of his body)
+function bunchStrap(ey) { var ph = rollNow(), c = ph >= 0 ? Math.cos(ph) : 1; if (c < 0.05) return; ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); if (ph >= 0) { ctx.translate(0, -5); ctx.scale(1, c); ctx.translate(0, 5); } ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-19, -9); ctx.quadraticCurveTo(-9, 3, -13, 13); ctx.strokeStyle = INK; ctx.lineWidth = 3.8; ctx.stroke(); ctx.strokeStyle = '#8a4e20'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }   // the strap across his middle (it goes round the back of the body for half of a roll)
 function drawTrail() {
   var n = trail.length, i, p, q, a, pw = state === 'launch' ? clamp((launchT / CFG.launchSecs - 0.12) / 0.4, 0, 1) : state === 'play' ? 0.25 + 0.75 * clamp(boost / CFG.boostV + kCh, 0, 1) : 0, qa;
   if (n < 2 || pw <= 0) return;
@@ -5893,9 +5894,9 @@ function render() {
   else {
     if (cardT >= 0 && state === 'play') { if (mir) { ctx.save(); ctx.translate(0, H); ctx.scale(1, -1); } hudM(1); stageCard(); hudM(0); if (mir) ctx.restore(); lap('card'); }   // drawn before Fancy, so Fancy always stays in view
     fl2 = flipB();   // ...and so are Fancy, his trail and the sparkles (the stage card, the counters and every word are not)
-    zm = zoomOn(); drawTrail(); if ((state === 'play' || state === 'paused') && flagsOn()) drawFlags(); if ((state === 'play' || state === 'paused') && bunchOn()) drawBuddies(ey); lap('trail'); drawSpeedLines(); lap('speedlines');
+    zm = zoomOn(); drawTrail(); if ((state === 'play' || state === 'paused') && flagsOn()) drawFlags(); if ((state === 'play' || state === 'paused') && bunchOn()) drawBuddies(ey, 0); lap('trail'); drawSpeedLines(); lap('speedlines');
     if (kEcho.length && !zm) kEchoes();
-    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); if ((state === 'play' || state === 'paused') && bunchOn()) bunchStrap(ey); ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); if (sKch > 0.02 && state === 'play') drawSuperK(ey); else if (sKarm && kHoldT > 0.12 && state === 'play' && sKused !== stage && empOwn(E.superK)) drawSuperK(ey, kHoldT / 0.55); }
+    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); if ((state === 'play' || state === 'paused') && bunchOn()) { drawBuddies(ey, 1); bunchStrap(ey); } ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); if (sKch > 0.02 && state === 'play') drawSuperK(ey); else if (sKarm && kHoldT > 0.12 && state === 'play' && sKused !== stage && empOwn(E.superK)) drawSuperK(ey, kHoldT / 0.55); }
     lap('fancy'); drawShield();
     if (zm) { ctx.restore(); if (!blinkOff()) drawFancy(zoomX + (bx - zoomX) * zoomK, GROUND_Y + (by - GROUND_Y) * zoomK, angle, 1); }   // in the swoop-in Fancy follows the zoomed track but is stamped at his normal size (a scaled stamp was the costly one)
   }
@@ -6113,10 +6114,8 @@ function softFail(e) {   // a canvas could not be made (memory ran out): build t
   if (!/canvas-memory|null/.test(String(e && e.message)) || artDown >= 3 || CFG.artScaleMax <= 1) return;
   artDown++; CFG.artScaleMax = Math.max(1, CFG.artScaleMax * 0.75); artK = 0; try { resize(); } catch (e2) { }
 }
-function drawGap() {   // how long to leave the picture alone: under an opaque window nobody sees it change, and a settled Oops card hardly moves
-  var g = opt('saver') ? 28 : 0;
-  if (state !== 'play' && coverOpen()) g = Math.max(g, 120); else if (state === 'dead' && deadT > 1.5) g = Math.max(g, 66);
-  return g;
+function drawGap() {   // how long to leave the picture alone: only the Battery saver now. Windows and the Oops card used to throttle it (about 8 and 15 pictures a second) on the idea that nobody sees it change, but the scenery shows round a window's edge and keeps moving, so it looked like a crawl
+  return opt('saver') ? 28 : 0;
 }
 var LAYER = '', LAYERD = false, DPRFORCE = 0;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
