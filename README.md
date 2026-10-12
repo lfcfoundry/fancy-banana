@@ -43,4 +43,4 @@ Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-ha
 ## More from JNFoo
 
 - [Apple Press](https://github.com/JNFoo/apple-press): a clicker game for kids ([play](https://jnfoo.github.io/apple-press/))
-- [browser-game-toolkit](https://github.com/JNFoo/browser-game-toolkit): small open-source (MIT) pieces for single-file browser games ([demos](https://jnfoo.github.io/browser-game-toolkit/))
+- [JS-modules](https://github.com/JNFoo/JS-modules): small open-source (MIT) pieces for single-file browser games ([demos](https://jnfoo.github.io/JS-modules/))
