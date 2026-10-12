@@ -2639,7 +2639,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1959';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2018';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2833,6 +2833,7 @@ function helpSecrets() {   // before the first win: a teaser; after it: a rumor 
   add('friend', 'Psst! The game is full of secrets now: shimmering edges, glowing gates, and a little door on the title screen. Five quick taps on Fancy there open the Banana Museum.');
   add('friend', huntOn() ? 'Six banana friends are lost in the stages: ' + frCount() + ' of 6 found. Look in the top and bottom corners, halfway between two gates.' : 'Rumor: six banana friends got lost around the stages. They only start hiding once the game has been beaten twice.');
   add('star', 'Challenges: a Challenges button on the title screen turns on Night flashlight, Tiny gaps, Wafer storm or Mirror for your next run. Reach the end in one to earn its badge and a new scarf and mask color for Costume.');
+  if (empOn()) add('friend', 'Fancy\'s Place: the little door at the bottom right of the title screen leads to Fancy\'s home. His power-ups, costumes and prizes hang on the wall, the mirror opens the Costume window, and the Apple Press does not work.');
   if (save.stats.wins >= 2) add('balloon', 'Prince Chimp fights: after your second win the last two gates of the final stage become a boss with three rounds, and a hit only repeats the round. Beat the first three for crown pieces, then the Crown Duel. You can turn the fights off with "Prince Chimp fight" in Challenges.');
   MUSE.forEach(function (r) { if (!save.unlocks[r[0]]) add(SEC_ICON[r[0]] || 'star', 'Rumor: ' + r[1] + '. ' + r[2]); });
 }
@@ -4088,6 +4089,8 @@ function update(dt) {
     updateMini(dt);
   } else if (state === 'gift') {
     giftUpdate(dt);
+  } else if (state === 'home' && HOME) {
+    homeUpdate(dt);
   } else if (state === 'victory') {
     vicT += dt; if (frng() < 0.25) burst(40 + frng() * 280, 120 + frng() * 200, 6, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 160, 220);
     fwkT -= dt; if (fwkT <= 0 && vicT > 0.5) { fwkT = calmOn() ? 1.6 : 0.5 + frng() * 0.5; fwk.push({ x: 40 + frng() * 280, y: 70 + frng() * 330, t: 0, o: frng(), c: ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'][Math.floor(frng() * 5)] }); }
@@ -4713,6 +4716,156 @@ function drawEmpDoor(cx, by0) {   // the Emporium door on the Balloon Party card
   for (var k = 0; k < 10; k++) { var r = k % 2 ? 4 : 9, an = -1.5708 + k * 0.62832; ctx[k ? 'lineTo' : 'moveTo'](cx + Math.cos(an) * r, y + 17 + Math.sin(an) * r); }
   ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(x + w - 7, y + 33, 2.6, 0, 6.2832); ctx.fill(); ctx.restore();
 }
+/* ===== Fancy's Place: the home base (a door on the title screen, once the Emporium is open). A room drawn once into a picture; Fancy wanders on the floor; tap things on the wall to read about them ===== */
+var HOME = null, HOME_DOOR = [300, 486, 44, 78], HOME_BOOKS = [['Lunch Trip', '#d8453b'], ['The Keeper\'s Light', '#2a8f9c'], ['Bolivar\'s Treasure', '#c9971f'], ['Yesterday\'s Soup', '#e0782a']];
+var HOME_JOKES = ['APPLE PRESS: Out of order. Please try the other game.', 'The screen says: "Press an apple. Get a banana." Nobody knows what that means.', 'Fancy tried a coin. The machine tried a vanilla wafer. Nobody won.', 'High score: ??? (the machine has been unplugged since before the jungle).'];
+function homeHit(pl) {
+  if (!empOn() || panelOpen() || titleFancyIn() < 1 || !mgIn(pl, HOME_DOOR)) return false;
+  startHome(); return true;
+}
+function drawHomeDoor() {   // the little arched door at the bottom right of the title screen
+  var cx = 322, by0 = 546, w = 36, h = 54, x = cx - w / 2, y = by0 - h, gl = 0.5 + 0.5 * Math.sin(time * 3);
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.fillStyle = '#b36a35';
+  ctx.beginPath(); ctx.moveTo(x, by0); ctx.lineTo(x, y + w / 2); ctx.arc(cx, y + w / 2, w / 2, Math.PI, 0); ctx.lineTo(x + w, by0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(58,42,77,.55)'; ctx.strokeRect(x + 6, y + 26, 10, 11); ctx.strokeRect(x + 20, y + 26, 10, 11); ctx.strokeRect(x + 6, y + 40, 10, 9); ctx.strokeRect(x + 20, y + 40, 10, 9);
+  ctx.fillStyle = '#ff6b81'; ctx.beginPath(); ctx.arc(cx - 3.6, y + 14, 4.2, 0, 6.2832); ctx.arc(cx + 3.6, y + 14, 4.2, 0, 6.2832); ctx.fill(); ctx.beginPath(); ctx.moveTo(cx - 7.6, y + 15.5); ctx.lineTo(cx, y + 24); ctx.lineTo(cx + 7.6, y + 15.5); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,217,59,' + (0.7 + 0.3 * gl) + ')'; ctx.beginPath(); ctx.arc(x + w - 6, y + 38, 2.8, 0, 6.2832); ctx.fill(); ctx.restore();
+  outlined('Home', cx, by0 + 12, 12, '#ffffff');
+}
+function startHome() {
+  closePanels(); state = 'home'; setBar(false); vy = 0; angle = 0; flapAnim = 0; fx.length = 0; ART.warm(0);
+  HOME = { bg: null, k: 0, z: [], x: 180, y: 524, tx: 180, ty: 524, face: 1, mv: 0, msg: [], mt: -9, jk: 0, pw: false };
+  homeSay('Welcome to Fancy\'s Place! Tap the wall to look closer, or the floor to walk around.');
+}
+function homeBack() { HOME = null; resetWorld(); state = 'title'; titleT = 5; setBar(true); }
+function homeSay(t) {
+  var a = t.split(' '), l = '', i, o = [];
+  ctx.font = '700 12px ' + FONT;
+  for (i = 0; i < a.length; i++) { if (l && ctx.measureText(l + ' ' + a[i]).width > 308) { o.push(l); l = a[i]; } else l = l ? l + ' ' + a[i] : a[i]; }
+  o.push(l); HOME.msg = o; HOME.mt = time;
+}
+function homeUpdate(dt) {
+  var h = HOME, dx = h.tx - h.x, dy = h.ty - h.y, d = Math.sqrt(dx * dx + dy * dy), s = 170 * dt, po;
+  if (d > 2) { if (d < s) s = d; h.x += dx / d * s; h.y += dy / d * s; if (Math.abs(dx) > 3) h.face = dx > 0 ? 1 : -1; h.mv = 1; } else h.mv = 0;
+  flapAnim = (h.mv || time % 2.2 < 0.5) && time % 0.5 < 0.18 ? 0.18 - time % 0.5 : 0;
+  po = panelOpen(); if (h.pw && !po) h.k = 0;   // a window just closed: the costume may have changed, so the room is drawn again
+  h.pw = po;
+}
+function homeTap(pl) {
+  var h = HOME, i, z, n, it, own;
+  if (!h || panelOpen()) return;
+  for (i = 0; i < h.z.length; i++) if (mgIn(pl, h.z[i])) break;
+  if (i >= h.z.length) { if (pl[1] > 462) { h.tx = clamp(pl[0], 26, 334); h.ty = clamp(pl[1], 484, 566); } return; }
+  z = h.z[i]; n = z[5]; burst(pl[0], pl[1], 6, ['#ffd93b', '#ffffff'], 110, 120);
+  if (z[4] === 'back') { homeBack(); return; }
+  if (z[4] === 'mirror') { openPanel(pWear); return; }
+  if (z[4] === 'apple') { homeSay(HOME_JOKES[h.jk++ % HOME_JOKES.length]); return; }
+  if (z[4] === 'book') { homeSay(HOME_BOOKS[n][0] + ': a story written in the P-See Story Editor.'); return; }
+  if (z[4] === 'up') { it = homeUps()[n]; homeSay(it.n + (it.m > 1 ? ' (level ' + it.l + ' of ' + it.m + ')' : '') + ': ' + (it.l ? '' : 'not yet bought. ') + it.d); return; }
+  if (z[4] === 'cos') { it = homeCos()[n]; homeSay(it.n + (it.own ? (it.on ? ': wearing it. Tap the mirror to change outfits.' : ': you own it. Tap the mirror to wear it.') : ': ' + it.how)); return; }
+  if (z[4] === 'prize') { it = homePrizes()[n]; homeSay(it.n + (it.own ? ': ' + it.yes : ': ' + it.how)); }
+}
+function homeUps() {
+  var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 });
+  return o;
+}
+function homeCos() {
+  return [{ n: 'Red bow', own: !!save.unlocks.bow, on: wearsBow(), how: 'reach stage ' + CFG.bowStage + ' to unlock it.' }, { n: 'Top hat', own: empOwn(E.hat), on: empWorn(E.hat), how: 'buy it in the Emporium.' },
+    { n: 'Cool shades', own: empOwn(E.shades), on: empWorn(E.shades), how: 'buy it in the Emporium.' }, { n: 'Banana Crown', own: !!save.unlocks.crown, on: wearsCrown(), how: 'win the Crown Duel.' }];
+}
+function homePrizes() {
+  var o = [], i;
+  for (i = 0; i < 4; i++) o.push({ n: FIGHTS[i][0] + ' medal', own: pcBeaten(i + 1), yes: 'beaten in Prince Chimp\'s fight.', how: 'beat Prince Chimp in this fight (after your second win).' });
+  o.push({ n: 'Crown pieces', own: pcBeaten(1) || !!save.unlocks.crown, yes: save.unlocks.crown ? 'the whole Banana Crown is yours!' : (pcBeaten(1) + pcBeaten(2) + pcBeaten(3)) + ' of 3 won.', how: 'one piece for each of the first three fights.' });
+  o.push({ n: 'Balloons', own: !!save.unlocks.balloons, yes: 'Prince Chimp\'s gift for losing to Fancy.', how: 'beat Prince Chimp once.' });
+  o.push({ n: 'Pennant flags', own: !!save.unlocks.flags, yes: 'they came with the balloons.', how: 'beat Prince Chimp once.' });
+  o.push({ n: 'Banana Bunch', own: bunchOk(), yes: 'all six lost friends found.', how: 'find all six lost friends.' });
+  return o;
+}
+function homeBuild() {
+  var h = HOME, c = h.bg || document.createElement('canvas'), g, i, j, x, y, z = [], it, own, sz, a, n;
+  c.width = Math.round(W * k); c.height = Math.round(H * k); h.bg = c; h.k = k; g = c.getContext('2d'); g.setTransform(k, 0, 0, k, 0, 0); g.lineJoin = 'round'; g.lineCap = 'round'; g.textBaseline = 'middle';
+  function T(t, tx, ty, s, fill, al, ink) { g.font = '800 ' + s + 'px ' + FONT; g.textAlign = al || 'center'; if (ink) { g.lineWidth = s / 3.2; g.strokeStyle = INK; g.strokeText(t, tx, ty); } g.fillStyle = fill; g.fillText(t, tx, ty); }
+  function RR(rx, ry, rw, rh, r) { g.beginPath(); g.roundRect(rx, ry, rw, rh, r); }
+  g.fillStyle = '#f6e1ad'; g.fillRect(0, 0, W, 460); g.fillStyle = 'rgba(214,170,96,.35)'; for (x = 0; x < W; x += 40) g.fillRect(x, 0, 20, 460);
+  g.fillStyle = '#d99a58'; g.fillRect(0, 48, W, 5); g.fillStyle = '#b9763a'; g.fillRect(0, 53, W, 8); g.fillStyle = '#7a4a26'; g.fillRect(0, 446, W, 14);
+  g.fillStyle = '#c98c52'; g.fillRect(0, 460, W, H - 460); g.strokeStyle = 'rgba(90,52,24,.35)'; g.lineWidth = 2;
+  for (y = 490, j = 0; y < H + 30; y += 30, j++) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); for (x = (j % 2) * 45 + 20; x < W; x += 90) { g.beginPath(); g.moveTo(x, y - 30); g.lineTo(x, y); g.stroke(); } }
+  g.fillStyle = '#d8485c'; g.beginPath(); g.ellipse(180, 535, 150, 46, 0, 0, 6.2832); g.fill(); g.lineWidth = 3; g.strokeStyle = '#ffd93b'; g.beginPath(); g.ellipse(180, 535, 135, 36, 0, 0, 6.2832); g.stroke();
+  T('Fancy\'s Place', 190, 30, 24, '#ffd93b', 'center', 1);
+  g.fillStyle = '#ffd93b'; RR(12, 12, 66, 34, 10); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke(); T('Back', 45, 30, 15, INK); z.push([12, 12, 66, 34, 'back', 0]);
+  // the power-up wall
+  T('POWER-UPS', 180, 70, 11, '#7a4a26'); a = homeUps();
+  for (i = 0; i < a.length; i++) {
+    it = a[i]; own = it.l > 0; x = 16 + (i % 4) * 83; y = 78 + Math.floor(i / 4) * 31; RR(x, y, 78, 26, 6);
+    if (own) {
+      g.fillStyle = '#fffbe8'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#8a5a33'; g.stroke(); sz = 10; g.font = '800 ' + sz + 'px ' + FONT; while (sz > 6.5 && g.measureText(it.n).width > (it.m > 1 ? 50 : 56)) { sz -= 0.5; g.font = '800 ' + sz + 'px ' + FONT; }
+      T(it.n, x + 5, y + 13.5, sz, '#4a2f14', 'left');
+      for (j = 0; j < it.m; j++) { g.beginPath(); g.arc(x + 78 - 7 - (it.m - 1 - j) * 7, y + 13, 2.6, 0, 6.2832); g.fillStyle = j < it.l ? '#e8a900' : 'rgba(122,74,38,.25)'; g.fill(); }
+    } else { g.fillStyle = 'rgba(122,74,38,.10)'; g.fill(); g.setLineDash([4, 3]); g.lineWidth = 1.5; g.strokeStyle = 'rgba(122,74,38,.5)'; g.stroke(); g.setLineDash([]); T('?', x + 39, y + 14, 12, 'rgba(122,74,38,.4)'); }
+    z.push([x, y, 78, 26, 'up', i]);
+  }
+  // the costume rack
+  T('COSTUMES', 180, 238, 11, '#7a4a26'); g.strokeStyle = '#7a4a26'; g.lineWidth = 4; g.beginPath(); g.moveTo(20, 252); g.lineTo(340, 252); g.stroke(); a = homeCos();
+  for (i = 0; i < 4; i++) {
+    x = 58 + i * 81; y = 276; it = a[i]; g.save(); g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.strokeStyle = '#7a4a26'; g.beginPath(); g.moveTo(x, 252); g.lineTo(x, y - 10); g.stroke(); g.lineWidth = 2; g.strokeStyle = INK;
+    if (i === 0) { g.fillStyle = '#e8453c'; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 16, y - 9); g.lineTo(x - 16, y + 9); g.closePath(); g.moveTo(x, y); g.lineTo(x + 16, y - 9); g.lineTo(x + 16, y + 9); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#b32a24'; g.beginPath(); g.arc(x, y, 4.5, 0, 6.2832); g.fill(); g.stroke(); }
+    else if (i === 1) { g.fillStyle = '#2b2b2b'; g.beginPath(); g.ellipse(x, y + 9, 18, 5, 0, 0, 6.2832); g.fill(); g.stroke(); RR(x - 10, y - 12, 20, 21, 2); g.fill(); g.stroke(); g.fillStyle = '#d8453b'; g.fillRect(x - 10, y + 1, 20, 5); }
+    else if (i === 2) { g.fillStyle = '#111'; g.beginPath(); g.ellipse(x - 10, y, 9, 6, 0, 0, 6.2832); g.ellipse(x + 10, y, 9, 6, 0, 0, 6.2832); g.fill(); g.stroke(); g.beginPath(); g.moveTo(x - 2, y - 1); g.lineTo(x + 2, y - 1); g.stroke(); g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(x - 14, y - 3, 4, 2); g.fillRect(x + 6, y - 3, 4, 2); }
+    else { g.translate(x, y + 2); ART.crown(g, 1); }
+    g.restore(); T(it.own ? it.n + (it.on ? ' (on)' : '') : '?', x, 297, 9, it.own ? '#4a2f14' : 'rgba(122,74,38,.4)'); z.push([x - 34, 256, 68, 46, 'cos', i]);
+  }
+  // the prize shelf
+  T('PRIZES', 180, 310, 11, '#7a4a26'); a = homePrizes();
+  for (i = 0; i < 8; i++) {
+    x = 38 + i * 41; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
+    if (i < 4) {
+      g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#e8453c'; g.beginPath(); g.moveTo(x - 7, y - 14); g.lineTo(x - 3, y + 2); g.lineTo(x - 11, y + 2); g.closePath(); g.fill(); g.fillStyle = '#4fb8ff'; g.beginPath(); g.moveTo(x + 7, y - 14); g.lineTo(x + 11, y + 2); g.lineTo(x + 3, y + 2); g.closePath(); g.fill();
+      g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 5, 11, 0, 6.2832); g.fill(); g.stroke(); T(String(i + 1), x, y + 5.5, 12, INK);
+    } else if (i === 4) { drawPieces(g, x, y + 2, 0.5); }
+    else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
+    else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
+    else { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
+    g.restore(); z.push([x - 19, 306, 38, 36, 'prize', i]);
+  }
+  g.fillStyle = '#8a5a33'; g.fillRect(12, 344, 336, 7); g.fillStyle = '#6a4222'; g.fillRect(12, 351, 336, 2);
+  // the Apple Press arcade machine
+  g.fillStyle = '#4b3a78'; g.beginPath(); g.moveTo(14, 452); g.lineTo(14, 372); g.quadraticCurveTo(14, 356, 30, 356); g.lineTo(74, 356); g.quadraticCurveTo(90, 356, 90, 372); g.lineTo(90, 452); g.closePath(); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
+  g.fillStyle = '#ff5a6a'; RR(20, 360, 64, 16, 4); g.fill(); g.lineWidth = 1.5; g.stroke(); T('APPLE PRESS', 52, 368.5, 8, '#ffffff');
+  g.fillStyle = '#0f2a1c'; RR(22, 382, 60, 34, 4); g.fill(); g.stroke(); g.fillStyle = '#ff4a5a'; g.beginPath(); g.arc(52, 401, 8, 0, 6.2832); g.fill(); g.fillStyle = '#6ede6e'; g.fillRect(52, 389, 3, 5); g.fillRect(55, 389, 4, 2);
+  g.fillStyle = '#2e2352'; g.fillRect(18, 421, 68, 13); g.strokeStyle = '#d0d0d8'; g.lineWidth = 2.4; g.beginPath(); g.moveTo(34, 427); g.lineTo(34, 421); g.stroke(); g.fillStyle = '#ff4a5a'; g.beginPath(); g.arc(34, 420, 3.4, 0, 6.2832); g.fill(); g.fillStyle = '#ffd93b'; g.beginPath(); g.arc(62, 427, 3.2, 0, 6.2832); g.fill(); g.fillStyle = '#7ad8ff'; g.beginPath(); g.arc(74, 427, 3.2, 0, 6.2832); g.fill();
+  g.fillStyle = '#1c1536'; g.fillRect(44, 439, 16, 6); z.push([14, 356, 76, 96, 'apple', 0]);
+  // the mirror (it opens the costume picker)
+  g.fillStyle = '#7a4a26'; g.fillRect(124, 446, 8, 8); g.fillRect(164, 446, 8, 8); g.fillStyle = '#d9a441'; g.beginPath(); g.ellipse(148, 402, 32, 48, 0, 0, 6.2832); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
+  g.fillStyle = '#d8efff'; g.beginPath(); g.ellipse(148, 402, 26, 42, 0, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke();
+  ART.banana(g, 148, 406, -0.05, 0.58, 0, 0.4, wearFlags(), 0); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 3; g.beginPath(); g.arc(148, 402, 33.5, 3.5, 4.5); g.stroke(); T('Costumes', 148, 459 - 4, 9, '#ffffff', 'center', 1); z.push([116, 356, 64, 96, 'mirror', 0]);
+  // the bookshelf
+  g.fillStyle = '#8a5a33'; g.fillRect(236, 354, 108, 98); g.fillStyle = '#5e3a1c'; g.fillRect(242, 360, 96, 40); g.fillRect(242, 406, 96, 40); g.lineWidth = 2; g.strokeStyle = INK; g.strokeRect(236, 354, 108, 98);
+  for (i = 0; i < 4; i++) {
+    j = i & 1; x = 247 + j * 4; y = (i >> 1 ? 446 : 400) - 13 * (j + 1); n = 86 - j * 6; g.fillStyle = HOME_BOOKS[i][1]; RR(x, y, n, 13, 2); g.fill(); g.lineWidth = 1.4; g.strokeStyle = INK; g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x + 3, y + 1.5, 2, 10); g.fillRect(x + n - 5, y + 1.5, 2, 10);
+    sz = 8; g.font = '800 ' + sz + 'px ' + FONT; while (sz > 5.5 && g.measureText(HOME_BOOKS[i][0]).width > n - 16) { sz -= 0.5; g.font = '800 ' + sz + 'px ' + FONT; } T(HOME_BOOKS[i][0], x + n / 2, y + 7, sz, '#ffffff');
+    z.push([x, y, n, 13, 'book', i]);
+  }
+  h.z = z;
+}
+function renderHome() {
+  var h = HOME, i, y;
+  var bl = Math.floor(time * 2) % 2, y0 = 396, sx = h.bg ? h.bg.width / W : 1;
+  if (!h.bg || h.k !== k) { homeBuild(); h.full = 1; }
+  if (h.full || fx.length || h.fxo) { ctx.drawImage(h.bg, 0, 0, W, H); h.full = 0; }   // the room never changes: after the first picture only the bottom part (where Fancy walks) is put back each frame, which costs a third as much
+  else { ctx.drawImage(h.bg, 0, y0 * sx, h.bg.width, h.bg.height - y0 * sx, 0, y0, W, H - y0); if (h.bl !== bl) ctx.drawImage(h.bg, 20 * sx, 358 * sx, 66 * sx, 20 * sx, 20, 358, 66, 20); }
+  h.fxo = fx.length > 0; h.bl = bl;
+  if (bl) { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(22, 363, 4, 3); ctx.fillRect(78, 363, 4, 3); }   // the Apple Press marquee blinks
+  ctx.fillStyle = 'rgba(70,35,10,.28)'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 24, 20 - Math.sin(time * 4) * 1.5, 6, 0, 0, 6.2832); ctx.fill();
+  ctx.save(); ctx.translate(h.x, h.y + Math.sin(time * 4) * 3 - 6); if (h.face < 0) ctx.scale(-1, 1); drawFancy(0, 0, h.mv ? 0.1 : -0.04, 0.85); ctx.restore();
+  drawFx();
+  if (h.msg.length && time - h.mt < 5) {
+    ctx.globalAlpha = clamp((5 - (time - h.mt)) / 0.4, 0, 1); y = 632 - 12 - h.msg.length * 16; ctx.fillStyle = 'rgba(40,24,12,.82)'; rrect(14, y - 2, 332, h.msg.length * 16 + 12, 10); ctx.fill();
+    ctx.font = '700 12px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffffff'; for (i = 0; i < h.msg.length; i++) ctx.fillText(h.msg[i], 180, y + 11 + i * 16); ctx.globalAlpha = 1;
+  }
+}
 function balResultCard() {
   var t = rsgT, a = clamp(Math.min(t / 0.3, (CFG.cardSecs - t) / 0.3), 0, 1), e = a * a * (3 - 2 * a), dx = (t < CFG.cardSecs / 2 ? 1 : -1) * (1 - e) * 400, y = 336, R = BALR, i;
   ctx.save(); ctx.translate(dx, 0); cardFrame(30, y, 300, 200, '#ff7aa8', 'Balloon Party!', 28, 46);
@@ -5295,6 +5448,7 @@ function render() {
   ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1;
   var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
   if (state === 'mini' && MG) { bkHide(); renderMini(); return; }
+  if (state === 'home' && HOME) { bkHide(); renderHome(); return; }
   var i, pe = punchT > 0 && !calmOn() ? punchT / CFG.punchSecs : 0;
   if (pe > 0) { var sh = pe * pe * 6 * Math.sin(time * 90); ctx.save(); ctx.translate(Math.round(sh * k) / k, Math.round(sh * 0.6 * k) / k); }   // camera shake at the blast off: a plain slide (a zoom would re-scale every picture on screen, which stalled Firefox and phones)
   var mir = mirOn(); if (mir) { ctx.save(); ctx.translate(0, H); ctx.scale(1, -1); }
@@ -5315,6 +5469,7 @@ function render() {
   lap('track'); drawGround(); lap('ground'); if (fl1) flipBlit(); if (ex) dist -= ex;
   if (bgT < 1) { ctx.globalAlpha = Math.min(calmOn() ? 0.4 : 0.92, (bgT < 0.5 ? bgT : 1 - bgT) * 2.6); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }   // the fade through white washes the scene only: the card, Fancy and the confetti stay clear
   if (ftStill > 0 && ftStill < 1) { ctx.globalAlpha = Math.min(calmOn() ? 0.4 : 0.92, (ftStill < 0.5 ? ftStill : 1 - ftStill) * 2.6); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }   // the arena fades in through white, like a new stage
+  if (state === 'title' && empOn() && titleFancyIn() >= 1) drawHomeDoor();
   if (state === 'title') { var fi = titleFancyIn(); if (fi > 0) { var fz = 1 + 2.6 * (1 - easeOutBack(fi)); ctx.globalAlpha = clamp(fi * 3, 0, 1); drawFancy(62 + 14 * easeOutBack(fi), 204 + TOFF + Math.sin(time * 4) * 6, -0.1 + Math.sin(time * 4) * 0.05 - (1 - fi) * 0.9 + Math.sin(time * 45) * 0.2 * museW, 1.25 * Math.max(.2, fz)); ctx.globalAlpha = 1; } }
   else {
     if (cardT >= 0 && state === 'play') { if (mir) { ctx.save(); ctx.translate(0, H); ctx.scale(1, -1); } hudM(1); stageCard(); hudM(0); if (mir) ctx.restore(); lap('card'); }   // drawn before Fancy, so Fancy always stays in view
@@ -5400,12 +5555,12 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && museHit(pl)) return; if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
 addEventListener('keydown', function (e) {
   if (e.key === ' ') kHeld.key = true;
-  if (e.key === 'Escape') { if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
+  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
   var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = true;
   if (state === 'mini' && e.key === 'ArrowUp') { e.preventDefault(); return; }
   if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
