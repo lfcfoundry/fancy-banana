@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.12.1257 (beta):** Rebuilt from source with the JNFoo copyright line. No gameplay change.
 - **2026.10.12.1236 (beta):** The title-screen copyright line now reads JNFoo.
 - **2026.10.12.1106 (beta):** The Banana Bunch is packed tighter in the rucksack, and the rucksack and bananas now spin with Fancy in his spiral. Scenery behind any open window (Challenges, Settings, Upgrades and the rest) no longer slows to a crawl.
 - **2026.10.12.1017 (beta):** The "x perfect" streak label no longer overprints the stage progress text.
