@@ -127,7 +127,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
 <div id="bar">
 <div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
-<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bSky" class="alt sm" hidden>Clouds</button><button id="bUp" class="alt sm">Upgrades</button></div>
+<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bSky" class="alt sm" hidden>Clouds</button><button id="bVolc" class="alt sm" hidden>Volcano</button><button id="bUp" class="alt sm">Upgrades</button></div>
 </div>
 <div id="bar2" hidden></div>
 <button id="bCont" hidden>Continue</button>
@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2141';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2201';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2909,7 +2909,7 @@ function refreshSet() {
   $('bFull').hidden = !(document.fullscreenEnabled && document.documentElement.requestFullscreen);
   $('bFull').textContent = document.fullscreenElement ? 'Leave full screen' : 'Full screen';
 }
-function speedLocked() { return state === 'play' || state === 'paused' || state === 'launch' || state === 'mini' || state === 'sky'; }
+function speedLocked() { return state === 'play' || state === 'paused' || state === 'launch' || state === 'mini' || state === 'sky' || state === 'volc'; }
 $('sSpeed').addEventListener('click', function () { if (speedLocked()) return; var i = SPEEDS.indexOf(spdPct()); save.opts.spd = SPEEDS[(i + 1) % SPEEDS.length]; delete save.opts.relaxed; persist(); refreshSet(); if (state === 'ready') resetWorld(); });
 TGS.forEach(function (t) { $(t[0]).addEventListener('click', function () { tgSet(t[1], !tgOn(t[1])); persist(); syncOpts(); refreshSet(); }); });
 $('bSet').addEventListener('click', function () { openPanel(pSet); });
@@ -2922,7 +2922,7 @@ if (RM && RM.addEventListener) RM.addEventListener('change', function () { if (!
 
 /* ===== Costumes and upgrades ===== */
 /* ===== The Banana Museum (five quick taps on Fancy on the title screen, once the game has been beaten) ===== */
-var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.'], ['boom', 'Boomerang Chimp', 'Buy the Boomerang key in the Emporium, then sail the whole Navy without losing a heart.'], ['sky', 'Chimp Airforce', 'Buy the Cloud key in the Emporium, then fly through the clouds to the volcano.']];
+var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.'], ['boom', 'Boomerang Chimp', 'Buy the Boomerang key in the Emporium, then sail the whole Navy without losing a heart.'], ['sky', 'Chimp Airforce', 'Buy the Cloud key in the Emporium, then fly through the clouds to the volcano.'], ['volc', 'Volcano Run', 'Buy the Volcano key in the Emporium, then fly out through the inside of the volcano.']];
 var museN = 0, museT = -9, museW = 0;
 var TOFF = 40;   // the title picture sits this far lower: the news ticker has the top of the screen
 function museHit(pl) {
@@ -2978,7 +2978,7 @@ function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet') + (empOwn(E.meg
 function nextCost(u) { var l = lvl(u.id); return l < u.costs.length ? u.costs[l] : 0; }
 function canBuy(u) { var c = nextCost(u); return c > 0 && bal() >= c; }
 function anyBuy() { return UPS.some(canBuy); }
-function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bSky').hidden = !skyOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
+function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bSky').hidden = !skyOn() || state !== 'title'; $('bVolc').hidden = !volcOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
 function lvl(id) { return save.boosts[id] || 0; }
 function bal() { return save.stats.friends + save.stats.coins - (save.boosts.spent || 0); }
 function refreshUp() {
@@ -3000,7 +3000,7 @@ function buy(u) {
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
 /* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
-var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11, superK: 12, keySky: 13 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11, superK: 12, keySky: 13, keyVolc: 14 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
 var EMP = [
   { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
   { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
@@ -3015,7 +3015,8 @@ var EMP = [
   { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 },
   { id: 'keyBoom', k: 'up', g: 4, name: 'Boomerang key', desc: 'Opens a secret boss at the end of Chimp\'s Navy: Boomerang Chimp. Dodge his boomerangs and watch them swing back (all hearts needed).', cost: 300 },
   { id: 'superK', k: 'up', g: 1, need: 'potassium', name: 'Super Potassium', desc: 'Needs Potassium Power. Hold the tap for half a second away from a gate lane: Fancy blasts forward for a few seconds and smashes everything he touches without a scratch. Once per stage.', cost: 250 },
-  { id: 'keySky', k: 'up', g: 4, name: 'Cloud key', desc: 'Opens a secret game on the title screen: the Chimp Airforce. Fly through the clouds, dodge the Chimp biplanes and their bomber, and reach the volcano.', cost: 300 }
+  { id: 'keySky', k: 'up', g: 4, name: 'Cloud key', desc: 'Opens a secret game on the title screen: the Chimp Airforce. Fly through the clouds, dodge the Chimp biplanes and their bomber, and reach the volcano.', cost: 300 },
+  { id: 'keyVolc', k: 'up', g: 4, name: 'Volcano key', desc: 'Opens a secret level on the title screen: the Volcano Run. Fly inside the volcano past lava streams, rock doors and tight slots, above the lava lake.', cost: 400 }
 ], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks', 'Keys to secret places'];
 function empOn() { return save.stats.balClears >= CFG.empClears; }
 function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
@@ -3077,6 +3078,7 @@ $('bEmp').addEventListener('click', function () { if (state === 'title') openPan
 $('bCont').addEventListener('click', continueRun);
 $('bPractice').addEventListener('click', function () { if (state === 'title') openPanel(pPrac); });
 $('bSky').addEventListener('click', function () { if (state === 'title' && skyOn()) startSky(); });
+$('bVolc').addEventListener('click', function () { if (state === 'title' && volcOn()) startVolc(); });
 $('pracClose').addEventListener('click', closePanels);
 /* Practice: the water level, or any stage that has been cleared (the same 40-credit upgrade). Nothing is earned and nothing is saved. */
 var pracN = 0, pracEnd = '';   // pracN: the stage being practiced (0 = a normal run); pracEnd: how a practice run ended ('win' or 'lose')
@@ -3437,6 +3439,7 @@ function onAction() {
   else if (state === 'paused') { if (resT >= 0) tapBufT = time; else beginResume(); }
   else if (state === 'mini') miniTap();
   else if (state === 'sky') skyTap();
+  else if (state === 'volc') volcTap();
   else if (state === 'gift') giftTap();
   else if (state === 'victory') victoryTap();
 }
@@ -3977,7 +3980,7 @@ function stageUp() {
   persist();
 }
 function onHidden() {
-  resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true);
+  resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true); if (state === 'volc') volcPause(true);
   if (state === 'play') { state = 'paused'; runPauses++; noteBest(); }
   persist();
 }
@@ -4122,6 +4125,8 @@ function update(dt) {
     updateMini(dt);
   } else if (state === 'sky' && SKY) {
     skyUpdate(dt);
+  } else if (state === 'volc' && VOLC) {
+    volcUpdate(dt);
   } else if (state === 'gift') {
     giftUpdate(dt);
   } else if (state === 'home' && HOME) {
@@ -4965,6 +4970,121 @@ function renderSky() {
   if (m.paused) { ctx.fillStyle = 'rgba(58,42,77,.45)'; ctx.fillRect(0, 0, W, H); outlined('Paused', W / 2, 226, 44, '#ffd93b'); outlined('Tap to continue', W / 2, 286, 24, '#ffffff'); mgBtn(PS_BT, 'Settings', '#4a9bd8'); mgBtn(MG_BT, 'Back to title', '#8a6cd8'); padLine(); drawExtrasCard(); }
   if (a) { m.y -= m.vy * a; m.sc -= vx * a; m.t -= a; for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; e.x -= e.vx * a; e.y -= e.vy * a; } }
 }
+/* ===== Volcano Run (the Volcano key): a secret side-scrolling level inside the volcano, flown like the main game (same flap, gravity and hearts). Lava streams fall in columns with gaps that slide down; rock doors slide shut and open on a beat; narrow slots cut through rock walls; the lava lake below burns. About 70 seconds. Win: +40 bananas and the Volcano medal in Fancy's Place. ===== */
+var VOLC = null, VOLC_X = 96, VOLC_V = 175, VOLC_N = 44, VOLC_FLOOR = 598;
+function volcOn() { return empOwn(E.keyVolc); }
+function volcPlan() {
+  var p = [], x = 560, i, pr, r, k;
+  for (i = 0; i < VOLC_N; i++) {
+    pr = i / (VOLC_N - 1); r = rng();
+    k = pr < 0.2 ? (r < 0.6 ? 'slot' : 'stream') : r < 0.38 ? 'stream' : r < 0.7 ? 'door' : 'slot';
+    if (k === 'slot') p.push({ k: 'slot', x: x, cy: 150 + rng() * 300, g: 176 - 24 * pr + 5 * lvl('roomy') });
+    else if (k === 'door') p.push({ k: 'door', x: x, cy: 170 + rng() * 260, T: 3.0 - 0.5 * pr, ph: rng() * 6.28 });
+    else { var gl = 196 - 30 * pr + 5 * lvl('roomy'), P = 300 + rng() * 60, sp = 72 + rng() * 30 + 16 * pr; p.push({ k: 'stream', x: x, P: P, gl: gl, sp: sp, ph: rng() * P }); if (pr > 0.6 && rng() < 0.3) { x += 160; p.push({ k: 'stream', x: x, P: P + 20, gl: gl, sp: sp * 0.8, ph: rng() * P }); } }
+    x += 285 - 55 * pr + rng() * 40;
+  }
+  return { obs: p, end: x + 120 };
+}
+function startVolc() {
+  flipV = 0; state = 'volc'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; MG = null; SKY = null; pracN = 0;
+  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH, pl = volcPlan(), i, bg = [];
+  for (i = 0; i < 12; i++) bg.push({ x: i * 62 + frng() * 30, w: 22 + frng() * 26, h: 60 + frng() * 150, up: i % 2 === 0, s: 0.25 + frng() * 0.2 });
+  VOLC = { ph: 'ready', t: 0, pt: 0, y: 300, vy: 0, fa: 0, rot: 0, hearts: h, maxH: h, inv: 0, obs: pl.obs, end: pl.end, paused: false, spd: relaxK() * plusK(), sc: 0, bg: bg, won: 0, hits: 0, say: '', sayT: 0 };
+}
+function volcExit() { VOLC = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
+function volcPause(on) { var m = VOLC; if (m && (m.ph === 'play' || m.ph === 'ready')) { m.paused = on === undefined ? !m.paused : on; if (m.paused) persist(); } }
+function volcHurt(m, lava) {
+  if (m.inv > 0 || m.ph !== 'play') return;
+  m.hearts--; m.hits++; m.inv = 1.5; m.vy = lava ? -430 : -200; burst(VOLC_X, m.y, 16, ['#ff9a3c', '#ffd93b', '#ff4a2a'], 220, 240);
+  if (m.hearts <= 0) { m.ph = 'lose'; m.pt = 0; m.vy = -260; }
+}
+function volcStream(o, t, y0, y1) {   // is the part of the column between y0 and y1 clear of lava? (the pattern slides down: gaps travel with it)
+  var a = (((y0 - t * o.sp - o.ph) % o.P) + o.P) % o.P, b = (((y1 - t * o.sp - o.ph) % o.P) + o.P) % o.P;
+  return a >= o.gl && b >= a;
+}
+function volcGapH(o, t) { return 10 + (200 + 5 * lvl('roomy')) * (0.5 + 0.5 * Math.sin(6.2832 * t / o.T + o.ph)); }
+function volcUpdate(dt) {
+  var m = VOLC, i, o, sx, hw, ok;
+  if (!m || m.paused) return;
+  m.pt += dt; if (m.fa > 0) m.fa -= dt; if (m.sayT > 0) m.sayT -= dt;
+  if (m.ph === 'ready') { m.y = 300 + Math.sin(time * 3) * 8; m.rot = Math.sin(time * 3) * 0.05; return; }
+  if (m.ph === 'win') { m.sc += VOLC_V * m.spd * dt * 0.5; m.y += (230 - m.y) * Math.min(1, dt * 2); m.rot = -0.12; if (frng() < 0.3) burst(40 + frng() * 280, 120 + frng() * 200, 6, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 160, 220); return; }
+  if (m.ph === 'lose') { m.vy = Math.min(CFG.maxFall, m.vy + CFG.gravity * dt); m.y = Math.min(760, m.y + m.vy * dt); m.rot += dt * 9; return; }
+  m.t += dt; m.sc += VOLC_V * m.spd * dt; if (m.inv > 0) m.inv -= dt;
+  m.vy = Math.min(CFG.maxFall, m.vy + CFG.gravity * (1 - 0.06 * lvl('gentle')) * dt); m.y += m.vy * dt; m.rot = clamp(m.vy / 900, -0.35, 0.5);
+  if (m.y < 30) { m.y = 30; if (m.vy < 0) m.vy = 0; }
+  if (m.y + 12 > VOLC_FLOOR) { m.y = VOLC_FLOOR - 12; volcHurt(m, true); if (m.ph === 'play') m.vy = -430; }   // the lava lake: it burns, and throws Fancy back up
+  for (i = 0; i < m.obs.length; i++) {
+    o = m.obs[i]; sx = o.x - m.sc; if (sx < -120) continue; if (sx > VOLC_X + 80) break;
+    hw = o.k === 'stream' ? 19 : 28; if (Math.abs(sx - VOLC_X) > hw + 10) continue;
+    if (o.k === 'stream') ok = volcStream(o, m.t, m.y - 11, m.y + 11);
+    else if (o.k === 'door') ok = Math.abs(m.y - o.cy) + 11 <= volcGapH(o, m.t) / 2;
+    else ok = Math.abs(m.y - o.cy) + 11 <= o.g / 2;
+    if (!ok) volcHurt(m, false);
+  }
+  if (m.sc >= m.end - 150 && m.ph === 'play') { m.ph = 'win'; m.pt = 0; m.won = 40; save.stats.friends += 40; persist(); burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); secretFound('volc', 'Secret found: the Volcano Run! A medal is on the wall in Fancy\'s Place.'); }
+}
+function volcTap() {
+  var m = VOLC; if (!m) return;
+  if (m.paused) { m.paused = false; return; }
+  if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { startVolc(); return; }
+  if (m.ph === 'ready') { m.ph = 'play'; m.pt = 0; }
+  if (m.ph === 'play') { m.vy = CFG.flapV; m.fa = 0.18; if (empWorn(E.confetti)) burst(VOLC_X - 10, m.y + 8, 7, ['#ff6b81', '#ffd93b', '#7ad8ff', '#8ae28a', '#c9a0ff'], 150, 220); }
+}
+function volcPointer(pl) {
+  var m = VOLC; if (!m) return;
+  if (m.paused) { if (mgIn(pl, MG_BT)) { volcExit(); return; } m.paused = false; return; }
+  if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { volcExit(); return; } if (mgIn(pl, SKY_BA)) { startVolc(); return; } return; }
+  if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { volcPause(true); return; }
+  volcTap();
+}
+function volcSlab(x, y0, y1, w, glow) {   // a slab of rock from y0 to y1, with a hot edge where it faces the gap
+  if (y1 <= y0) return; var g;
+  ctx.fillStyle = '#4d3944'; ctx.fillRect(x - w / 2, y0, w, y1 - y0); ctx.fillStyle = '#6a4f5a'; ctx.fillRect(x - w / 2, y0, 8, y1 - y0); ctx.fillStyle = '#3a2833'; ctx.fillRect(x + w / 2 - 9, y0, 9, y1 - y0);
+  ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.strokeRect(x - w / 2, y0, w, y1 - y0);
+  if (glow) { ctx.fillStyle = '#ff7a2a'; ctx.fillRect(x - w / 2 + 3, glow < 0 ? y0 + 2 : y1 - 7, w - 6, 5); ctx.fillStyle = '#ffd93b'; ctx.fillRect(x - w / 2 + 8, glow < 0 ? y0 + 3 : y1 - 5, w - 16, 2); }
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; for (var yy = y0 + 22; yy < y1 - 10; yy += 34) ctx.fillRect(x - w / 2 + 12, yy, w - 24, 3);
+}
+function volcDrawOb(o, sx, t) {
+  var yy, len, k;
+  if (o.k === 'slot') { volcSlab(sx, -4, o.cy - o.g / 2, 56, 1); volcSlab(sx, o.cy + o.g / 2, VOLC_FLOOR + 6, 56, -1); }
+  else if (o.k === 'door') { var h = volcGapH(o, t); volcSlab(sx, -4, o.cy - h / 2, 50, 1); volcSlab(sx, o.cy + h / 2, VOLC_FLOOR + 6, 50, -1); }
+  else {
+    var off = (t * o.sp + o.ph) % o.P, seg = o.P - o.gl;
+    ctx.fillStyle = 'rgba(255,110,40,.18)'; ctx.fillRect(sx - 34, 0, 68, VOLC_FLOOR);
+    for (k = -1; k * o.P + off < VOLC_FLOOR; k++) { yy = off + k * o.P - o.gl + o.gl; yy = off + k * o.P; len = o.P - o.gl; if (yy + len < 0 || yy > VOLC_FLOOR) continue;
+      ctx.fillStyle = '#ff5a1f'; rrect(sx - 20, yy, 40, len, 18); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.fillStyle = '#ffa63a'; rrect(sx - 12, yy + 4, 24, Math.max(8, len - 8), 12); ctx.fill(); ctx.fillStyle = '#ffe58a'; rrect(sx - 4, yy + 8, 7, Math.max(6, len - 16), 4); ctx.fill(); }
+    ctx.fillStyle = '#4d3944'; ctx.fillRect(sx - 30, -4, 60, 26); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.strokeRect(sx - 30, -4, 60, 26);
+  }
+}
+function renderVolc() {
+  var m = VOLC, i, o, sx, a = m.ph === 'play' && !m.paused ? acc : 0, vx = VOLC_V * m.spd, lh = opt('lefty'), hx = function (x) { return lh ? W - x : x; }, g, b, tt;
+  if (a) { m.y += m.vy * a; m.sc += vx * a; m.t += a; }
+  g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1c0c1a'); g.addColorStop(0.7, '#4a1a22'); g.addColorStop(1, '#8a2a16'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(40,16,34,.9)'; for (i = 0; i < m.bg.length; i++) { b = m.bg[i]; sx = ((b.x - m.sc * b.s) % 744 + 744) % 744 - 60; ctx.beginPath(); if (b.up) { ctx.moveTo(sx - b.w, 0); ctx.lineTo(sx + b.w, 0); ctx.lineTo(sx, b.h); } else { ctx.moveTo(sx - b.w * 1.4, VOLC_FLOOR); ctx.lineTo(sx + b.w * 1.4, VOLC_FLOOR); ctx.lineTo(sx, VOLC_FLOOR - b.h * 0.7); } ctx.closePath(); ctx.fill(); }
+  ctx.strokeStyle = 'rgba(255,120,40,.22)'; ctx.lineWidth = 2; for (i = 0; i < 5; i++) { sx = ((i * 97 - m.sc * 0.5) % 500 + 500) % 500 - 60; ctx.beginPath(); ctx.moveTo(sx, 90 + i * 70); ctx.lineTo(sx + 30, 120 + i * 70); ctx.lineTo(sx + 18, 160 + i * 70); ctx.stroke(); }   // glowing cracks in the far wall
+  if (m.end - m.sc < W + 300) { var ex = m.end - m.sc; g = ctx.createRadialGradient(ex, 300, 10, ex, 300, 260); g.addColorStop(0, 'rgba(255,248,200,1)'); g.addColorStop(0.35, 'rgba(255,200,110,.8)'); g.addColorStop(1, 'rgba(255,120,40,0)'); ctx.fillStyle = g; ctx.fillRect(ex - 260, 0, 520, VOLC_FLOOR + 40); }   // the way out, at the end
+  for (i = 0; i < m.obs.length; i++) { o = m.obs[i]; sx = o.x - m.sc; if (sx < -70 || sx > W + 70) continue; volcDrawOb(o, sx, m.t); }
+  ctx.fillStyle = '#ff6a1f'; ctx.beginPath(); ctx.moveTo(0, H); ctx.lineTo(0, VOLC_FLOOR); for (i = 0; i <= W; i += 12) ctx.lineTo(i, VOLC_FLOOR + 3 + Math.sin(i * 0.05 + time * 2.4) * 3 + Math.sin(i * 0.13 - time * 1.7) * 1.5); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffb13a'; ctx.fillRect(0, VOLC_FLOOR + 14, W, H - VOLC_FLOOR - 14); ctx.fillStyle = 'rgba(255,240,150,.6)'; for (i = 0; i < 6; i++) { sx = ((i * 71 - m.sc * 1.5) % 400 + 400) % 400 - 20; ctx.fillRect(sx, VOLC_FLOOR + 18 + (i % 3) * 7, 26, 3); }
+  ctx.fillStyle = '#ffd36a'; for (i = 0; i < 16; i++) { tt = (time * 0.35 + i * 0.37) % 1; ctx.globalAlpha = 1 - tt; ctx.beginPath(); ctx.arc(((i * 53 - m.sc * 0.9) % 400 + 400) % 400 - 20, VOLC_FLOOR - tt * 520, 1.8 + (i % 3) * 0.7, 0, 6.2832); ctx.fill(); } ctx.globalAlpha = 1;   // embers drift up
+  drawFx();
+  if (!(m.inv > 0 && m.ph === 'play' && Math.floor(time * 14) % 2)) { ctx.save(); ctx.translate(VOLC_X, m.y); ctx.rotate(m.rot); ctx.scale(1 - 0.07 * (m.fa > 0 ? m.fa / 0.18 : 0), 1 + 0.1 * (m.fa > 0 ? m.fa / 0.18 : 0)); ART.banana(ctx, 0, 0, 0, 1, m.fa > 0 ? m.fa : 0, time, wearFlags(), m.vy, false, 0, -1, m.inv > 1.1 || m.ph === 'lose' ? 2 : 0); ctx.restore(); }
+  for (i = 0; i < m.maxH; i++) skyHeart(hx(26 + i * 28), 30, i < m.hearts);
+  var pg = clamp(m.sc / (m.end - 150), 0, 1); ctx.fillStyle = 'rgba(30,20,50,.5)'; rrect(60, 56, 240, 9, 4.5); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke(); if (pg > 0.01) { ctx.fillStyle = '#ffd93b'; rrect(60, 56, 240 * pg, 9, 4.5); ctx.fill(); } ART.coin(ctx, 60 + 240 * pg, 60.5, time);
+  if (m.ph === 'ready' || m.ph === 'play') drawPauseBtn(MG_PB, 0.55);
+  if (m.ph === 'ready') { outlined('Volcano Run!', W / 2, 150, 40, '#ffd93b'); outlined('Tap to flap through the volcano.', W / 2, 192, 17, '#ffffff'); outlined('Fly through the gaps in the lava streams.', W / 2, 218, 17, '#ffffff'); outlined('Rock doors open and close: time them!', W / 2, 244, 17, '#ffffff'); outlined('The lava lake below burns!', W / 2, 270, 17, '#ffd93b'); outlined('Tap to start', W / 2, 420, 22 + Math.sin(time * 5) * 1.5, '#ffffff'); }
+  else if (m.ph === 'win') {
+    cardFrame(40, 150, 280, 252, '#58c46f', 'Out of the volcano!', 25); outlinedC('+' + m.won, W / 2, 232, 34, '#ffd93b'); outlined('bananas', W / 2, 266, 18, '#ffffff'); outlined('Volcano medal won!', W / 2, 296, 16, '#ffd93b');
+    ctx.globalAlpha = m.pt > 0.6 ? 1 : 0.35; mgBtn(SKY_BA, 'Fly again', '#58c46f'); mgBtn(SKY_BT, 'Back to title', '#8a6cd8'); ctx.globalAlpha = 1;
+  } else if (m.ph === 'lose') {
+    ctx.fillStyle = 'rgba(58,42,77,.3)'; ctx.fillRect(0, 0, W, H); cardFrame(40, 150, 280, 252, '#d8603a', 'Too hot!', 32); outlined('The volcano got you.', W / 2, 226, 18, '#ffffff'); outlined(Math.floor(clamp(m.sc / (m.end - 150), 0, 1) * 100) + '% of the way out', W / 2, 262, 16, '#ffd93b');
+    ctx.globalAlpha = m.pt > 0.6 ? 1 : 0.35; mgBtn(SKY_BA, 'Fly again', '#58c46f'); mgBtn(SKY_BT, 'Back to title', '#8a6cd8'); ctx.globalAlpha = 1;
+  }
+  if (m.paused) { ctx.fillStyle = 'rgba(58,42,77,.45)'; ctx.fillRect(0, 0, W, H); outlined('Paused', W / 2, 226, 44, '#ffd93b'); outlined('Tap to continue', W / 2, 286, 24, '#ffffff'); mgBtn(PS_BT, 'Settings', '#4a9bd8'); mgBtn(MG_BT, 'Back to title', '#8a6cd8'); padLine(); drawExtrasCard(); }
+  if (a) { m.y -= m.vy * a; m.sc -= vx * a; m.t -= a; }
+}
 var HOME = null, HOME_DOOR = [300, 486, 44, 78], HOME_BOOKS = [['Lunch Trip', '#d8453b'], ['The Keeper\'s Light', '#2a8f9c'], ['Bolivar\'s Treasure', '#c9971f'], ['Yesterday\'s Soup', '#e0782a']];
 var HOME_JOKES = ['APPLE PRESS: Out of order. Please try the other game.', 'The screen says: "Press an apple. Get a banana." Nobody knows what that means.', 'Fancy tried a coin. The machine tried a vanilla wafer. Nobody won.', 'High score: ??? (the machine has been unplugged since before the jungle).'];
 function homeHit(pl) {
@@ -5015,7 +5135,7 @@ function homeTap(pl) {
 }
 function homeUps() {
   var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
-  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 }, { n: 'Super Potassium', d: EMP[E.superK].desc, l: empOwn(E.superK) ? 1 : 0, m: 1 }, { n: 'Cloud key', d: EMP[E.keySky].desc, l: empOwn(E.keySky) ? 1 : 0, m: 1 });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 }, { n: 'Super Potassium', d: EMP[E.superK].desc, l: empOwn(E.superK) ? 1 : 0, m: 1 }, { n: 'Cloud key', d: EMP[E.keySky].desc, l: empOwn(E.keySky) ? 1 : 0, m: 1 }, { n: 'Volcano key', d: EMP[E.keyVolc].desc, l: empOwn(E.keyVolc) ? 1 : 0, m: 1 });
   return o;
 }
 function homeCos() {
@@ -5031,6 +5151,7 @@ function homePrizes() {
   o.push({ n: 'Banana Bunch', own: bunchOk(), yes: 'all six lost friends found.', how: 'find all six lost friends.' });
   o.push({ n: 'Boomerang medal', own: !!save.unlocks.boom, yes: 'won from Boomerang Chimp.', how: 'beat Boomerang Chimp at the end of Chimp\'s Navy (needs the Boomerang key and all your hearts).' });
   o.push({ n: 'Cloud medal', own: !!save.unlocks.sky, yes: 'won in the Chimp Airforce.', how: 'reach the volcano in the Chimp Airforce (needs the Cloud key).' });
+  o.push({ n: 'Volcano medal', own: !!save.unlocks.volc, yes: 'won in the Volcano Run.', how: 'fly out of the volcano in the Volcano Run (needs the Volcano key).' });
   return o;
 }
 function homeBuild() {
@@ -5068,8 +5189,8 @@ function homeBuild() {
   }
   // the prize shelf
   T('PRIZES', 180, 310, 11, '#7a4a26'); a = homePrizes();
-  for (i = 0; i < 10; i++) {
-    x = 25 + i * 34.5; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
+  for (i = 0; i < 11; i++) {
+    x = 22 + i * 31.6; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
     if (i < 4) {
       g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#e8453c'; g.beginPath(); g.moveTo(x - 7, y - 14); g.lineTo(x - 3, y + 2); g.lineTo(x - 11, y + 2); g.closePath(); g.fill(); g.fillStyle = '#4fb8ff'; g.beginPath(); g.moveTo(x + 7, y - 14); g.lineTo(x + 11, y + 2); g.lineTo(x + 3, y + 2); g.closePath(); g.fill();
       g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 5, 11, 0, 6.2832); g.fill(); g.stroke(); T(String(i + 1), x, y + 5.5, 12, INK);
@@ -5077,9 +5198,10 @@ function homeBuild() {
     else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
     else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
     else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
+    else if (i === 10) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ff5a1f'; g.beginPath(); g.moveTo(x - 8, y + 10); g.lineTo(x - 3, y - 2); g.lineTo(x + 3, y - 2); g.lineTo(x + 8, y + 10); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); g.fillStyle = '#ffd93b'; g.beginPath(); g.ellipse(x, y - 2, 3.5, 1.6, 0, 0, 6.2832); g.fill(); }
     else if (i === 9) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x - 4, y + 5, 4.2, 0, 6.2832); g.arc(x + 1, y + 2.5, 5, 0, 6.2832); g.arc(x + 6, y + 5, 3.8, 0, 6.2832); g.fill(); g.lineWidth = 1.4; g.stroke(); }
     else { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.translate(x, y + 5); g.scale(0.42, 0.42); g.beginPath(); g.moveTo(-17, 6); g.quadraticCurveTo(-4, -2, 0, -15); g.quadraticCurveTo(4, -2, 17, 6); g.quadraticCurveTo(2, 3, 0, -6); g.quadraticCurveTo(-2, 3, -17, 6); g.closePath(); g.fillStyle = '#d99a48'; g.fill(); g.lineWidth = 3.4; g.stroke(); }
-    g.restore(); z.push([x - 17, 306, 34, 36, 'prize', i]);
+    g.restore(); z.push([x - 15.5, 306, 31, 36, 'prize', i]);
   }
   g.fillStyle = '#8a5a33'; g.fillRect(12, 344, 336, 7); g.fillStyle = '#6a4222'; g.fillRect(12, 351, 336, 2);
   // the Apple Press arcade machine
@@ -5701,6 +5823,7 @@ function render() {
   var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
   if (state === 'mini' && MG) { bkHide(); renderMini(); return; }
   if (state === 'sky' && SKY) { bkHide(); renderSky(); return; }
+  if (state === 'volc' && VOLC) { bkHide(); renderVolc(); return; }
   if (state === 'home' && HOME) { bkHide(); renderHome(); return; }
   var i, pe = punchT > 0 && !calmOn() ? punchT / CFG.punchSecs : 0;
   if (pe > 0) { var sh = pe * pe * 6 * Math.sin(time * 90); ctx.save(); ctx.translate(Math.round(sh * k) / k, Math.round(sh * 0.6 * k) / k); }   // camera shake at the blast off: a plain slide (a zoom would re-scale every picture on screen, which stalled Firefox and phones)
@@ -5808,16 +5931,17 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
-  if (state === 'sky') { skyPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
+  if (state === 'sky') { skyPointer(pl); return; }
+  if (state === 'volc') { volcPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
 addEventListener('keydown', function (e) {
   if (e.key === ' ') kHeld.key = true;
-  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
+  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (state === 'volc' && !panelOpen()) { if (VOLC && (VOLC.paused || VOLC.ph === 'win' || VOLC.ph === 'lose')) volcExit(); else volcPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
   var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = true;
   if (state === 'mini' && e.key === 'ArrowUp') { e.preventDefault(); return; }
-  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
+  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'volc') volcPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
   if ((e.key === 'c' || e.key === 'C') && contCan() && !panelOpen()) { payContinue(); return; }
   if (e.key !== ' ' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
   var ae = document.activeElement, t = ae && ae.tagName;
