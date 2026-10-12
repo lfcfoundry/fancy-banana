@@ -1,5 +1,12 @@
 # What's new
 
+- **2026.10.12.0151 (beta):** **A big bug hunt.** Three code reviews and about half a million random taps, keys, purchases and stage jumps in two browsers found and fixed these:
+  - Spending: bananas bought with coins came back after a reload, and "Start brand new" was undone by one. Fixed, and a damaged save can no longer hand out credits or levels.
+  - Volcano Run: the lava streams now hurt where the lava is drawn (the gaps were the wrong way round).
+  - Winning: after the last gate you can no longer lose the win by bumping something; a golden gate can no longer pull you into a vault in the middle of a boss fight; the one-run spare bounce and spare heart are spent once, not twice, around the balloon gift.
+  - Super Potassium: once per stage now means the stage where the blast started, you get a moment of safety when it ends, and moving gates stay smashed.
+  - Controls: arrow keys no longer stick when you switch windows, a double tap on a Back button no longer starts a run, a tap beside an open window no longer resumes the game behind it, and a controller can now pause and leave Chimp Airforce, Volcano Run and Fancy's Place.
+  - Small things: Help no longer draws blank icons the second time it opens, the Secrets count reads N of 11, the Surprise gift never wastes bananas on a full stock, and a few cards and lists show the right lines in the secret games.
 - **2026.10.11.2354 (beta):** **Banana Bunch as a rucksack:** a small brown pack with three banana friends poking out, strapped to Fancy's back. **Crown Duel cookies are fairer:** a pulsing ring now shows where each falling cookie will cross, and the close pairs come further apart. (Test Lab: Helpers are at the top, and Back to title brings the title buttons back.)
 - **2026.10.11.2332 (beta):** **A new look for the Banana Bunch:** instead of six little friends flying in a clump, it is now one bunch of six banana friends on a stem, worn on Fancy's back like a backpack. It swings as he climbs and falls, and it shows in the Costume picker, on the prize shelf and in the mirror in Fancy's Place.
 - **2026.10.11.2201 (beta):** **Volcano Run:** a new Emporium key (the Volcano key, 400 bananas) adds a Volcano button to the title screen: a secret level inside the volcano. Flap through falling lava streams whose gaps slide down, rock doors that open and close on a beat, and narrow slots, all above a lava lake that burns. Reach the way out for 40 bananas and a Volcano medal on the wall in Fancy's Place.

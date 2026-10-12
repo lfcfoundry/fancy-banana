@@ -79,7 +79,7 @@ button.pf,button:focus-visible,textarea:focus-visible{outline:calc(3*var(--u)) s
 .pcl{position:relative;top:calc(-4*var(--u));right:calc(-4*var(--u));width:calc(36*var(--u));height:calc(36*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(22*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
 body.big .pcl{width:calc(48*var(--u));height:calc(48*var(--u))}
 #uClose,#eClose{position:absolute;top:calc(8*var(--u));right:calc(8*var(--u));z-index:3;width:calc(40*var(--u));height:calc(40*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(24*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
-body.big #uClose,#eClose{width:calc(52*var(--u));height:calc(52*var(--u));min-width:0;min-height:0}
+body.big #uClose,body.big #eClose{width:calc(52*var(--u));height:calc(52*var(--u));min-width:0;min-height:0}
 body.big .ut{min-height:calc(120*var(--u))}
 #pSet h2{margin:0 0 calc(4*var(--u));font-size:calc(22*var(--u))}
 .opt.cmp{min-height:calc(50*var(--u));margin:calc(4*var(--u)) 0;padding:calc(4*var(--u)) calc(10*var(--u));font-size:calc(15*var(--u));line-height:1.15}
@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2354';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.12.0151';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2704,12 +2704,16 @@ function defaultSave() { return { game: 'bananafly', v: 1, best: 0, bestR: 0, be
 function cleanSave(o) {
   if (!isObj(o) || o.game !== 'bananafly') return null;
   var s = isObj(o.stats) ? o.stats : {}, fr = num(s.friends, 0, 1e9), bo = boostObj(o.boosts);
-  if (bo.spent > fr) bo.spent = fr;   // you cannot have spent more friends than you freed
+  var cn = num(s.coins, 0, 1e9), cu = flatObj(o.cont), op = flatObj(o.opts), un = flatObj(o.unlocks);
+  if (bo.spent > fr + cn) bo.spent = fr + cn;   // you cannot have spent more than you ever had (friends and coins together)
+  if (cu.st !== undefined) { cu.st = Math.floor(Number(cu.st)); if (!(cu.st >= 1 && cu.st <= 500)) delete cu.st; }   // a stage number must be a whole number in range
+  if (op.spd !== undefined && [100, 90, 80, 70, 60].indexOf(op.spd) < 0) delete op.spd;
+  if (un.emp !== undefined) un.emp = (Math.max(0, Math.floor(Number(un.emp)) || 0)) & 0xfffff;
   return {
     game: 'bananafly', v: 1,
-    best: num(o.best, 0, 1e6), bestR: num(o.bestR, 0, 1e6), bestS: flatObj(o.bestS), cont: flatObj(o.cont), opts: flatObj(o.opts), bestStage: Math.max(1, num(o.bestStage, 1, 1e5)),
+    best: num(o.best, 0, 1e6), bestR: num(o.bestR, 0, 1e6), bestS: flatObj(o.bestS), cont: cu, opts: op, bestStage: Math.max(1, num(o.bestStage, 1, 1e5)),
     stats: { runs: num(s.runs, 0, 1e9), gates: num(s.gates, 0, 1e9), flaps: num(s.flaps, 0, 1e9), secs: num(s.secs, 0, 1e9), friends: fr, wins: num(s.wins, 0, 1e9), coins: num(s.coins, 0, 1e9), streak: num(s.streak, 0, 1e9), plus: num(s.plus, 0, 1000), bestWin: num(s.bestWin, 0, 1e7), bestPz: num(s.bestPz, 0, 1e6), balClears: num(s.balClears, 0, 1e6) },
-    unlocks: flatObj(o.unlocks), boosts: bo, savedAt: num(o.savedAt, 0, 9e15)
+    unlocks: un, boosts: bo, savedAt: num(o.savedAt, 0, 9e15)
   };
 }
 function tryParse(t) { try { return JSON.parse(t); } catch (e) { return null; } }
@@ -2776,6 +2780,7 @@ function readText(text) {
   var bytes;
   try { bytes = b64d(m[2]); } catch (e) { return Promise.reject(new Error(BAD)); }
   var done = function (b) {
+    if (b.length > 2e6) throw new Error(BAD);
     var o = tryParse(new TextDecoder().decode(b)), c = cleanSave(o);
     if (!c) throw new Error(BAD);
     return c;
@@ -2797,7 +2802,7 @@ function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden 
 function fmtTime(s) { var m = Math.floor(s / 60); return m < 1 ? s + ' s' : m + ' min ' + (s % 60) + ' s'; }
 function refreshHelp() {
   var r = $('recs'); r.textContent = '';
-  [['Best score', save.best], ['Best score (80% speed)', save.bestR], ['Best score (90% speed)', save.bestS[90] || 0], ['Best score (70% speed)', save.bestS[70] || 0], ['Best score (60% speed)', save.bestS[60] || 0], ['Best stage', save.bestStage], ['Runs', save.stats.runs], ['Gates passed', save.stats.gates], ['Flaps', save.stats.flaps], ['Friends freed', save.stats.friends], ['Prince Chimp defeated', save.stats.wins], ['Banana coins found', save.stats.coins], ['Best perfect streak', save.stats.streak], ['Time played', fmtTime(save.stats.secs)], ['Speed bonus', '+' + Math.min(CFG.plusMax, save.stats.plus) * 10 + '%'], ['Fastest win', save.stats.bestWin ? fmtM(save.stats.bestWin) : 'none yet'], ['Fewest pauses in a win', save.stats.bestPz ? save.stats.bestPz - 1 : 'none yet'], ['Secrets found', secretsAll() + ' of 10'], ['Costume: bow tie', save.unlocks.bow ? 'unlocked' : 'reach stage ' + CFG.bowStage]].forEach(function (p) {
+  [['Best score', save.best], ['Best score (80% speed)', save.bestR], ['Best score (90% speed)', save.bestS[90] || 0], ['Best score (70% speed)', save.bestS[70] || 0], ['Best score (60% speed)', save.bestS[60] || 0], ['Best stage', save.bestStage], ['Runs', save.stats.runs], ['Gates passed', save.stats.gates], ['Flaps', save.stats.flaps], ['Friends freed', save.stats.friends], ['Prince Chimp defeated', save.stats.wins], ['Banana coins found', save.stats.coins], ['Best perfect streak', save.stats.streak], ['Time played', fmtTime(save.stats.secs)], ['Speed bonus', '+' + Math.min(CFG.plusMax, save.stats.plus) * 10 + '%'], ['Fastest win', save.stats.bestWin ? fmtM(save.stats.bestWin) : 'none yet'], ['Fewest pauses in a win', save.stats.bestPz ? save.stats.bestPz - 1 : 'none yet'], ['Secrets found', secretsAll() + ' of ' + (SEC_KEYS.length + 1)], ['Costume: bow tie', save.unlocks.bow ? 'unlocked' : 'reach stage ' + CFG.bowStage]].forEach(function (p) {
     var dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = p[0]; dd.textContent = p[1]; r.appendChild(dt); r.appendChild(dd);
   });
   helpArt(); helpSecrets();
@@ -2825,7 +2830,7 @@ function helpIcon(c, kind) {   // one small picture for the Help panel (the game
   } catch (e) { logError('helpicon', e); }
   ctx = old;
 }
-function helpArt() { var L = $('pHelp').querySelectorAll('canvas.hic'), i; for (i = 0; i < L.length; i++) helpIcon(L[i], L[i].getAttribute('data-k')); }
+function helpArt() { var L = $('pHelp').querySelectorAll('canvas.hic[data-k]'), i; for (i = 0; i < L.length; i++) helpIcon(L[i], L[i].getAttribute('data-k')); }
 var SEC_ICON = { balloons: 'balloon', flags: 'flag', wafers: 'wafer', vault: 'star', gold: 'coin', drawer: 'gate', raft: 'barrels', cove: 'bubble', boss: 'sub' };
 function helpSecrets() {   // before the first win: a teaser; after it: a rumor for every secret not found yet
   var box = $('secList');
@@ -2848,11 +2853,14 @@ function describe(c) { return 'best score ' + c.best + ', best stage ' + c.bestS
 
 var pending = null;
 function say(t) { saveMsg.textContent = t; }
+var loadSeq = 0;
 function stage1Load(text) {
+  var mySeq = ++loadSeq;
   readText(text).then(function (c) {
+    if (mySeq !== loadSeq || pSave.hidden) return;   // the window was closed (or another code chosen) while this one was being read
     pending = c; bConfirm.hidden = false;
     say('Found: ' + describe(c) + '. Press the yellow button to replace your progress. Your current progress is kept as a backup on this device.');
-  }, function (e) { pending = null; bConfirm.hidden = true; say(e.message); });
+  }, function (e) { if (mySeq !== loadSeq) return; pending = null; bConfirm.hidden = true; say(e.message); });
 }
 function applyLoaded() {
   if (!pending) return;
@@ -2873,12 +2881,13 @@ function copyCode() {
   var fallback = function () { codeEl.focus(); codeEl.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { } say(ok ? 'Copied.' : 'Select the code above and copy it.'); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say('Copied.'); }, fallback); else fallback();
 }
-var dlHold = 0;   // a native Save or Open dialog is on screen: the browser keeps the page's drawing and the dialog fighting for the screen, so the game rests (no steps, no drawing) until you are back
+var holdDone = null, dlHold = 0;   // a native Save or Open dialog is on screen: the browser keeps the page's drawing and the dialog fighting for the screen, so the game rests (no steps, no drawing) until you are back
 function holdForDialog() {
+  if (holdDone) holdDone();
   var t0 = performance.now(), seenBlur = false, tm = 0;
-  var done = function () { if (!dlHold) return; dlHold = 0; removeEventListener('blur', onB); removeEventListener('focus', done); removeEventListener('pointermove', back, true); removeEventListener('pointerdown', back, true); removeEventListener('keydown', back, true); clearInterval(tm); };
+  var done = function () { dlHold = 0; if (holdDone === done) holdDone = null; removeEventListener('blur', onB); removeEventListener('focus', done); removeEventListener('pointermove', back, true); removeEventListener('pointerdown', back, true); removeEventListener('keydown', back, true); clearInterval(tm); };
   var onB = function () { seenBlur = true; }, back = function () { if (performance.now() - t0 > 400) done(); };   // input only counts once the dialog has had time to open
-  dlHold = 1; addEventListener('blur', onB); addEventListener('focus', done); addEventListener('pointermove', back, true); addEventListener('pointerdown', back, true); addEventListener('keydown', back, true);
+  dlHold = 1; holdDone = done; addEventListener('blur', onB); addEventListener('focus', done); addEventListener('pointermove', back, true); addEventListener('pointerdown', back, true); addEventListener('keydown', back, true);
   tm = setInterval(function () { var age = performance.now() - t0; if ((!seenBlur && age > 2500) || age > 90000) done(); }, 500);   // no dialog took the focus (a browser that saves straight to Downloads): carry on after a moment
 }
 function downloadFile() {
@@ -2975,12 +2984,14 @@ var UPS = [
   { id: 'limes', name: 'Lime defense', desc: 'Little rocket limes shoot down a coconut in boss fights, or a seagull in Chimp\'s Navy, that is about to hit you (2 per fight or Navy run, per level)', costs: [150, 300] },
   { id: 'practice', name: 'Practice Chimp\'s Navy', desc: 'Play the water level any time from the title screen (nothing is earned)', costs: [40] }
 ];
+var UPMAX = {};
+UPS.forEach(function (u) { UPMAX[u.id] = u.costs.length; });
 function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet') + (empOwn(E.mega) ? 1 : 0)); }
 function nextCost(u) { var l = lvl(u.id); return l < u.costs.length ? u.costs[l] : 0; }
 function canBuy(u) { var c = nextCost(u); return c > 0 && bal() >= c; }
 function anyBuy() { return UPS.some(canBuy); }
 function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bSky').hidden = !skyOn() || state !== 'title'; $('bVolc').hidden = !volcOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
-function lvl(id) { return save.boosts[id] || 0; }
+function lvl(id) { var v = save.boosts[id] || 0, m = UPMAX[id]; return m !== undefined && v > m ? m : v; }   // never past the shop's top level (a damaged or edited save cannot give a million)
 function bal() { return save.stats.friends + save.stats.coins - (save.boosts.spent || 0); }
 function refreshUp() {
   $('upBal').textContent = bal(); var box = $('upList'); box.textContent = '';
@@ -3040,10 +3051,10 @@ function refreshEmp() {
 }
 function empTile(box, i) {
   var e = EMP[i], b = document.createElement('button'), nm = document.createElement('b'), sm = document.createElement('small'), em = document.createElement('em'), stock = e.k === 'perk' ? lvl(e.id) : 0,
-    own = e.k !== 'perk' && e.k !== 'gift' && empOwn(i), lock = !!e.need && !lvl(e.need) && !own, can = bal() >= e.cost && !(e.k === 'perk' && stock >= 9) && !lock;
+    own = e.k !== 'perk' && e.k !== 'gift' && empOwn(i), lock = !!e.need && !lvl(e.need) && !own, can = bal() >= e.cost && !(e.k === 'perk' && stock >= 9) && !(e.k === 'gift' && lvl('perkB') >= 9 && lvl('perkH') >= 9) && !lock;
   b.className = 'ut' + (!own && !can ? ' off' : ''); nm.textContent = e.name; b.appendChild(nm);
   sm.textContent = e.desc + (stock ? ' You have ' + stock + '.' : ''); b.appendChild(sm);
-  if (own) { em.textContent = e.k === 'up' ? 'Yours!' : empNow(i) ? (e.k === 'wear' ? 'Wearing it' : 'Using it') : (e.k === 'wear' ? 'Tap to wear' : 'Tap to use'); if (e.k !== 'up') b.addEventListener('click', function () { empToggle(i); }); else b.classList.add('done'); }
+  if (own) { em.textContent = e.k === 'up' ? (e.need && !lvl(e.need) ? 'Yours, but it needs Potassium Power again' : 'Yours!') : empNow(i) ? (e.k === 'wear' ? 'Wearing it' : 'Using it') : (e.k === 'wear' ? 'Tap to wear' : 'Tap to use'); if (e.k !== 'up') b.addEventListener('click', function () { empToggle(i); }); else b.classList.add('done'); }
   else { em.textContent = lock ? 'Needs Potassium Power first' : can ? 'Buy for ' + e.cost : bal() < e.cost ? e.cost - bal() + ' more to go' : 'Stock is full'; if (can) b.addEventListener('click', function () { empBuy(i); }); else b.disabled = true; }
   b.appendChild(em); box.appendChild(b);
 }
@@ -3056,9 +3067,11 @@ function empBuy(i) {
   var e = EMP[i], m, a, b; if (bal() < e.cost || (e.need && !lvl(e.need))) return;
   if (e.k === 'perk') { if (lvl(e.id) >= 9) return; save.boosts[e.id] = lvl(e.id) + 1; m = e.name + ' is packed for your next run!'; }
   else if (e.k === 'gift') {
-    a = Math.random() < 0.5 ? 'perkB' : 'perkH'; b = Math.random() < 0.5 ? 'perkB' : 'perkH';
-    save.boosts[a] = Math.min(9, lvl(a) + 1); save.boosts[b] = Math.min(9, lvl(b) + 1);
-    m = a === b ? 'Surprise! Two ' + (a === 'perkB' ? 'spare bounces' : 'spare hearts') + '!' : 'Surprise! A spare bounce and a spare heart!';
+    var pk = ['perkB', 'perkH'].filter(function (k) { return lvl(k) < 9; }), got = [], gi, gk;   // only stock that has room is picked, so a gift never pays for nothing
+    if (!pk.length) return;
+    for (gi = 0; gi < 2; gi++) { pk = pk.filter(function (k) { return lvl(k) < 9; }); if (!pk.length) break; gk = pk[Math.floor(Math.random() * pk.length)]; save.boosts[gk] = lvl(gk) + 1; got.push(gk); }
+    a = got[0]; b = got[1];
+    m = !b ? 'Surprise! A spare ' + (a === 'perkB' ? 'bounce' : 'heart') + '!' : a === b ? 'Surprise! Two ' + (a === 'perkB' ? 'spare bounces' : 'spare hearts') + '!' : 'Surprise! A spare bounce and a spare heart!';
   } else { if (empOwn(i)) return; save.unlocks.emp = (save.unlocks.emp | 0) | (1 << i); save.unlocks.empOff = (save.unlocks.empOff | 0) & ~(1 << i); if (e.k === 'trail') save.unlocks.empTr = e.tr; m = 'Yay! ' + e.name + ' is yours!'; }
   save.boosts.spent = (save.boosts.spent || 0) + e.cost; empRedo(m);
 }
@@ -3078,8 +3091,8 @@ $('bUp').addEventListener('click', function () { openPanel(pUp); });
 $('bEmp').addEventListener('click', function () { if (state === 'title') openPanel(pEmp); });
 $('bCont').addEventListener('click', continueRun);
 $('bPractice').addEventListener('click', function () { if (state === 'title') openPanel(pPrac); });
-$('bSky').addEventListener('click', function () { if (state === 'title' && skyOn()) startSky(); });
-$('bVolc').addEventListener('click', function () { if (state === 'title' && volcOn()) startVolc(); });
+$('bSky').addEventListener('click', function () { if (state === 'title' && skyOn() && !panelOpen()) startSky(); });
+$('bVolc').addEventListener('click', function () { if (state === 'title' && volcOn() && !panelOpen()) startVolc(); });
 $('pracClose').addEventListener('click', closePanels);
 /* Practice: the water level, or any stage that has been cleared (the same 40-credit upgrade). Nothing is earned and nothing is saved. */
 var pracN = 0, pracEnd = '';   // pracN: the stage being practiced (0 = a normal run); pracEnd: how a practice run ended ('win' or 'lose')
@@ -3281,6 +3294,7 @@ function obRects(o) {
 }
 function obMove(o, dt) {   // a moving gate: still while it is off the screen, then every few seconds it eases in and out of its move (a smooth hump, then a rest)
   var m = o.mv, u, d, h;
+  if (o.smash) return;   // a smashed gate stays gone
   if (o.x > W - 20 || o.x < -CFG.obW) return; m.t += dt; u = ((m.t + m.ph) % m.per) / m.per; h = u < m.win ? Math.sin(Math.PI * u / m.win) : 0; d = m.amp * h * h * (3 - 2 * h);
   if (Math.abs(d - m.d) < 0.04) return; m.d = d; o.gt = o.gt0 + d; if (m.k === 2) o.gb = o.gb0 - d; obRects(o);
 }
@@ -3289,6 +3303,7 @@ function spawnOb(x) {
   var lo = CFG.minObH + gap / 2, hi = GROUND_Y - CFG.minObH - gap / 2;
   var pc = lastC, c = clamp(lastC + (rng() * 2 - 1) * CFG.maxShift, lo, hi);
   if (spawned > 0 && spawned === gateStart(gs)) c = clamp(CFG.rsgY + (rng() * 2 - 1) * 25, lo, hi);   // the first gate after a stage break opens right where Fancy waits, so GO never starts with a scramble
+  if (spawned <= gateStart(gs)) kRunN = 0;   // a lane run never carries over a stage break
   if (lvl('potassium') && !BAL && !fightStage(gs) && spawned > gateStart(gs)) {   // with Potassium Power, now and then a few gates in a row line up (so the move has something to ride)
     if (kRunN > 0) { kRunN--; c = clamp(kRunC + (rng() * 2 - 1) * 13, lo, hi); }
     else if (rng() < 0.2) { kRunN = 2; kRunC = lastC; c = clamp(kRunC + (rng() * 2 - 1) * 13, lo, hi); }
@@ -3358,8 +3373,8 @@ function kStep(dt) {   // runs once per step while flying; returns the speed mul
   var ok = kOk(), i, o, a = null, b = null, u, tgt, mv, k;
   if (kHolding() && state === 'play') { if (kHoldT === 0) sKarm = !kOn && !sKon && !(ok && (kAvail = kLaneFind()) && kReach(kAvail)); kHoldT += dt; } else kHoldT = 0;
   if (sKon) {
-    sKt -= dt; if (!ok || sKt <= 0) { sKon = false; sKused = stage; grace = 0.2; vy = clamp(vy, -120, 120); if (ok) pop('Phew!', '#ffe27a', 18); } else { by = clamp(by, 70, GROUND_Y - 70); kBy0 = by; vy = 0; fallD = 0; angle = 0; grace = Math.max(grace, 0.05); invuln = Math.max(invuln, 0.08); }
-  } else if (ok && !kOn && sKarm && kHoldT >= 0.55 && empOwn(E.superK) && sKused !== stage) { sKon = true; sKt = 2.6; sKarm = false; sKused = 0; kEchoT = 0; pop('SUPER POTASSIUM!', '#ffe27a', 26); burst(CFG.bananaX, by, 30, ['#ffe27a', '#ffffff', '#fff2a0', '#ff9a3c'], 300, 220); punchT = CFG.punchSecs; }
+    sKt -= dt; if (!ok || sKt <= 0) { sKon = false; sKused = sKst; invuln = Math.max(invuln, 0.7); grace = 0.2; vy = clamp(vy, -120, 120); if (ok) pop('Phew!', '#ffe27a', 18); } else { by = clamp(by, 70, GROUND_Y - 70); kBy0 = by; vy = 0; fallD = 0; angle = 0; grace = Math.max(grace, 0.05); invuln = Math.max(invuln, 0.08); }
+  } else if (ok && !kOn && sKarm && kHoldT >= 0.55 && empOwn(E.superK) && sKused !== stage) { sKon = true; sKt = 2.6; sKst = stage; sKarm = false; sKused = 0; kEchoT = 0; pop('SUPER POTASSIUM!', '#ffe27a', 26); burst(CFG.bananaX, by, 30, ['#ffe27a', '#ffffff', '#fff2a0', '#ff9a3c'], 300, 220); punchT = CFG.punchSecs; }
   if (ok && !kOn && !sKon) {
     kAvail = kLaneFind(); if (kAvail && !kReach(kAvail)) kAvail = null;
     if (kAvail && kHoldT >= 0.15) { kOn = true; kLane = kAvail; for (i = 0; i < kLane.length; i++) kLane[i].kg = true; kEchoT = 0; pop('POTASSIUM POWER!', '#ffe27a', 22); burst(CFG.bananaX, by, 16, ['#ffe27a', '#ffffff', '#fff2a0'], 220, 180); }
@@ -3384,8 +3399,8 @@ function kStep(dt) {   // runs once per step while flying; returns the speed mul
   kHint += ((kAvail && !kOn ? 1 : 0) - kHint) * Math.min(1, dt * 8);
   return (1 + 0.25 * k) * (1 + 0.7 * sKch * sKch * (3 - 2 * sKch));
 }
-var sKon = false, sKt = 0, sKch = 0, sKused = 0, sKarm = false;   // Super Potassium: blasting now, seconds left, the blast's ramp (0 to 1), the stage it was last used in, and whether this hold began away from a gate lane
-function kReset() { sKon = false; sKt = 0; sKch = 0; sKarm = false; kOn = false; kCh = 0; kHoldT = 0; kLane = null; kAvail = null; kEcho.length = 0; kRunN = 0; kHint = 0; }
+var sKon = false, sKt = 0, sKch = 0, sKused = 0, sKst = 0, sKarm = false;   // Super Potassium: blasting now, seconds left, the blast's ramp (0 to 1), the stage it was last used in, and whether this hold began away from a gate lane
+function kReset() { sKon = false; sKt = 0; sKch = 0; sKused = 0; sKarm = false; kOn = false; kCh = 0; kHoldT = 0; kLane = null; kAvail = null; kEcho.length = 0; kRunN = 0; kHint = 0; }
 function kEchoes() {   // fading copies of Fancy, left behind where he was: they stay in the world, so the faster he goes the further apart they sit
   for (var i = 0; i < kEcho.length; i++) { var e = kEcho[i]; ctx.globalAlpha = 0.6 * e.k * (1 - e.t / 0.5); drawFancy(e.x, e.y, e.r, 1); }
   ctx.globalAlpha = 1;
@@ -3430,9 +3445,10 @@ function rsgStartTap() {   // a tap during the wait starts Ready, Set, GO; a tap
   if (rsgT >= 0.7 && rsgT < CFG.cardSecs) { rsgT = CFG.cardSecs; rsgTap = true; cardT = -1; return true; }
   return false;
 }
+var exitAt = -1e9;   // when a secret game or practice was left: a double tap must not also start a run
 function onAction() {
   if (panelOpen()) return;
-  if (state === 'title') toReady();
+  if (state === 'title') { if (performance.now() - exitAt > 400) toReady(); }
   else if (state === 'dead') { if (deadT >= CFG.retryDelay) { if (pracN) startPracticeStage(pracN); else toReady(); } }
   else if (state === 'ready') startLaunch();
   else if (state === 'launch') { if (skipLaunch()) { launchT = CFG.launchSecs * 0.88; trail.length = 0; } }
@@ -3934,6 +3950,7 @@ function drawHug() {   // a hint for those who look: a faint shimmer on the edge
   if (hugT > 0) { ctx.fillStyle = '#ffd93b'; ctx.fillRect(0, hugKind === 'drawer' ? fy - 4 : 0, W * clamp(hugT / CFG.hugSecs, 0, 1), 6); }
 }
 function die() {
+  if (pendNext === 'win') return;   // the last gate is cleared: the victory is on its way, nothing can undo it now
   if (secondWind()) return;
   kOn = false; kCh = 0; kEcho.length = 0; kHint = 0; sKon = false; sKch = 0;
   state = 'dead'; deadT = 0; vy = -200; cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0;
@@ -3978,20 +3995,20 @@ function stageUp() {
   balNight = pendNext === 'balloons' && done === CFG.bal2After;
   if (pendNext !== 'mini' && pendNext !== 'balloons') { bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist; }   // before the water bonus the scene stays put (no glimpse of the next stage): it washes out to white into the mini game
   if (stage >= CFG.bowStage && !save.unlocks.bow) { save.unlocks.bow = true; toast('New costume unlocked: a bow tie for Fancy!'); }
-  if (pendNext === 'win') { save.stats.wins++; save.stats.friends += CFG.winBonus; nextT = 0.8; if (runChal && !pracN) { var bk = 'b_' + runChal; if (!save.unlocks[bk]) { save.unlocks[bk] = 1; badgeNew = CHAL[chalIdx() - 1][1]; } } }   // the finale gets its own victory screen instead of a stage card
+  if (pendNext === 'win') { save.stats.wins++; save.stats.friends += CFG.winBonus; nextT = 0.8; grace = 1.2; vy = 0; if (runChal && !pracN) { var bk = 'b_' + runChal; if (!save.unlocks[bk]) { save.unlocks[bk] = 1; badgeNew = CHAL[chalIdx() - 1][1]; } } }   // the finale gets its own victory screen instead of a stage card
   else { cardT = 0; cardY = cardGoal = mirY(by) < 335 ? 345 : 125; nextT = pendNext ? CFG.cardSecs + 0.35 : 0; rsgT = 0; rsgGo = false; rsgTap = false; celT = CFG.celSecs; }   // a little celebration roll, once around
   if (pendNext !== 'win' && !pracN) save.cont = { st: stage, tm: Math.round(runSecs) };   // where to carry on if the tab is closed mid-run
   if (pendNext !== 'win' && themeOf(stage + 1) !== themeOf(stage)) ART.warm(themeOf(stage + 1));   // start building the look of the stage after this one right away (it used to wait for the first gate: too late on a slow laptop)
   persist();
 }
 function onHidden() {
-  resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true); if (state === 'volc') volcPause(true);
+  keys = {}; kHeld.key = false; kHeld.ptr = false; resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true); if (state === 'volc') volcPause(true);
   if (state === 'play') { state = 'paused'; runPauses++; noteBest(); }
   persist();
 }
 /* Keep the screen awake while a run is going (the browser lets go by itself when the tab is hidden, so ask again when it is back) */
 var wlock = null, wlBusy = false, wlFail = 0;
-function wlWant() { return state === 'launch' || state === 'play' || state === 'mini'; }
+function wlWant() { return state === 'launch' || state === 'play' || state === 'mini' || state === 'sky' || state === 'volc'; }
 function wlSync() {
   if (!navigator.wakeLock || document.hidden) return;
   if (wlWant()) {
@@ -4012,6 +4029,7 @@ function saveHint() {
   toast('Tip: Safari clears saved games after a week away. Open Save to copy your save code, or add Fancy to your Home Screen.', 8000);
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { }); } catch (e) { }
 }
+addEventListener('blur', function (e) { if (e.target === window) { keys = {}; kHeld.key = false; kHeld.ptr = false; } });
 document.addEventListener('visibilitychange', function () { if (document.hidden) onHidden(); else wlSync(); });
 addEventListener('pagehide', onHidden);
 
@@ -4111,7 +4129,7 @@ function update(dt) {
         else if (cd2 < magR() * magR()) { var cdd = Math.sqrt(cd2), pull = (1 - cdd / magR()) * CFG.magnetV * dt / cdd; cn.dx -= cdx * pull; cn.y -= cdy * pull; }   // coins drift toward Fancy when he is near
       }
       if (!o.passed && o.x + CFG.obW < CFG.bananaX - CFG.bananaR) {
-        o.passed = true; score++; rateGate(o); if (o.gold && !VAULT) warp = true;
+        o.passed = true; score++; rateGate(o); if (o.gold && !VAULT && !FT) warp = true;
         if (score === gateStart(stage + 1)) { if (pracN) pracWin(); else stageUp(); }
         if (!pracN && runStartBest > 0 && score === runStartBest + 1) { pop('NEW BEST!', '#ffd93b', 26); burst(CFG.bananaX + 30, by, 22, ['#ffd93b', '#ffffff', '#ff6b81'], 240, 240); }   // past the old record
         if (score - gateStart(stage) === 1) { if (themeOf(stage) === CFG.finalTheme) warmFight(); if (themeOf(stage) === CFG.balAfter && save.unlocks.balloons && !pracN) ART.bal.warm(); if (themeOf(stage) === CFG.bal2After && empOwn(E.keyBal) && !pracN) ART.bal.warm(true); if (themeOf(stage) === CFG.miniAfter) ART.mg.warm(); else if (themeOf(stage + 1) !== bgTheme) ART.warm(themeOf(stage + 1)); }   // build the next stage's pictures early (right after the first gate, in small steps), in a calm moment
@@ -4157,7 +4175,7 @@ var MG_PB = [318, 30];   // where the pause button sits
 var MG_INTRO = 2.6;   // seconds the title and instructions show before Ready, Set, Go
 var mgDn = null;      // where the finger went down, relative to Fancy: a tap only leaps, a drag steers
 function startMini(practice) {
-  flipV = 0; if (!practice) split('Water'); CFG.mgSpeed = MG_V0 * relaxK() * plusK(); var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH; state = 'mini'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; ART.warm(themeOf(stage));
+  flipV = 0; if (!practice) { if (clkSp.length && clkSp[clkSp.length - 1][0] === 'Water') clkSp.pop(); split('Water'); } CFG.mgSpeed = MG_V0 * relaxK() * plusK(); var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + (practice ? 0 : runPH); state = 'mini'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; ART.warm(themeOf(stage));
   MG = { ph: 'intro', pt: 0, t: 0, scroll: 0, x: W / 2, y: CFG.mgY0, tx: W / 2, ty: CFG.mgY0, leap: -1, buf: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: null, pi: 0, saved: 0, leaps: 0, slow: 0, practice: !!practice, wcd: 1.4, wc: 0, bonus: 0, wsh: lvl('wshield'), pl: 0, lh: h, lid: 0, lw: 0, lb: 0, pay: null, off: 0, lm: lvl('limes') * 2, lt: 0, limes: [], boss: null, bossDone: false, cove: 70 + rng() * 220, coveHit: false, life: [], lifeAt: 0 };
   MG.plan = mgPlan();
 }
@@ -4366,7 +4384,7 @@ function updateMini(dt) {
   if (lt >= CFG.mgSecs && !m.boss) { m.ph = 'win'; m.pt = 0; if (!m.practice) { save.stats.friends += CFG.friendsPerStage + m.saved + m.bonus; persist(); } burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); }
 }
 function finishMini() {   // back to the side-scrolling flight: the next stage starts with a calm stretch
-  ART.mg.free(); state = 'play'; obs = []; by = CFG.rsgY; bx = CFG.bananaX; vy = 0; angle = 0; grace = 0; rsgT = CFG.cardSecs; rsgGo = false; rsgTap = false; boost = 0; boostT = 99; trackOn = false; cardT = -1; topT = 0; MG = null;
+  ART.mg.free(); state = 'play'; obs = []; by = CFG.rsgY; bx = CFG.bananaX; vy = 0; angle = 0; grace = 0; rsgT = CFG.cardSecs; rsgGo = false; rsgTap = false; boost = 0; boostT = 99; trackOn = false; cardT = -1; topT = 0; MG = null; fl.length = 0;
   bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist; washA = 0; nextX = W + CFG.obW + speedFor(stage) * (rsgGoAt() - rsgT + 0.4); fx.length = 0; invuln = 0; lastAfter = 0; trail.length = 0;
 }
 /* practice (bought in the shop, played from the title screen): the same level, nothing earned; when it ends or Fancy is out, a card offers Try again or Back to title */
@@ -4433,7 +4451,7 @@ function practiceCard(m) {   // practice ended (won or out of hearts): try it ag
   mgBtn(MG_BA, 'Try again!', '#58c46f'); mgBtn(MG_BT, 'Back to title', '#8a6cd8'); outlined(padOn ? 'A: again   B: title' : 'Space: again   Esc: title', W / 2, 424, 13, '#ffffff'); ctx.globalAlpha = 1;
 }
 function startPractice() { ART.mg.warm(); ART.mg.done(); startMini(true); }
-function practiceExit() { pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
+function practiceExit() { exitAt = performance.now(); pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
 function mgOnBtn(l) { return Math.abs(l[0] - MG_PB[0]) < PBR + 8 && Math.abs(l[1] - MG_PB[1]) < PBR + 8; }
 function mgPause(on) { var m = MG; if (m && (m.ph === 'play' || m.ph === 'intro')) { var was = !!m.paused; m.paused = on === undefined ? !m.paused : on; if (m.paused && !was) runPauses++; } }
 function miniTap() { var m = MG; if (!m || panelOpen()) return; if (m.paused) { m.paused = false; return; } if (m.ph === 'intro' && tapWaitOn && !m.go && (m.wait || m.pt >= 0.7)) { m.go = true; m.wait = false; m.pt = Math.max(m.pt, MG_INTRO); return; } if (m.practice && mgCard(m)) { startMini(true); return; } if (m.ph === 'lose' && m.pt > 0.6) startMini(m.practice); else mgLeap(); }
@@ -4639,7 +4657,7 @@ function openWin() {
   $('winNote').textContent = up ? 'You beat Prince Chimp! Pick what happens next.' : 'You beat Prince Chimp! Your speed bonus is already at the top: +' + CFG.plusMax * 10 + '%.';
 }
 function giftNeeded() { return !save.unlocks.balloons ? 1 : pcBeaten(4) && !save.unlocks.crown ? 2 : 0; }   // 1: Prince Chimp's balloons (first win), 2: the crown (Crown Duel won)
-function afterWin() { toReady(); giftTitle = false; var g = giftNeeded(); if (g) startGift(g === 2 ? 1 : 0); }
+function afterWin() { giftTitle = false; var g = giftNeeded(); if (g) { resetWorld(); startGift(g === 2 ? 1 : 0); } else toReady(); }   // a gift scene ends with the only toReady, so the one-run perks are spent once
 var freshArmed = false;
 function winTitle() { save.stats.plus = Math.min(CFG.plusMax, save.stats.plus + 1); persist(); pWin.hidden = true; var g = giftNeeded(); if (g) { startGift(g === 2 ? 1 : 0, true); return; } resetWorld(); state = 'title'; titleT = 5; setBar(true); toast('Saved. Welcome back to the title screen!', 3000); }   // keep everything, save, and rest at the title screen instead of going straight to the launch pad
 function winKeep() { save.stats.plus = Math.min(CFG.plusMax, save.stats.plus + 1); persist(); pWin.hidden = true; afterWin(); }
@@ -4823,11 +4841,11 @@ function skyPlan() {
 }
 function startSky() {
   flipV = 0; state = 'sky'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; MG = null; pracN = 0;
-  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH, i, bg = [];
+  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0), i, bg = [];
   for (i = 0; i < 9; i++) bg.push({ x: frng() * 460, y: 60 + frng() * 480, r: 14 + frng() * 22, s: 0.2 + frng() * 0.25 });
   SKY = { ph: 'ready', t: 0, pt: 0, y: 300, vy: 0, fa: 0, rot: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: skyPlan(), pi: 0, lm: lvl('limes') * 2, lt: 0, limes: [], boss: null, bossDone: false, paused: false, spd: relaxK() * plusK(), sc: 0, say: '', sayT: 0, bg: bg, won: 0, hits: 0, shot: 0 };
 }
-function skyExit() { SKY = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
+function skyExit() { exitAt = performance.now(); SKY = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
 function skyPause(on) { var m = SKY; if (m && (m.ph === 'play' || m.ph === 'ready')) { m.paused = on === undefined ? !m.paused : on; if (m.paused) { persist(); } } }
 function skySay(m, t) { m.say = t; m.sayT = 1.6; }
 function skyAdd(m, q) {
@@ -4836,10 +4854,10 @@ function skyAdd(m, q) {
   if (e.mode === 2) { var tt = Math.max(0.5, (e.x - SKY_X) / -e.vx); e.vy = clamp((m.y - e.y) / tt, -250, 250); }
   m.ents.push(e); return e;
 }
-function skyHurt(m) {
+function skyHurt(m) {   // (the lime missiles in flight are dropped when the flight ends)
   if (m.inv > 0 || m.ph !== 'play') return;
   m.hearts--; m.hits++; m.inv = 1.5; m.vy = -220; burst(SKY_X, m.y, 16, ['#ffffff', '#ffd93b', '#ff6b81'], 220, 240);
-  if (m.hearts <= 0) { m.ph = 'lose'; m.pt = 0; m.vy = -260; }
+  if (m.hearts <= 0) { m.ph = 'lose'; m.pt = 0; m.vy = -260; m.limes.length = 0; }
 }
 function skyUpdate(dt) {
   var m = SKY, i, e, b, tt, a, v;
@@ -4885,17 +4903,17 @@ function skyUpdate(dt) {
     a = Math.atan2(e.y - v.y, e.x - v.x); v.a = a; v.x += Math.cos(a) * 560 * dt; v.y += Math.sin(a) * 560 * dt;
     if ((e.x - v.x) * (e.x - v.x) + (e.y - v.y) * (e.y - v.y) < 22 * 22) { e.dead = true; m.shot++; burst(e.x, e.y, 24, ['#7ccc2e', '#ffd93b', '#ffffff', '#ff9a3c'], 260, 240); m.limes.splice(i, 1); }
   }
-  if (m.t >= SKY_SECS) { m.ph = 'win'; m.pt = 0; m.won = 25; save.stats.friends += 25; persist(); burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); secretFound('sky', 'Secret found: the Chimp Airforce! A medal is on the wall in Fancy\'s Place.'); }
+  if (m.t >= SKY_SECS && m.ph === 'play') { m.ph = 'win'; m.pt = 0; m.limes.length = 0; m.won = 25; save.stats.friends += 25; persist(); burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); secretFound('sky', 'Secret found: the Chimp Airforce! A medal is on the wall in Fancy\'s Place.'); }
 }
 function skyTap() {
   var m = SKY; if (!m) return;
   if (m.paused) { m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { startSky(); return; }
-  if (m.ph === 'ready') { m.ph = 'play'; m.pt = 0; }
+  if (m.ph === 'ready' && m.pt > 0.3) { m.ph = 'play'; m.pt = 0; }
   if (m.ph === 'play') { m.vy = CFG.flapV; m.fa = 0.18; if (empWorn(E.confetti)) burst(SKY_X - 10, m.y + 8, 7, ['#ff6b81', '#ffd93b', '#7ad8ff', '#8ae28a', '#c9a0ff'], 150, 220); }
 }
 function skyPointer(pl) {
-  var m = SKY; if (!m) return;
+  var m = SKY; if (!m || panelOpen()) return;
   if (m.paused) { if (mgIn(pl, MG_BT)) { skyExit(); return; } m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { skyExit(); return; } if (mgIn(pl, SKY_BA)) { startSky(); return; } return; }
   if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { skyPause(true); return; }
@@ -4992,11 +5010,11 @@ function volcPlan() {
 }
 function startVolc() {
   flipV = 0; state = 'volc'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; MG = null; SKY = null; pracN = 0;
-  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH, pl = volcPlan(), i, bg = [];
+  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0), pl = volcPlan(), i, bg = [];
   for (i = 0; i < 12; i++) bg.push({ x: i * 62 + frng() * 30, w: 22 + frng() * 26, h: 60 + frng() * 150, up: i % 2 === 0, s: 0.25 + frng() * 0.2 });
   VOLC = { ph: 'ready', t: 0, pt: 0, y: 300, vy: 0, fa: 0, rot: 0, hearts: h, maxH: h, inv: 0, obs: pl.obs, end: pl.end, paused: false, spd: relaxK() * plusK(), sc: 0, bg: bg, won: 0, hits: 0, say: '', sayT: 0 };
 }
-function volcExit() { VOLC = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
+function volcExit() { exitAt = performance.now(); VOLC = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
 function volcPause(on) { var m = VOLC; if (m && (m.ph === 'play' || m.ph === 'ready')) { m.paused = on === undefined ? !m.paused : on; if (m.paused) persist(); } }
 function volcHurt(m, lava) {
   if (m.inv > 0 || m.ph !== 'play') return;
@@ -5005,7 +5023,7 @@ function volcHurt(m, lava) {
 }
 function volcStream(o, t, y0, y1) {   // is the part of the column between y0 and y1 clear of lava? (the pattern slides down: gaps travel with it)
   var a = (((y0 - t * o.sp - o.ph) % o.P) + o.P) % o.P, b = (((y1 - t * o.sp - o.ph) % o.P) + o.P) % o.P;
-  return a >= o.gl && b >= a;
+  return a >= o.P - o.gl && b >= a;
 }
 function volcGapH(o, t) { return 10 + (200 + 5 * lvl('roomy')) * (0.5 + 0.5 * Math.sin(6.2832 * t / o.T + o.ph)); }
 function volcUpdate(dt) {
@@ -5033,11 +5051,11 @@ function volcTap() {
   var m = VOLC; if (!m) return;
   if (m.paused) { m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { startVolc(); return; }
-  if (m.ph === 'ready') { m.ph = 'play'; m.pt = 0; }
+  if (m.ph === 'ready' && m.pt > 0.3) { m.ph = 'play'; m.pt = 0; }
   if (m.ph === 'play') { m.vy = CFG.flapV; m.fa = 0.18; if (empWorn(E.confetti)) burst(VOLC_X - 10, m.y + 8, 7, ['#ff6b81', '#ffd93b', '#7ad8ff', '#8ae28a', '#c9a0ff'], 150, 220); }
 }
 function volcPointer(pl) {
-  var m = VOLC; if (!m) return;
+  var m = VOLC; if (!m || panelOpen()) return;
   if (m.paused) { if (mgIn(pl, MG_BT)) { volcExit(); return; } m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { volcExit(); return; } if (mgIn(pl, SKY_BA)) { startVolc(); return; } return; }
   if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { volcPause(true); return; }
@@ -5110,7 +5128,7 @@ function startHome() {
   HOME = { bg: null, k: 0, z: [], x: 180, y: 524, tx: 180, ty: 524, face: 1, mv: 0, msg: [], mt: -9, jk: 0, pw: false };
   homeSay('Welcome to Fancy\'s Place! Tap the wall to look closer, or the floor to walk around.');
 }
-function homeBack() { HOME = null; resetWorld(); state = 'title'; titleT = 5; setBar(true); }
+function homeBack() { exitAt = performance.now(); HOME = null; resetWorld(); state = 'title'; titleT = 5; setBar(true); }
 function homeSay(t) {
   var a = t.split(' '), l = '', i, o = [];
   ctx.font = '700 12px ' + FONT;
@@ -5235,7 +5253,7 @@ function renderHome() {
   var bl = Math.floor(time * 2) % 2, y0 = 396, sx = h.bg ? h.bg.width / W : 1;
   if (!h.bg || h.k !== k) { homeBuild(); h.full = 1; }
   if (h.full || fx.length || h.fxo) { ctx.drawImage(h.bg, 0, 0, W, H); h.full = 0; }   // the room never changes: after the first picture only the bottom part (where Fancy walks) is put back each frame, which costs a third as much
-  else { ctx.drawImage(h.bg, 0, y0 * sx, h.bg.width, h.bg.height - y0 * sx, 0, y0, W, H - y0); if (h.bl !== bl) ctx.drawImage(h.bg, 20 * sx, 358 * sx, 66 * sx, 20 * sx, 20, 358, 66, 20); }
+  else { ctx.drawImage(h.bg, 0, y0 * sx, h.bg.width, h.bg.height - y0 * sx, 0, y0, W, H - y0); if (h.bl !== bl || bl) ctx.drawImage(h.bg, 20 * sx, 358 * sx, 66 * sx, 20 * sx, 20, 358, 66, 20); }
   h.fxo = fx.length > 0; h.bl = bl;
   if (bl) { ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(22, 363, 4, 3); ctx.fillRect(78, 363, 4, 3); }   // the Apple Press marquee blinks
   ctx.fillStyle = 'rgba(70,35,10,.28)'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 24, 20 - Math.sin(time * 4) * 1.5, 6, 0, 0, 6.2832); ctx.fill();
@@ -5566,9 +5584,9 @@ var TESTFILE = false, labUsed = false;   // the tester build flips TESTFILE to t
 var XSHORT = { potassium: 'Potassium Power', practice: 'Practice Navy', wshield: 'Wafer shield', rope: 'Rope cutter', superleap: 'Super Leap' };
 var XCHIP = { roomy: ['R', '#7be07b'], gentle: ['G', '#6ec6ff'], shield: ['B', '#ff6b81'], magnet: ['M', '#b45cff'], sweet: ['P', '#ffd93b'], dare: ['D', '#ff8a1f'], golden: ['$', '#f2b81f'], wind: ['W', '#4ad6c8'], potassium: ['K', '#ffe27a'], limes: ['L', '#9be84a'] };   // the letters of the small row shown while flying (Chimp's Navy extras only appear on the pause list)
 function extrasList() {   // everything switched on for this run, as [text, color] lines for the pause list
-  var L = [], i, u, l, t;
+  var L = [], i, u, l, t, sec = state === 'sky' || state === 'volc';   // the secret games use hearts and lime missiles, not bounces, second wind, challenges or fights
   for (i = 0; i < UPS.length; i++) {
-    u = UPS[i]; l = lvl(u.id); if (!l) continue;
+    u = UPS[i]; l = lvl(u.id); if (!l || (sec && (u.id === 'shield' || u.id === 'wind'))) continue;
     t = (XSHORT[u.id] || u.name) + (u.costs.length > 1 ? ' ' + l : '');
     if (u.id === 'shield' && state !== 'mini') t += ' (' + shield + ' left)';
     if (u.id === 'wind' && state !== 'mini') t += windUsed ? ' (used)' : ' (ready)';
@@ -5577,8 +5595,8 @@ function extrasList() {   // everything switched on for this run, as [text, colo
   }
   L.push(['Speed ' + spdPct() + '%', spdPct() === 100 ? '#cfe6ff' : '#ffd93b']);
   if (save.stats.plus > 0) L.push(['Victory bonus +' + Math.round((plusK() - 1) * 100) + '%', '#ffd93b']);
-  if (runChal) for (i = 0; i < CHAL.length; i++) if (CHAL[i][0] === runChal) L.push(['Challenge: ' + CHAL[i][1], '#ff9ac0']);
-  if (runFight) L.push(['Fight: ' + FIGHTS[runFight - 1][0], '#ff9ac0']);
+  if (runChal && !sec) for (i = 0; i < CHAL.length; i++) if (CHAL[i][0] === runChal) L.push(['Challenge: ' + CHAL[i][1], '#ff9ac0']);
+  if (runFight && !sec) L.push(['Fight: ' + FIGHTS[runFight - 1][0], '#ff9ac0']);
   return L;
 }
 function drawExtrasCard() {   // the list on the pause screens, in two columns under the buttons
@@ -5954,17 +5972,17 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { var rp0 = runPauses; onHidden(); runPauses = rp0; openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
   if (state === 'sky') { skyPointer(pl); return; }
   if (state === 'volc') { volcPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
 addEventListener('keydown', function (e) {
   if (e.key === ' ') kHeld.key = true;
-  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (state === 'volc' && !panelOpen()) { if (VOLC && (VOLC.paused || VOLC.ph === 'win' || VOLC.ph === 'lose')) volcExit(); else volcPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
+  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (state === 'volc' && !panelOpen()) { if (VOLC && (VOLC.paused || VOLC.ph === 'win' || VOLC.ph === 'lose')) volcExit(); else volcPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && !panelOpen() && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
   var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = true;
   if (state === 'mini' && e.key === 'ArrowUp') { e.preventDefault(); return; }
-  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'volc') volcPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
+  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (e.repeat) return; if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'volc') volcPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
   if ((e.key === 'c' || e.key === 'C') && contCan() && !panelOpen()) { payContinue(); return; }
   if (e.key !== ' ' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
   var ae = document.activeElement, t = ae && ae.tagName;
@@ -5974,7 +5992,7 @@ addEventListener('keydown', function (e) {
 });
 // A button that was clicked or tapped lets go of the keyboard focus, so the space bar flaps instead of pressing that same button again (a focused button swallows Space). A keyboard press (detail 0) keeps its focus.
 document.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('button') : null; if (b && e.detail > 0) b.blur(); });
-addEventListener('keyup', function (e) { if (e.key === ' ') kHeld.key = false; var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = false; });
+addEventListener('keyup', function (e) { if (e.key === ' ') kHeld.key = false; var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[String(e.key).toLowerCase()]; if (kk) keys[kk] = false; });
 document.addEventListener('contextmenu', function (e) { if (e.target === cv) e.preventDefault(); });
 
 /* ===== Game controller. In play: any face button or trigger flaps or leaps, Start pauses, the stick or d-pad steers in the water level.
@@ -6041,14 +6059,17 @@ function padStep() {
     else if (E.pz && !root) { padNavT = false; padHint(''); toReady(); }
   } else {   // ---- playing ----
     padHint('');
-    canPause = (state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused);
+    canPause = (state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused);
     if (state === 'title' && (E.l || E.r || E.u || E.d)) { c = padCands(stageEl); if (c.length) { padNavT = true; padHintAt = now; padFocus($('bCont').getClientRects().length ? $('bCont') : c[0]); } }
     else if ((E.xy || E.sel) && canPause) padOpenSet();
     else if (E.xy && contCan() && !panelOpen()) payContinue();
-    else if (E.b && pracN && ((state === 'dead' && deadT >= CFG.retryDelay) || canPause)) practiceExit();
+    else if (E.b && (pracN || (state === 'mini' && MG && MG.practice)) && ((state === 'dead' && deadT >= CFG.retryDelay) || canPause)) practiceExit();
+    else if (E.b && state === 'sky' && SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit();
+    else if (E.b && state === 'volc' && VOLC && (VOLC.paused || VOLC.ph === 'win' || VOLC.ph === 'lose')) volcExit();
+    else if (E.b && state === 'home') homeBack();
     else if (E.b && state === 'mini' && MG && MG.practice && mgCard(MG)) practiceExit();
     else if (E.act && !((D.xy || D.sel) && canPause && !D.a)) { if (state === 'play' || state === 'launch') tapRipple(mx(bx), mirY(by), tapIgnored()); onAction(); }
-    if (E.pz && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); else if (state === 'title') { padNavT = false; toReady(); } }
+    if (E.pz && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); else if (state === 'sky') skyPause(); else if (state === 'volc') volcPause(); else if (state === 'home') homeBack(); else if (state === 'title') { padNavT = false; toReady(); } }
   }
   kHeld.pad = !!D.a; padPrev = D;
 }
