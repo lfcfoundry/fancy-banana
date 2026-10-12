@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2028';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2043';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2922,7 +2922,7 @@ if (RM && RM.addEventListener) RM.addEventListener('change', function () { if (!
 
 /* ===== Costumes and upgrades ===== */
 /* ===== The Banana Museum (five quick taps on Fancy on the title screen, once the game has been beaten) ===== */
-var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.']];
+var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.'], ['boom', 'Boomerang Chimp', 'Buy the Boomerang key in the Emporium, then sail the whole Navy without losing a heart.']];
 var museN = 0, museT = -9, museW = 0;
 var TOFF = 40;   // the title picture sits this far lower: the news ticker has the top of the screen
 function museHit(pl) {
@@ -3000,7 +3000,7 @@ function buy(u) {
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
 /* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
-var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
 var EMP = [
   { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
   { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
@@ -3012,7 +3012,8 @@ var EMP = [
   { id: 'perkB', k: 'perk', g: 3, name: 'Spare bounce', desc: 'One extra free bounce for your next run.', cost: 25 },
   { id: 'perkH', k: 'perk', g: 3, name: 'Spare heart', desc: 'One extra heart in Chimp\'s Navy for your next run.', cost: 20 },
   { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 },
-  { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 }
+  { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 },
+  { id: 'keyBoom', k: 'up', g: 4, name: 'Boomerang key', desc: 'Opens a secret boss at the end of Chimp\'s Navy: Boomerang Chimp. Dodge his boomerangs and watch them swing back (all hearts needed).', cost: 300 }
 ], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks', 'Keys to secret places'];
 function empOn() { return save.stats.balClears >= CFG.empClears; }
 function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
@@ -3421,7 +3422,7 @@ function secondWind() {   // the Second wind upgrade: once per run, a crash rest
 }
 /* ===== Secrets (build 2): hidden rooms open from the second playthrough, the lost-friend hunt from the third ===== */
 var FR_NAMES = ['Pip', 'Specs', 'Wizzy', 'Dapper', 'Leafy', 'Lucky'], FR_V = [0, 1, 2, 3, 4, 0];   // the six lost friends and which look (hat, glasses...) each one wears
-var SEC_KEYS = ['balloons', 'flags', 'wafers', 'vault', 'gold', 'drawer', 'raft', 'cove', 'boss'];
+var SEC_KEYS = ['balloons', 'flags', 'wafers', 'vault', 'gold', 'drawer', 'raft', 'cove', 'boss', 'boom'];
 function secretsOn() { return save.stats.wins >= 1; }
 function runSec() { return secretsOn() && !runChal; }   // the hidden rooms stay shut during a challenge run
 /* ===== Challenges (build 3a): optional ways to play, from the first win on. Beat the last stage in one to earn its badge, and a new scarf and mask color. ===== */
@@ -4172,7 +4173,7 @@ function mgLeap() {
 function mgOver(m) { var u = m.leap / mgLeapT(); return m.leap >= 0 && u > 0.12 && u < 0.88; }   // high enough to clear things on the water
 function mgHurt() {
   var m = MG; if (m.inv > 0 || m.ph !== 'play') return;
-  if (m.boss) { if (!m.boss.end) { m.boss.end = 'fail'; m.boss.et = 0; m.inv = 1.6; burst(m.x, m.y, 22, ['#ffffff', '#7ad8ff'], 240, 260); pop('It got away!', '#ffffff', 22); } return; }   // the giant sub's round costs no heart: one hit and it simply sails off
+  if (m.boss && m.boss.kind !== 'boom') { if (!m.boss.end) { m.boss.end = 'fail'; m.boss.et = 0; m.inv = 1.6; burst(m.x, m.y, 22, ['#ffffff', '#7ad8ff'], 240, 260); pop('It got away!', '#ffffff', 22); } return; }   // the giant sub's round costs no heart: one hit and it simply sails off
   m.hearts--; runHurts++; m.inv = 1.6; burst(m.x, m.y, 30, ['#ffffff', '#bfe8ff', '#7ad8ff', '#ff6b81'], 260, 280); mgRip.push({ x: m.x, y: m.y, t: time }, { x: m.x, y: m.y, t: time + .12 });
   if (m.hearts <= 0) { m.ph = 'lose'; m.pt = 0; }
 }
@@ -4189,10 +4190,46 @@ function mgSplit(e, i, px, py) {   // a barrel group comes apart into single bar
   for (kk = 0; kk < c; kk++) mgAddEnt({ k: 'barrels', n: 1, x: e.vert ? e.x : bx0 + kk * 36 - 2, y: e.vert ? by0 + kk * 36 : e.y, vo: e.vy + (e.vert ? sp(kk) * 45 : 0) + (rng() - 0.3) * 40, vx: (e.vert ? (rng() - 0.5) * 140 : sp(kk) * 70) + (rng() - 0.5) * 40 });
   m.ents.splice(i, 1); burst(px, py, 22, ['#ffffff', '#bfe8ff', '#d19a58'], 220, 200);
 }
-function startBoss() { var m = MG; m.boss = { t: 0, fire: 0.9, drop: 2.2, x: W / 2, end: '', et: 0 }; pop('BOSS SUB!', '#ff6b81', 30); burst(W / 2, 100, 30, ['#ffffff', '#7ad8ff', '#ff6b81'], 260, 240); }
+function startBoss() { var m = MG, bm = empOwn(E.keyBoom); m.boss = { kind: bm ? 'boom' : 'sub', t: 0, fire: bm ? 1.4 : 0.9, drop: 2.2, x: W / 2, end: '', et: 0, hp: 3, st: 0, bm: [], fl: 0 }; pop(bm ? 'BOOMERANG CHIMP!' : 'BOSS SUB!', bm ? '#ffd93b' : '#ff6b81', 30); burst(W / 2, 100, 30, ['#ffffff', '#7ad8ff', '#ff6b81'], 260, 240); }
+function boomStep(m, b, dt) {   // Boomerang Chimp (the Boomerang key): each boomerang flies out to where Fancy was, swings round in a loop and comes back to the Chimp. If it did not hit Fancy, it hits him. Three hits and he is done.
+  var i, q, u, d, nx, ny, n, dx, dy, hx, hy, L, k;
+  if (b.fl > 0) b.fl -= dt;
+  if (b.end) { b.et += dt; if (b.et > (b.end === 'won' ? 1.8 : 1.0)) { m.boss = null; m.bossDone = true; } return; }
+  if (b.st > 0) b.st -= dt; else b.fire -= dt;
+  if (b.fire <= 0 && b.bm.length < (b.hp <= 1 ? 2 : 1)) {
+    b.fire = b.hp <= 1 ? 1.5 : 2.0; hx = b.x; hy = 92; dx = m.x - hx; dy = m.y - hy; L = Math.sqrt(dx * dx + dy * dy) || 1;
+    b.bm.push({ ax: m.x, ay: m.y, t: 0, dur: 2.3 - 0.25 * (3 - b.hp), w: Math.min(80, L * 0.3), hit: 0, x: hx, y: hy }); burst(hx, hy, 8, ['#c98a3c', '#ffffff'], 110, 100);
+  }
+  for (i = b.bm.length - 1; i >= 0; i--) {
+    q = b.bm[i]; q.t += dt; u = Math.min(1, q.t / q.dur); hx = b.x; hy = 92; dx = q.ax - hx; dy = q.ay - hy; L = Math.sqrt(dx * dx + dy * dy) || 1; nx = -dy / L; ny = dx / L; d = (1 - Math.cos(6.2832 * u)) / 2;
+    q.x = hx + dx * d + nx * q.w * Math.sin(6.2832 * u); q.y = hy + dy * d + ny * q.w * Math.sin(6.2832 * u);
+    if (!calmOn() && frng() < 0.7) fxAdd(q.x, q.y, (frng() - 0.5) * 30, (frng() - 0.5) * 30, 0.3, '#fff2a0', 2 + frng() * 2, false, 0);
+    dx = m.x - q.x; dy = m.y - q.y;
+    if (m.ph === 'play' && m.inv <= 0 && !mgOver(m) && dx * dx + dy * dy < (CFG.mgHitR + 12) * (CFG.mgHitR + 12)) { burst(q.x, q.y, 14, ['#c98a3c', '#ffffff', '#7ad8ff'], 200, 200); mgHurt(); b.bm.splice(i, 1); continue; }
+    if (u >= 1) {
+      b.bm.splice(i, 1); b.hp--; b.fl = 0.5; b.st = 0.9; burst(b.x, 92, 26, ['#ffd93b', '#ffffff', '#c98a3c'], 260, 220);
+      if (b.hp <= 0) { b.end = 'won'; b.et = 0; m.bonus += 20; pop('BOOMERANG CHIMP BEATEN! +20', '#ffd93b', 22); burst(b.x, 100, 44, ['#ffd93b', '#ffffff', '#ff6b81', '#7ad8ff'], 320, 280); secretFound('boom', 'Secret found: Boomerang Chimp! A medal is on the wall in Fancy\'s Place.'); b.bm.length = 0; }
+      else pop('OUCH! ' + b.hp + ' to go', '#ffd93b', 22);
+    }
+  }
+}
+function drawBoomerang(x, y, sc, a) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.scale(sc, sc); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-17, 6); ctx.quadraticCurveTo(-4, -2, 0, -15); ctx.quadraticCurveTo(4, -2, 17, 6); ctx.quadraticCurveTo(2, 3, 0, -6); ctx.quadraticCurveTo(-2, 3, -17, 6); ctx.closePath();
+  ctx.fillStyle = '#d99a48'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke(); ctx.fillStyle = '#e8453c'; ctx.beginPath(); ctx.arc(-11, 4.4, 2, 0, 6.2832); ctx.arc(11, 4.4, 2, 0, 6.2832); ctx.fill(); ctx.restore();
+}
+function boomDraw(b) {   // Boomerang Chimp on his raft, with a red bandana, three boomerang lives, and the boomerangs in flight
+  var y = 96 + Math.sin(time * 2) * 3, a = b.end === 'won' ? clamp(1 - b.et / 1.8, 0, 1) : 1, i, q, sh = b.fl > 0 && Math.floor(time * 24) % 2 ? 4 : 0;
+  ctx.globalAlpha = a; mgRaft(b.x + sh, y + 26 + (b.end ? b.et * 30 : 0)); ART.chimp(ctx, b.x + sh, y - 14 + (b.end ? b.et * 30 : 0), 0.42, 1, time);
+  ctx.fillStyle = '#e8453c'; ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(b.x - 13 + sh, y - 26); ctx.lineTo(b.x + 13 + sh, y - 26); ctx.lineTo(b.x + 13 + sh, y - 20); ctx.lineTo(b.x - 13 + sh, y - 20); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(b.x + 13 + sh, y - 23); ctx.lineTo(b.x + 22 + sh, y - 28); ctx.lineTo(b.x + 20 + sh, y - 18); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (!b.end) { for (i = 0; i < 3; i++) { ctx.globalAlpha = i < b.hp ? 1 : 0.25; drawBoomerang(130 + i * 50, 22, 0.8, -0.3); } ctx.globalAlpha = 1; }
+  for (i = 0; i < b.bm.length; i++) { q = b.bm[i]; ctx.fillStyle = 'rgba(0,30,60,.2)'; ctx.beginPath(); ctx.ellipse(q.x + 8, q.y + 16, 14, 5, 0, 0, 6.2832); ctx.fill(); drawBoomerang(q.x, q.y, 1.1, time * 16); }
+}
 function bossStep(dt) {
   var m = MG, b = m.boss, a, sw = 175, n = 0, i;
   b.t += dt; m.off += dt; b.x = W / 2 + Math.sin(b.t * 0.9) * 90;
+  if (b.kind === 'boom') { boomStep(m, b, dt); return; }
   if (b.end) { b.et += dt; if (b.et > (b.end === 'won' ? 1.5 : 1.0)) { m.boss = null; m.bossDone = true; } return; }
   b.fire -= dt;
   if (b.fire <= 0) {
@@ -4429,6 +4466,7 @@ function mgRaft(x, y) {   // the treasure raft: planks, a chest and a glint
   ctx.fillStyle = '#fffbe0'; var g = Math.sin(time * 6) * 8; ctx.fillRect(g - 1, -36, 2, 10); ctx.fillRect(g - 5, -32, 10, 2); ctx.restore();
 }
 function mgBoss(b) {   // Prince Chimp's giant submarine, up at the top of the sea
+  if (b.kind === 'boom') { boomDraw(b); return; }
   var y = 84 + Math.sin(time * 2) * 3, a = b.end === 'won' ? clamp(1 - b.et / 1.5, 0, 1) : b.end === 'fail' ? clamp(1 - b.et / 1.0, 0, 1) : 1;
   ctx.save(); ctx.globalAlpha = a; ctx.translate(b.x, y + (b.end ? b.et * 30 : 0)); ctx.scale(1.9, 1.9); ART.mg.draw(ctx, 'sub', 0, 0); ctx.restore(); ctx.globalAlpha = a;
   ART.chimp(ctx, b.x, y - 40, 0.42, 1, time); ctx.globalAlpha = 1;
@@ -4773,7 +4811,7 @@ function homeTap(pl) {
 }
 function homeUps() {
   var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
-  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 });
   return o;
 }
 function homeCos() {
@@ -4787,6 +4825,7 @@ function homePrizes() {
   o.push({ n: 'Balloons', own: !!save.unlocks.balloons, yes: 'Prince Chimp\'s gift for losing to Fancy.', how: 'beat Prince Chimp once.' });
   o.push({ n: 'Pennant flags', own: !!save.unlocks.flags, yes: 'they came with the balloons.', how: 'beat Prince Chimp once.' });
   o.push({ n: 'Banana Bunch', own: bunchOk(), yes: 'all six lost friends found.', how: 'find all six lost friends.' });
+  o.push({ n: 'Boomerang medal', own: !!save.unlocks.boom, yes: 'won from Boomerang Chimp.', how: 'beat Boomerang Chimp at the end of Chimp\'s Navy (needs the Boomerang key and all your hearts).' });
   return o;
 }
 function homeBuild() {
@@ -4824,16 +4863,17 @@ function homeBuild() {
   }
   // the prize shelf
   T('PRIZES', 180, 310, 11, '#7a4a26'); a = homePrizes();
-  for (i = 0; i < 8; i++) {
-    x = 38 + i * 41; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
+  for (i = 0; i < 9; i++) {
+    x = 31 + i * 37.5; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
     if (i < 4) {
       g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#e8453c'; g.beginPath(); g.moveTo(x - 7, y - 14); g.lineTo(x - 3, y + 2); g.lineTo(x - 11, y + 2); g.closePath(); g.fill(); g.fillStyle = '#4fb8ff'; g.beginPath(); g.moveTo(x + 7, y - 14); g.lineTo(x + 11, y + 2); g.lineTo(x + 3, y + 2); g.closePath(); g.fill();
       g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 5, 11, 0, 6.2832); g.fill(); g.stroke(); T(String(i + 1), x, y + 5.5, 12, INK);
-    } else if (i === 4) { drawPieces(g, x, y + 2, 0.5); }
+    } else if (i === 4) { drawPieces(g, x, y + 2, 0.42); }
     else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
     else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
-    else { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
-    g.restore(); z.push([x - 19, 306, 38, 36, 'prize', i]);
+    else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
+    else { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.translate(x, y + 5); g.scale(0.42, 0.42); g.beginPath(); g.moveTo(-17, 6); g.quadraticCurveTo(-4, -2, 0, -15); g.quadraticCurveTo(4, -2, 17, 6); g.quadraticCurveTo(2, 3, 0, -6); g.quadraticCurveTo(-2, 3, -17, 6); g.closePath(); g.fillStyle = '#d99a48'; g.fill(); g.lineWidth = 3.4; g.stroke(); }
+    g.restore(); z.push([x - 18, 306, 36, 36, 'prize', i]);
   }
   g.fillStyle = '#8a5a33'; g.fillRect(12, 344, 336, 7); g.fillStyle = '#6a4222'; g.fillRect(12, 351, 336, 2);
   // the Apple Press arcade machine
