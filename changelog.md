@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.12.1017 (beta):** The "x perfect" streak label no longer overprints the stage progress text.
 - **2026.10.12.0618 (beta):** **Second bug hunt, this time in the drawing code.** Fixed: an obstacle could show another stage's art after a quick retry; the Gorilla Guard arena could go missing after a screen resize; the gorilla's open hand had a wrong shine; cool shades flickered off on every blink; text overlapped on the victory card and the balloon result card; the Cloud and Volcano result buttons hung off their card; settings changes (large buttons, left-handed, Calm) now show at once on a paused screen; the water-level wake no longer pops in at the top of a leap; the controller hint no longer covers the pause list. **Pay to continue** now counts as one attempt in your lifetime stats.
 - **2026.10.12.0151 (beta):** **A big bug hunt.** Three code reviews and about half a million random taps, keys, purchases and stage jumps in two browsers found and fixed these:
   - Spending: bananas bought with coins came back after a reload, and "Start brand new" was undone by one. Fixed, and a damaged save can no longer hand out credits or levels.

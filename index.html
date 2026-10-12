@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.12.0618';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.12.1017';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -5921,7 +5921,7 @@ function render() {
       var lh = opt('lefty'), hx = function (x) { return lh ? W - x : x; }, ha = lh ? 'right' : 'left';   // left-handed: the counters move to the right so the pause button can sit at the left
       ART.coin(ctx, hx(24), 26, time); outlinedC(String(runCoins), hx(42), 27, 22, '#ffffff', ha);
       drawTapIcon(hx(24), 58); outlinedC(String(runFlaps), hx(42), 59, 20, '#ffffff', ha);   // taps this run
-      if (streak >= 2) outlinedC('x' + streak + ' perfect', hx(14), 86, 16, '#ffd93b', ha);
+      if (streak >= 2) outlinedC('x' + streak + ' perfect', hx(14), 79, 14, '#ffd93b', ha);   // sits in the gap between the tap counter and the progress line (it used to overprint the line's text)
     }
     if (state === 'play' || state === 'paused') { drawPauseBtn(PB, .5); drawClock(PB[0]); ctx.save(); ctx.translate(0, -HUDUP); if (BAL) drawBalHud(); else if (FT && FT.ph !== 'wait') drawFtHud(); else drawProgress(); if (state === 'play') drawExtrasRow(); ctx.restore(); if (state === 'play') drawKHint(); }   // the pause button, and how far along the stage is
     lap('hud');
