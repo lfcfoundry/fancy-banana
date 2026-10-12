@@ -127,7 +127,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
 <div id="bar">
 <div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
-<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bUp" class="alt sm">Upgrades</button></div>
+<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bSky" class="alt sm" hidden>Clouds</button><button id="bUp" class="alt sm">Upgrades</button></div>
 </div>
 <div id="bar2" hidden></div>
 <button id="bCont" hidden>Continue</button>
@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2059';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2141';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2909,7 +2909,7 @@ function refreshSet() {
   $('bFull').hidden = !(document.fullscreenEnabled && document.documentElement.requestFullscreen);
   $('bFull').textContent = document.fullscreenElement ? 'Leave full screen' : 'Full screen';
 }
-function speedLocked() { return state === 'play' || state === 'paused' || state === 'launch' || state === 'mini'; }
+function speedLocked() { return state === 'play' || state === 'paused' || state === 'launch' || state === 'mini' || state === 'sky'; }
 $('sSpeed').addEventListener('click', function () { if (speedLocked()) return; var i = SPEEDS.indexOf(spdPct()); save.opts.spd = SPEEDS[(i + 1) % SPEEDS.length]; delete save.opts.relaxed; persist(); refreshSet(); if (state === 'ready') resetWorld(); });
 TGS.forEach(function (t) { $(t[0]).addEventListener('click', function () { tgSet(t[1], !tgOn(t[1])); persist(); syncOpts(); refreshSet(); }); });
 $('bSet').addEventListener('click', function () { openPanel(pSet); });
@@ -2922,7 +2922,7 @@ if (RM && RM.addEventListener) RM.addEventListener('change', function () { if (!
 
 /* ===== Costumes and upgrades ===== */
 /* ===== The Banana Museum (five quick taps on Fancy on the title screen, once the game has been beaten) ===== */
-var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.'], ['boom', 'Boomerang Chimp', 'Buy the Boomerang key in the Emporium, then sail the whole Navy without losing a heart.']];
+var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.'], ['boom', 'Boomerang Chimp', 'Buy the Boomerang key in the Emporium, then sail the whole Navy without losing a heart.'], ['sky', 'Chimp Airforce', 'Buy the Cloud key in the Emporium, then fly through the clouds to the volcano.']];
 var museN = 0, museT = -9, museW = 0;
 var TOFF = 40;   // the title picture sits this far lower: the news ticker has the top of the screen
 function museHit(pl) {
@@ -2978,7 +2978,7 @@ function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet') + (empOwn(E.meg
 function nextCost(u) { var l = lvl(u.id); return l < u.costs.length ? u.costs[l] : 0; }
 function canBuy(u) { var c = nextCost(u); return c > 0 && bal() >= c; }
 function anyBuy() { return UPS.some(canBuy); }
-function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
+function syncUp() { $('bCont').hidden = !(save.cont.st > 1) || state !== 'title'; $('bCont').textContent = 'Continue: stage ' + (save.cont.st || 0); $('bUp').hidden = !anyBuy(); $('bPractice').hidden = lvl('practice') < 1 || state !== 'title'; $('bEmp').hidden = !empOn() || state !== 'title'; $('bSky').hidden = !skyOn() || state !== 'title'; $('bChal').hidden = !secretsOn() || state !== 'title'; applyColors(); }
 function lvl(id) { return save.boosts[id] || 0; }
 function bal() { return save.stats.friends + save.stats.coins - (save.boosts.spent || 0); }
 function refreshUp() {
@@ -3000,7 +3000,7 @@ function buy(u) {
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
 /* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
-var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11, superK: 12 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11, superK: 12, keySky: 13 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
 var EMP = [
   { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
   { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
@@ -3014,7 +3014,8 @@ var EMP = [
   { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 },
   { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 },
   { id: 'keyBoom', k: 'up', g: 4, name: 'Boomerang key', desc: 'Opens a secret boss at the end of Chimp\'s Navy: Boomerang Chimp. Dodge his boomerangs and watch them swing back (all hearts needed).', cost: 300 },
-  { id: 'superK', k: 'up', g: 1, need: 'potassium', name: 'Super Potassium', desc: 'Needs Potassium Power. Hold the tap for half a second away from a gate lane: Fancy blasts forward for a few seconds and smashes everything he touches without a scratch. Once per stage.', cost: 250 }
+  { id: 'superK', k: 'up', g: 1, need: 'potassium', name: 'Super Potassium', desc: 'Needs Potassium Power. Hold the tap for half a second away from a gate lane: Fancy blasts forward for a few seconds and smashes everything he touches without a scratch. Once per stage.', cost: 250 },
+  { id: 'keySky', k: 'up', g: 4, name: 'Cloud key', desc: 'Opens a secret game on the title screen: the Chimp Airforce. Fly through the clouds, dodge the Chimp biplanes and their bomber, and reach the volcano.', cost: 300 }
 ], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks', 'Keys to secret places'];
 function empOn() { return save.stats.balClears >= CFG.empClears; }
 function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
@@ -3075,6 +3076,7 @@ $('bUp').addEventListener('click', function () { openPanel(pUp); });
 $('bEmp').addEventListener('click', function () { if (state === 'title') openPanel(pEmp); });
 $('bCont').addEventListener('click', continueRun);
 $('bPractice').addEventListener('click', function () { if (state === 'title') openPanel(pPrac); });
+$('bSky').addEventListener('click', function () { if (state === 'title' && skyOn()) startSky(); });
 $('pracClose').addEventListener('click', closePanels);
 /* Practice: the water level, or any stage that has been cleared (the same 40-credit upgrade). Nothing is earned and nothing is saved. */
 var pracN = 0, pracEnd = '';   // pracN: the stage being practiced (0 = a normal run); pracEnd: how a practice run ended ('win' or 'lose')
@@ -3434,6 +3436,7 @@ function onAction() {
   else if (state === 'play') { if (rsgStartTap()) return; if (tapIgnored()) tapBufT = time; if (spinT <= 0 && !rsgHold()) flap(); }   // a tap that cannot flap yet is remembered for a moment
   else if (state === 'paused') { if (resT >= 0) tapBufT = time; else beginResume(); }
   else if (state === 'mini') miniTap();
+  else if (state === 'sky') skyTap();
   else if (state === 'gift') giftTap();
   else if (state === 'victory') victoryTap();
 }
@@ -3974,7 +3977,7 @@ function stageUp() {
   persist();
 }
 function onHidden() {
-  resT = -1; if (state === 'mini') mgPause(true);
+  resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true);
   if (state === 'play') { state = 'paused'; runPauses++; noteBest(); }
   persist();
 }
@@ -4117,6 +4120,8 @@ function update(dt) {
     if (resT >= 0) { resT -= dt; if (resT < 0) { resT = -2; resume(); if (time - tapBufT <= 0.12) flap(); } }   // 3 - 2 - 1, then play carries on
   } else if (state === 'mini') {
     updateMini(dt);
+  } else if (state === 'sky' && SKY) {
+    skyUpdate(dt);
   } else if (state === 'gift') {
     giftUpdate(dt);
   } else if (state === 'home' && HOME) {
@@ -4786,6 +4791,180 @@ function drawEmpDoor(cx, by0) {   // the Emporium door on the Balloon Party card
   ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(x + w - 7, y + 33, 2.6, 0, 6.2832); ctx.fill(); ctx.restore();
 }
 /* ===== Fancy's Place: the home base (a door on the title screen, once the Emporium is open). A room drawn once into a picture; Fancy wanders on the floor; tap things on the wall to read about them ===== */
+/* ===== Chimp Airforce (the Cloud key): a secret flying game. Same one-tap flap as the main game, but in open sky: Chimp biplanes cross from the right, cloud banks hide some of them, Lime defense shoots the ones that would hit (and coconuts), a bomber fires coconuts near the end, then the volcano rises. Three hearts, about a minute. Win: +25 bananas, the Cloud medal on the wall in Fancy's Place. ===== */
+var SKY = null, SKY_SECS = 62, SKY_X = 96, SKY_V = 190, SKY_BOSS = 38, SKY_BA = [70, 330, 220, 46], SKY_BT = [70, 388, 220, 46];
+function skyOn() { return empOwn(E.keySky); }
+function skyPlan() {
+  var p = [], t = 2.6, pr, gap, x, y, vx, r, c = 0;
+  function pl(tt, yy, o) { o = o || {}; o.t = tt; o.k = 'plane'; o.y = yy; o.vx = o.vx || -(205 + rng() * 30 + 55 * pr); p.push(o); }
+  while (t < SKY_BOSS - 1.5) {
+    pr = clamp((t - 2.6) / (SKY_BOSS - 4), 0, 1); r = rng(); y = 90 + rng() * 460;
+    if (r < 0.2 + 0.1 * pr && pr > 0.25) { y = 110 + rng() * 270; vx = -(195 + 40 * pr); pl(t, y, { vx: vx, col: c++ % 3 }); pl(t, y + 150, { vx: vx, col: c++ % 3 }); }   // a pair with a gap to fly through
+    else if (r < 0.45 && pr > 0.15) pl(t, 130 + rng() * 360, { mode: 1, amp: 36 + rng() * 26, ph: rng() * 6.28, col: c++ % 3 });   // a weaver
+    else if (r < 0.62 && pr > 0.45) pl(t, 70 + rng() * 120, { mode: 2, vx: -(190 + 30 * pr), col: c++ % 3 });   // a diver, aimed at where Fancy is when it appears
+    else pl(t, y, { col: c++ % 3 });
+    gap = 1.5 - 0.45 * pr + rng() * 0.45; t += gap;
+  }
+  for (t = 5; t < SKY_BOSS - 3; t += 5.5 + rng() * 2) {   // cloud banks drift in; from a little way in, a plane flies through the middle of some
+    y = 120 + rng() * 380; r = { t: t, k: 'cloud', y: y, w: 130 + rng() * 60, h: 76 + rng() * 30, seed: rng() * 100 };
+    p.push(r); if (t > 10 && rng() < 0.65) { pr = clamp((t - 2.6) / (SKY_BOSS - 4), 0, 1); pl(t + 1.7, y + (rng() - 0.5) * 34, { vx: -(185 + 25 * pr), col: c++ % 3 }); }
+  }
+  p.sort(function (a, b) { return a.t - b.t; }); return p;
+}
+function startSky() {
+  flipV = 0; state = 'sky'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; MG = null; pracN = 0;
+  var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH, i, bg = [];
+  for (i = 0; i < 9; i++) bg.push({ x: frng() * 460, y: 60 + frng() * 480, r: 14 + frng() * 22, s: 0.2 + frng() * 0.25 });
+  SKY = { ph: 'ready', t: 0, pt: 0, y: 300, vy: 0, fa: 0, rot: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: skyPlan(), pi: 0, lm: lvl('limes') * 2, lt: 0, limes: [], boss: null, bossDone: false, paused: false, spd: relaxK() * plusK(), sc: 0, say: '', sayT: 0, bg: bg, won: 0, hits: 0, shot: 0 };
+}
+function skyExit() { SKY = null; pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
+function skyPause(on) { var m = SKY; if (m && (m.ph === 'play' || m.ph === 'ready')) { m.paused = on === undefined ? !m.paused : on; if (m.paused) { persist(); } } }
+function skySay(m, t) { m.say = t; m.sayT = 1.6; }
+function skyAdd(m, q) {
+  var e = { k: q.k, x: q.x === undefined ? W + 50 : q.x, y: q.y, vx: q.vx || 0, vy: q.vy || 0, w: q.w || 56, h: q.h || 22, mode: q.mode || 0, amp: q.amp || 0, ph: q.ph || 0, y0: q.y, col: q.col || 0, seed: q.seed || 0, dead: false, t: 0 };
+  if (e.mode === 1) e.y = e.y0 + e.amp * Math.sin(e.ph);
+  if (e.mode === 2) { var tt = Math.max(0.5, (e.x - SKY_X) / -e.vx); e.vy = clamp((m.y - e.y) / tt, -250, 250); }
+  m.ents.push(e); return e;
+}
+function skyHurt(m) {
+  if (m.inv > 0 || m.ph !== 'play') return;
+  m.hearts--; m.hits++; m.inv = 1.5; m.vy = -220; burst(SKY_X, m.y, 16, ['#ffffff', '#ffd93b', '#ff6b81'], 220, 240);
+  if (m.hearts <= 0) { m.ph = 'lose'; m.pt = 0; m.vy = -260; }
+}
+function skyUpdate(dt) {
+  var m = SKY, i, e, b, tt, a, v;
+  if (!m || m.paused) return;
+  m.pt += dt; if (m.fa > 0) m.fa -= dt; if (m.sayT > 0) m.sayT -= dt;
+  if (m.ph === 'ready') { m.y = 300 + Math.sin(time * 3) * 8; m.rot = Math.sin(time * 3) * 0.05; return; }
+  if (m.ph === 'win') {   // the volcano is here: coast, with fireworks
+    m.sc += SKY_V * m.spd * dt * 0.4; m.y += (250 - m.y) * Math.min(1, dt * 2); m.rot = -0.12;
+    if (frng() < 0.3) burst(40 + frng() * 280, 120 + frng() * 200, 6, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 160, 220);
+    return;
+  }
+  if (m.ph === 'lose') { m.vy = Math.min(CFG.maxFall, m.vy + CFG.gravity * dt); m.y = Math.min(760, m.y + m.vy * dt); m.rot += dt * 9; if (m.ents.length) m.ents.length = 0; return; }
+  m.t += dt; m.sc += SKY_V * m.spd * dt; if (m.inv > 0) m.inv -= dt; if (m.lt > 0) m.lt -= dt;
+  m.vy = Math.min(CFG.maxFall, m.vy + CFG.gravity * (1 - 0.06 * lvl('gentle')) * dt); m.y += m.vy * dt;
+  if (m.y < 36) { m.y = 36; if (m.vy < 0) m.vy = 0; } if (m.y > 590) { m.y = 590; m.vy = 0; }   // the roof and the sea of clouds below are soft: no harm
+  m.rot = clamp(m.vy / 900, -0.35, 0.5);
+  while (m.pi < m.plan.length && m.plan[m.pi].t <= m.t) { v = m.plan[m.pi++]; if (v.k === 'cloud') skyAdd(m, { k: 'cloud', y: v.y, vx: -80 * m.spd, w: v.w, h: v.h, seed: v.seed, x: W + v.w / 2 + 10 }); else skyAdd(m, { k: 'plane', y: v.y, vx: v.vx * m.spd, mode: v.mode, amp: v.amp, ph: v.ph, col: v.col }); }
+  if (!m.boss && !m.bossDone && m.t >= SKY_BOSS) { m.boss = { t: 0, x: W + 140, y: 270, fire: 1.4, n: 0 }; skySay(m, 'BOMBER!'); }
+  if (m.boss) {
+    b = m.boss; b.t += dt; b.x += ((b.t < 11.2 ? 284 : W + 150) - b.x) * Math.min(1, dt * 2.2); b.y = 280 + 150 * Math.sin(b.t * 0.95); b.fire -= dt;
+    if (b.t > 1 && b.t < 11 && b.fire <= 0 && m.ph === 'play') {
+      b.fire = 1.45 - 0.25 * Math.min(1, b.t / 10); a = Math.atan2(m.y - (b.y + 10), SKY_X - (b.x - 70)); b.n++;
+      for (i = b.n % 4 === 0 ? -1 : 0; i <= (b.n % 4 === 0 ? 1 : 0); i++) skyAdd(m, { k: 'coco', x: b.x - 70, y: b.y + 10, vx: Math.cos(a + i * 0.3) * 195 * m.spd, vy: Math.sin(a + i * 0.3) * 195 * m.spd, w: 18, h: 18 });
+    }
+    if (b.t > 13.5) { m.boss = null; m.bossDone = true; }
+  }
+  for (i = m.ents.length - 1; i >= 0; i--) {
+    e = m.ents[i]; e.t += dt; if (e.mode === 1) e.vy = e.amp * 2.6 * Math.cos(e.ph + e.t * 2.6);
+    e.x += e.vx * dt; e.y += e.vy * dt;
+    if (e.dead || e.x < -150 || e.x > W + 260 || e.y < -80 || e.y > H + 80) { m.ents.splice(i, 1); continue; }
+    if (e.k === 'plane' && circleRect(SKY_X, m.y, 11, e.x - e.w / 2 + 3, e.y - e.h / 2 + 3, e.w - 6, e.h - 6)) { skyHurt(m); if (m.inv > 1.4) { e.dead = true; burst(e.x, e.y, 18, ['#ff9a3c', '#ffd93b', '#5a5a66'], 200, 220); } }
+    else if (e.k === 'coco' && (e.x - SKY_X) * (e.x - SKY_X) + (e.y - m.y) * (e.y - m.y) < 19 * 19) { skyHurt(m); if (m.inv > 1.4) { e.dead = true; burst(e.x, e.y, 14, ['#8a5a33', '#ffd93b', '#ffffff'], 200, 220); } }
+  }
+  if (m.lm > 0 && m.lt <= 0 && m.ph === 'play') {   // Lime defense: something that would hit Fancy in the next half second gets a rocket lime
+    for (i = 0; i < m.ents.length; i++) {
+      e = m.ents[i]; if (e.dead || e.tg || e.k === 'cloud' || e.x < SKY_X + 70 || e.x > W - 2) continue;
+      tt = (e.x - SKY_X) / Math.max(60, -e.vx); if (tt < 0.1 || tt > 0.6) continue;
+      if (Math.abs(e.y + e.vy * tt - m.y) < (e.k === 'coco' ? 24 : 32)) { e.tg = true; m.lm--; m.lt = 0.4; m.limes.push({ x: SKY_X + 14, y: m.y, e: e, a: 0 }); skySay(m, 'LIME!'); break; }
+    }
+  }
+  for (i = m.limes.length - 1; i >= 0; i--) {
+    v = m.limes[i]; e = v.e; if (e.dead && v.dead !== 1) { m.limes.splice(i, 1); continue; }
+    a = Math.atan2(e.y - v.y, e.x - v.x); v.a = a; v.x += Math.cos(a) * 560 * dt; v.y += Math.sin(a) * 560 * dt;
+    if ((e.x - v.x) * (e.x - v.x) + (e.y - v.y) * (e.y - v.y) < 22 * 22) { e.dead = true; m.shot++; burst(e.x, e.y, 24, ['#7ccc2e', '#ffd93b', '#ffffff', '#ff9a3c'], 260, 240); m.limes.splice(i, 1); }
+  }
+  if (m.t >= SKY_SECS) { m.ph = 'win'; m.pt = 0; m.won = 25; save.stats.friends += 25; persist(); burst(W / 2, m.y, 40, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 380); secretFound('sky', 'Secret found: the Chimp Airforce! A medal is on the wall in Fancy\'s Place.'); }
+}
+function skyTap() {
+  var m = SKY; if (!m) return;
+  if (m.paused) { m.paused = false; return; }
+  if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { startSky(); return; }
+  if (m.ph === 'ready') { m.ph = 'play'; m.pt = 0; }
+  if (m.ph === 'play') { m.vy = CFG.flapV; m.fa = 0.18; if (empWorn(E.confetti)) burst(SKY_X - 10, m.y + 8, 7, ['#ff6b81', '#ffd93b', '#7ad8ff', '#8ae28a', '#c9a0ff'], 150, 220); }
+}
+function skyPointer(pl) {
+  var m = SKY; if (!m) return;
+  if (m.paused) { if (mgIn(pl, MG_BT)) { skyExit(); return; } m.paused = false; return; }
+  if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { skyExit(); return; } if (mgIn(pl, SKY_BA)) { startSky(); return; } return; }
+  if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { skyPause(true); return; }
+  skyTap();
+}
+function skyPlane(x, y, col, ghost) {   // a little red, blue or yellow biplane flying left, a chimp in the cockpit and a spinning propeller
+  var c = ['#d8453b', '#3f8fd8', '#e8b22a'][col % 3];
+  ctx.save(); ctx.translate(x, y); ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  ctx.fillStyle = mixc(c, '#2b1a2e', 0.25); ctx.beginPath(); ctx.moveTo(18, -2); ctx.lineTo(32, -14); ctx.lineTo(32, -4); ctx.lineTo(24, 4); ctx.closePath(); ctx.fill(); ctx.stroke();   // tail fin
+  ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(0, 1, 30, 9, 0, 0, 6.2832); ctx.fill(); ctx.stroke();   // body
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.ellipse(-4, -2, 16, 3, 0, 0, 6.2832); ctx.fill();
+  ART.chimp(ctx, -2, -9, 0.2, 0);   // the pilot
+  ctx.fillStyle = mixc(c, '#ffffff', 0.18); rrect(-16, -15, 32, 5, 2); ctx.fill(); ctx.stroke(); rrect(-14, 6, 28, 5, 2); ctx.fill(); ctx.stroke();   // two wings
+  ctx.beginPath(); ctx.moveTo(-8, -10); ctx.lineTo(-8, 6); ctx.moveTo(8, -10); ctx.lineTo(8, 6); ctx.stroke();
+  ctx.fillStyle = 'rgba(40,40,60,.45)'; ctx.beginPath(); ctx.ellipse(-32, 1, 3, 12, 0, 0, 6.2832); ctx.fill();   // the propeller blur
+  ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(10, 1, 3.4, 0, 6.2832); ctx.fill(); ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.restore();
+}
+function skyBomber(x, y, t) {   // the big grey chimp bomber with four propellers
+  ctx.save(); ctx.translate(x, y); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.lineJoin = 'round';
+  ctx.fillStyle = '#6f7d92'; ctx.beginPath(); ctx.moveTo(40, -4); ctx.lineTo(74, -28); ctx.lineTo(74, -6); ctx.lineTo(54, 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#8f9db3'; ctx.beginPath(); ctx.ellipse(0, 4, 66, 20, 0, 0, 6.2832); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7a889e'; ctx.beginPath(); ctx.moveTo(-20, 0); ctx.lineTo(30, -8); ctx.lineTo(44, 36); ctx.lineTo(0, 30); ctx.closePath(); ctx.fill(); ctx.stroke();   // wing
+  ctx.fillStyle = '#c9e8ff'; ctx.beginPath(); ctx.ellipse(-44, -2, 15, 10, 0, 0, 6.2832); ctx.fill(); ctx.stroke(); ART.chimp(ctx, -44, 4, 0.34, 0);
+  ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(14, 2, 6, 0, 6.2832); ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(40,40,60,.4)'; for (var i = 0; i < 2; i++) { ctx.beginPath(); ctx.ellipse(-30 + i * 34, 26 + i * 4 + 2, 4, 15 + Math.sin(t * 40 + i) * 1.5, 0, 0, 6.2832); ctx.fill(); }
+  ctx.restore();
+}
+function skyCloud(e, a) {   // a bank of cloud: one soft white shape (planes inside show through a little)
+  var s = e.seed, w = e.w, h = e.h, i, cx, cy, r;
+  ctx.save(); ctx.translate(e.x, e.y);
+  for (var pass = 0; pass < 2; pass++) {
+    ctx.fillStyle = pass ? 'rgba(255,255,255,' + a + ')' : 'rgba(176,196,226,' + a + ')'; ctx.beginPath();
+    for (i = 0; i < 6; i++) { cx = (i / 5 - 0.5) * (w - h * 0.6) + Math.sin(s + i * 2.1) * 6; cy = Math.sin(s * 1.7 + i * 1.3) * h * 0.14 + (pass ? 0 : 7); r = h * (0.34 + 0.12 * Math.abs(Math.sin(s + i * 1.9))); ctx.moveTo(cx + r, cy); ctx.arc(cx, cy, r, 0, 6.2832); }
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function skyHeart(x, y, on) { ctx.save(); ctx.translate(x, y); ctx.lineWidth = 2.4; ctx.strokeStyle = '#ffffff'; ctx.fillStyle = on ? '#ff4a5a' : 'rgba(60,50,80,.55)'; ctx.beginPath(); ctx.moveTo(0, 9); ctx.bezierCurveTo(-16, -2, -9, -14, 0, -6); ctx.bezierCurveTo(9, -14, 16, -2, 0, 9); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+function skyVolcano(x) {   // the island's volcano: a dark cone with a glowing crater and a plume
+  var g = ctx.createLinearGradient(0, 300, 0, 640);
+  ctx.save(); ctx.translate(x, 0); g.addColorStop(0, '#6a4a52'); g.addColorStop(1, '#3a2a36');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-230, 640); ctx.lineTo(-48, 318); ctx.quadraticCurveTo(0, 304, 48, 318); ctx.lineTo(230, 640); ctx.closePath(); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.fillStyle = '#ff7a2a'; ctx.beginPath(); ctx.ellipse(0, 318, 46, 11, 0, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.ellipse(0, 319, 30, 6, 0, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = '#ff7a2a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-30, 330); ctx.quadraticCurveTo(-60, 440, -90, 640); ctx.moveTo(26, 330); ctx.quadraticCurveTo(50, 450, 70, 640); ctx.stroke();   // lava runs
+  ctx.fillStyle = 'rgba(90,80,96,.75)'; for (var i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(Math.sin(time * 0.8 + i) * 12 + i * 4, 290 - i * 34, 20 + i * 7, 0, 6.2832); ctx.fill(); }
+  ctx.restore();
+}
+function renderSky() {
+  var m = SKY, i, e, a = m.ph === 'play' && !m.paused ? acc : 0, vx = SKY_V * m.spd, lh = opt('lefty'), hx = function (x) { return lh ? W - x : x; }, g, b, yy;
+  if (a) { m.y += m.vy * a; m.sc += vx * a; m.t += a; for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; e.x += e.vx * a; e.y += e.vy * a; } }
+  g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#4fa8e8'); g.addColorStop(0.6, '#9fd6f5'); g.addColorStop(1, '#e6f4ff'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.arc(280, 110, 44, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#fff6c2'; ctx.beginPath(); ctx.arc(280, 110, 26, 0, 6.2832); ctx.fill();
+  for (i = 0; i < m.bg.length; i++) { b = m.bg[i]; yy = b.y; var bx = ((b.x - m.sc * b.s) % 460 + 460) % 460 - 50; ctx.fillStyle = 'rgba(255,255,255,' + (0.35 + b.s * 0.6) + ')'; ctx.beginPath(); ctx.arc(bx, yy, b.r, 0, 6.2832); ctx.arc(bx + b.r * 0.9, yy + 4, b.r * 0.75, 0, 6.2832); ctx.arc(bx - b.r * 0.8, yy + 5, b.r * 0.7, 0, 6.2832); ctx.fill(); }
+  if (m.t > SKY_SECS - 14) skyVolcano(SKY_X + (SKY_SECS - m.t) * 40 + (m.ph === 'win' ? -Math.min(1, m.pt) * 0 : 0));
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; for (i = 0; i < 6; i++) { var sx = ((i * 83 - m.sc * 2.6) % 440 + 440) % 440 - 40, sy = 70 + ((i * 197) % 480); ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + 26, sy); ctx.stroke(); }   // wind streaks
+  ctx.fillStyle = '#ffffff'; ctx.beginPath(); for (i = 0; i < 12; i++) { var sx2 = i * 34 - ((m.sc * 1.2) % 34); ctx.moveTo(sx2 + 26, 618); ctx.arc(sx2, 618 + Math.sin(i * 2.3) * 4, 26, 0, 6.2832); } ctx.fill(); ctx.fillRect(0, 622, W, 20);   // the sea of clouds far below
+  for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; if (e.k === 'plane') skyPlane(e.x, e.y, e.col); else if (e.k === 'coco') { ctx.fillStyle = '#7a4a26'; ctx.beginPath(); ctx.arc(e.x, e.y, 9, 0, 6.2832); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(e.x - 3, e.y - 3, 3, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#ffd93b'; ctx.beginPath(); ctx.arc(e.x + 8 - Math.sin(time * 30) * 1.5, e.y - 8, 2.6, 0, 6.2832); ctx.fill(); } }
+  if (m.boss) skyBomber(m.boss.x, m.boss.y, time);
+  for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; if (e.k === 'cloud') skyCloud(e, 0.8); }
+  drawFx();
+  if (!(m.inv > 0 && m.ph === 'play' && Math.floor(time * 14) % 2)) { ctx.save(); ctx.translate(SKY_X, m.y); ctx.rotate(m.rot); ctx.scale(1 - 0.07 * (m.fa > 0 ? m.fa / 0.18 : 0), 1 + 0.1 * (m.fa > 0 ? m.fa / 0.18 : 0)); ART.banana(ctx, 0, 0, 0, 1, m.fa > 0 ? m.fa : 0, time, wearFlags(), m.vy, false, 0, -1, m.inv > 1.1 || m.ph === 'lose' ? 2 : 0); ctx.restore(); }
+  for (i = 0; i < m.limes.length; i++) { e = m.limes[i]; ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.a); ctx.fillStyle = '#ff9a3c'; ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(-20 - Math.sin(time * 50) * 3, -3); ctx.lineTo(-20, 3); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#7ccc2e'; ctx.beginPath(); ctx.ellipse(0, 0, 9, 5.5, 0, 0, 6.2832); ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = INK; ctx.stroke(); ctx.restore(); }
+  for (i = 0; i < m.maxH; i++) skyHeart(hx(26 + i * 28), 30, i < m.hearts);
+  if (m.lm > 0) { var lx = hx(26 + m.maxH * 28 + 6); ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.fillStyle = '#7ccc2e'; ctx.beginPath(); ctx.arc(lx, 30, 10, 0, 7); ctx.fill(); ctx.stroke(); outlined(String(m.lm), lx, 30, 13, '#ffffff'); }
+  var pg = clamp(m.t / SKY_SECS, 0, 1); ctx.fillStyle = 'rgba(30,20,50,.5)'; rrect(60, 56, 240, 9, 4.5); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke(); if (pg > 0.01) { ctx.fillStyle = '#ffd93b'; rrect(60, 56, 240 * pg, 9, 4.5); ctx.fill(); } ART.coin(ctx, 60 + 240 * pg, 60.5, time);
+  if (m.ph === 'ready' || m.ph === 'play') drawPauseBtn(MG_PB, 0.55);
+  if (m.sayT > 0 && m.ph === 'play') outlined(m.say, W / 2, 150, 34, '#ffd93b');
+  if (m.ph === 'ready') { outlined('Chimp Airforce!', W / 2, 170, 38, '#ffd93b'); outlined('Tap to flap. Dodge the biplanes!', W / 2, 212, 17, '#ffffff'); outlined('Clouds hide planes. Watch the bomber!', W / 2, 238, 17, '#ffffff'); outlined('Fly to the volcano!', W / 2, 264, 17, '#ffd93b'); outlined('Tap to start', W / 2, 400, 22 + Math.sin(time * 5) * 1.5, '#ffffff'); }
+  else if (m.ph === 'win') {
+    cardFrame(40, 150, 280, 252, '#58c46f', 'The volcano!', 30); outlinedC('+' + m.won, W / 2, 232, 34, '#ffd93b'); outlined('bananas', W / 2, 266, 18, '#ffffff'); outlined('Cloud medal won!', W / 2, 296, 16, '#ffd93b');
+    ctx.globalAlpha = m.pt > 0.6 ? 1 : 0.35; mgBtn(SKY_BA, 'Fly again', '#58c46f'); mgBtn(SKY_BT, 'Back to title', '#8a6cd8'); ctx.globalAlpha = 1;
+  } else if (m.ph === 'lose') {
+    ctx.fillStyle = 'rgba(58,42,77,.3)'; ctx.fillRect(0, 0, W, H); cardFrame(40, 150, 280, 252, '#4a9bd8', 'Shot down!', 32); ART.chimp(ctx, 256, 232, 0.5, 0, time); outlined('The Chimp', 120, 224, 18, '#ffffff'); outlined('Airforce got you.', 140, 250, 18, '#ffffff'); outlined(Math.floor(clamp(m.t / SKY_SECS, 0, 1) * 100) + '% of the way to the volcano', W / 2, 296, 14, '#ffd93b');
+    ctx.globalAlpha = m.pt > 0.6 ? 1 : 0.35; mgBtn(SKY_BA, 'Fly again', '#58c46f'); mgBtn(SKY_BT, 'Back to title', '#8a6cd8'); ctx.globalAlpha = 1;
+  }
+  if (m.paused) { ctx.fillStyle = 'rgba(58,42,77,.45)'; ctx.fillRect(0, 0, W, H); outlined('Paused', W / 2, 226, 44, '#ffd93b'); outlined('Tap to continue', W / 2, 286, 24, '#ffffff'); mgBtn(PS_BT, 'Settings', '#4a9bd8'); mgBtn(MG_BT, 'Back to title', '#8a6cd8'); padLine(); drawExtrasCard(); }
+  if (a) { m.y -= m.vy * a; m.sc -= vx * a; m.t -= a; for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; e.x -= e.vx * a; e.y -= e.vy * a; } }
+}
 var HOME = null, HOME_DOOR = [300, 486, 44, 78], HOME_BOOKS = [['Lunch Trip', '#d8453b'], ['The Keeper\'s Light', '#2a8f9c'], ['Bolivar\'s Treasure', '#c9971f'], ['Yesterday\'s Soup', '#e0782a']];
 var HOME_JOKES = ['APPLE PRESS: Out of order. Please try the other game.', 'The screen says: "Press an apple. Get a banana." Nobody knows what that means.', 'Fancy tried a coin. The machine tried a vanilla wafer. Nobody won.', 'High score: ??? (the machine has been unplugged since before the jungle).'];
 function homeHit(pl) {
@@ -4836,7 +5015,7 @@ function homeTap(pl) {
 }
 function homeUps() {
   var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
-  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 }, { n: 'Super Potassium', d: EMP[E.superK].desc, l: empOwn(E.superK) ? 1 : 0, m: 1 });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 }, { n: 'Super Potassium', d: EMP[E.superK].desc, l: empOwn(E.superK) ? 1 : 0, m: 1 }, { n: 'Cloud key', d: EMP[E.keySky].desc, l: empOwn(E.keySky) ? 1 : 0, m: 1 });
   return o;
 }
 function homeCos() {
@@ -4851,6 +5030,7 @@ function homePrizes() {
   o.push({ n: 'Pennant flags', own: !!save.unlocks.flags, yes: 'they came with the balloons.', how: 'beat Prince Chimp once.' });
   o.push({ n: 'Banana Bunch', own: bunchOk(), yes: 'all six lost friends found.', how: 'find all six lost friends.' });
   o.push({ n: 'Boomerang medal', own: !!save.unlocks.boom, yes: 'won from Boomerang Chimp.', how: 'beat Boomerang Chimp at the end of Chimp\'s Navy (needs the Boomerang key and all your hearts).' });
+  o.push({ n: 'Cloud medal', own: !!save.unlocks.sky, yes: 'won in the Chimp Airforce.', how: 'reach the volcano in the Chimp Airforce (needs the Cloud key).' });
   return o;
 }
 function homeBuild() {
@@ -4868,13 +5048,13 @@ function homeBuild() {
   // the power-up wall
   T('POWER-UPS', 180, 70, 11, '#7a4a26'); a = homeUps();
   for (i = 0; i < a.length; i++) {
-    it = a[i]; own = it.l > 0; x = 16 + (i % 4) * 83; y = 78 + Math.floor(i / 4) * 31; RR(x, y, 78, 26, 6);
+    it = a[i]; own = it.l > 0; x = 16 + (i % 4) * 83; y = 78 + Math.floor(i / 4) * 26; RR(x, y, 78, 22, 6);
     if (own) {
       g.fillStyle = '#fffbe8'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#8a5a33'; g.stroke(); sz = 10; g.font = '800 ' + sz + 'px ' + FONT; while (sz > 6.5 && g.measureText(it.n).width > (it.m > 1 ? 50 : 56)) { sz -= 0.5; g.font = '800 ' + sz + 'px ' + FONT; }
-      T(it.n, x + 5, y + 13.5, sz, '#4a2f14', 'left');
-      for (j = 0; j < it.m; j++) { g.beginPath(); g.arc(x + 78 - 7 - (it.m - 1 - j) * 7, y + 13, 2.6, 0, 6.2832); g.fillStyle = j < it.l ? '#e8a900' : 'rgba(122,74,38,.25)'; g.fill(); }
-    } else { g.fillStyle = 'rgba(122,74,38,.10)'; g.fill(); g.setLineDash([4, 3]); g.lineWidth = 1.5; g.strokeStyle = 'rgba(122,74,38,.5)'; g.stroke(); g.setLineDash([]); T('?', x + 39, y + 14, 12, 'rgba(122,74,38,.4)'); }
-    z.push([x, y, 78, 26, 'up', i]);
+      T(it.n, x + 5, y + 11.5, sz, '#4a2f14', 'left');
+      for (j = 0; j < it.m; j++) { g.beginPath(); g.arc(x + 78 - 7 - (it.m - 1 - j) * 7, y + 11, 2.6, 0, 6.2832); g.fillStyle = j < it.l ? '#e8a900' : 'rgba(122,74,38,.25)'; g.fill(); }
+    } else { g.fillStyle = 'rgba(122,74,38,.10)'; g.fill(); g.setLineDash([4, 3]); g.lineWidth = 1.5; g.strokeStyle = 'rgba(122,74,38,.5)'; g.stroke(); g.setLineDash([]); T('?', x + 39, y + 12, 12, 'rgba(122,74,38,.4)'); }
+    z.push([x, y, 78, 22, 'up', i]);
   }
   // the costume rack
   T('COSTUMES', 180, 238, 11, '#7a4a26'); g.strokeStyle = '#7a4a26'; g.lineWidth = 4; g.beginPath(); g.moveTo(20, 252); g.lineTo(340, 252); g.stroke(); a = homeCos();
@@ -4888,8 +5068,8 @@ function homeBuild() {
   }
   // the prize shelf
   T('PRIZES', 180, 310, 11, '#7a4a26'); a = homePrizes();
-  for (i = 0; i < 9; i++) {
-    x = 31 + i * 37.5; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
+  for (i = 0; i < 10; i++) {
+    x = 25 + i * 34.5; y = 328; it = a[i]; g.save(); g.lineWidth = 2; g.strokeStyle = INK;
     if (i < 4) {
       g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#e8453c'; g.beginPath(); g.moveTo(x - 7, y - 14); g.lineTo(x - 3, y + 2); g.lineTo(x - 11, y + 2); g.closePath(); g.fill(); g.fillStyle = '#4fb8ff'; g.beginPath(); g.moveTo(x + 7, y - 14); g.lineTo(x + 11, y + 2); g.lineTo(x + 3, y + 2); g.closePath(); g.fill();
       g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 5, 11, 0, 6.2832); g.fill(); g.stroke(); T(String(i + 1), x, y + 5.5, 12, INK);
@@ -4897,8 +5077,9 @@ function homeBuild() {
     else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
     else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
     else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
+    else if (i === 9) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x - 4, y + 5, 4.2, 0, 6.2832); g.arc(x + 1, y + 2.5, 5, 0, 6.2832); g.arc(x + 6, y + 5, 3.8, 0, 6.2832); g.fill(); g.lineWidth = 1.4; g.stroke(); }
     else { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.translate(x, y + 5); g.scale(0.42, 0.42); g.beginPath(); g.moveTo(-17, 6); g.quadraticCurveTo(-4, -2, 0, -15); g.quadraticCurveTo(4, -2, 17, 6); g.quadraticCurveTo(2, 3, 0, -6); g.quadraticCurveTo(-2, 3, -17, 6); g.closePath(); g.fillStyle = '#d99a48'; g.fill(); g.lineWidth = 3.4; g.stroke(); }
-    g.restore(); z.push([x - 18, 306, 36, 36, 'prize', i]);
+    g.restore(); z.push([x - 17, 306, 34, 36, 'prize', i]);
   }
   g.fillStyle = '#8a5a33'; g.fillRect(12, 344, 336, 7); g.fillStyle = '#6a4222'; g.fillRect(12, 351, 336, 2);
   // the Apple Press arcade machine
@@ -5519,6 +5700,7 @@ function render() {
   ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1;
   var cw = (FBforce ? FBforce === 'css' : FBff) && flipSX() === -1; if (cw !== cssF || LAYERD) { cssF = cw; LAYERD = false; cv.style.transform = (LAYER === 'z' ? 'translateZ(0)' : '') + (cw ? ' scaleX(-1)' : ''); cv.style.willChange = LAYER === 'wc' ? 'transform' : ''; }
   if (state === 'mini' && MG) { bkHide(); renderMini(); return; }
+  if (state === 'sky' && SKY) { bkHide(); renderSky(); return; }
   if (state === 'home' && HOME) { bkHide(); renderHome(); return; }
   var i, pe = punchT > 0 && !calmOn() ? punchT / CFG.punchSecs : 0;
   if (pe > 0) { var sh = pe * pe * 6 * Math.sin(time * 90); ctx.save(); ctx.translate(Math.round(sh * k) / k, Math.round(sh * 0.6 * k) / k); }   // camera shake at the blast off: a plain slide (a zoom would re-scale every picture on screen, which stalled Firefox and phones)
@@ -5626,15 +5808,16 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { onHidden(); openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
+  if (state === 'sky') { skyPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
 addEventListener('keydown', function (e) {
   if (e.key === ' ') kHeld.key = true;
-  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
+  if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
   var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = true;
   if (state === 'mini' && e.key === 'ArrowUp') { e.preventDefault(); return; }
-  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
+  if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
   if ((e.key === 'c' || e.key === 'C') && contCan() && !panelOpen()) { payContinue(); return; }
   if (e.key !== ' ' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
   var ae = document.activeElement, t = ae && ae.tagName;
