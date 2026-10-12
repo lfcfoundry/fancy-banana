@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2332';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2354';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2948,7 +2948,7 @@ function refreshWear() {
     var g = $(p[0]).getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 176, 120); g.setTransform(2, 0, 0, 2, 0, 0);
     ART.banana(g, 54, 32, -0.05, 0.95, 0, 0.4, p[1], 0);
   });
-  var bg = $('cvBunch').getContext('2d'); bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, 176, 120); bg.setTransform(2, 0, 0, 2, 0, 0); bg.globalAlpha = bunchOk() ? 1 : 0.3; bg.save(); bg.translate(40, 22); bunchDraw(bg, 0.58); bg.restore(); ART.banana(bg, 58, 30, -0.05, 0.8, 0, 0.4, false, 0); bg.globalAlpha = 1;
+  var bg = $('cvBunch').getContext('2d'); bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, 176, 120); bg.setTransform(2, 0, 0, 2, 0, 0); bg.globalAlpha = bunchOk() ? 1 : 0.3; bg.save(); bg.translate(41, 31); bg.rotate(-0.15); bunchDraw(bg, 0.34); bg.restore(); ART.banana(bg, 58, 30, -0.05, 0.8, 0, 0.4, false, 0); bg.globalAlpha = 1;
   refreshColors();
   $('wPlain').classList.toggle('on', !on); $('wBow').classList.toggle('on', on);
   $('wRain').disabled = !rainOk(); $('wRain').classList.toggle('on', rainOn()); $('rainNote').textContent = rainOk() ? (rainOn() ? 'A rainbow behind Fancy' : 'Off') : 'A secret: a perfect streak of 10';
@@ -3503,6 +3503,10 @@ function ftWaf(F, y, d, K, fist) { var k = fist ? 'fist' : 'waf', m = FT_MZ[F.n]
 function ftLane(F, y, d) { var m = FT_MZ[F.n].lane; ftMk(F, 'lane', { y: clamp(y, FT_BMIN + m[1], FT_BMAX + m[1]), d: d, act: 0.5 }); }
 function ftCoco(F, ty, T, d, K) { ftMk(F, 'coco', { ty: ty, T2: T / K, g: 560, r: 15, d: d, x: 0, y: 0, vx: 0, vy: 0 }); }
 function ftCookie(F, ty, T, d, K, x0) { ftMk(F, 'cook', { ty: ty, T2: T / K, g: 520, r: 14, d: d, x0: x0, x: x0, y: -26, vx: 0, vy: 0, first: !F.list.some(function (q) { return q.k === 'cook'; }) }); }   // a vanilla cookie that falls in from above the top edge and crosses Fancy's column at height ty
+function ftRing(a) {   // where a cookie will cross Fancy's column: a pulsing ring the size of the danger zone, until the cookie has gone past
+  var r = a.r + CFG.bananaR - 3, p = 0.75 + 0.25 * Math.sin(time * 12);
+  ctx.save(); ctx.globalAlpha = p; ctx.fillStyle = 'rgba(255,90,70,.16)'; ctx.beginPath(); ctx.arc(bx, a.ty, r, 0, 6.2832); ctx.fill(); ctx.setLineDash([6, 4]); ctx.lineWidth = 3; ctx.strokeStyle = '#ffd93b'; ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 2; ctx.strokeStyle = '#ff5a46'; ctx.beginPath(); ctx.moveTo(bx - r - 6, a.ty); ctx.lineTo(bx - r + 6, a.ty); ctx.moveTo(bx + r - 6, a.ty); ctx.lineTo(bx + r + 6, a.ty); ctx.moveTo(bx, a.ty - r - 6); ctx.lineTo(bx, a.ty - r + 6); ctx.moveTo(bx, a.ty + r - 6); ctx.lineTo(bx, a.ty + r + 6); ctx.stroke(); ctx.restore();
+}
 function ftWave(F, d, K) { ftMk(F, 'wave', { vx: -(236 + 14 * F.r) * K, d: d, x: 0 }); }
 function ftAim(a, p) {   // a coconut is held in the thrower's hand until it is let go: its flight is worked out from the hand
   var x0 = p.x + a.ox, y0 = p.y + a.oy; a.x = x0; a.y = y0; a.vx = -(x0 - bx) / a.T2; a.vy = (a.ty - y0 - 0.5 * a.g * a.T2 * a.T2) / a.T2;
@@ -3524,8 +3528,8 @@ function ftPattern(F, K) {   // push one volley and say how long until the next
   if (k === 4) {   // the Prince claps and vanilla cookies drop from above (only in reruns of the Crown Duel): one, then two a moment apart, then two almost together
     var cx0 = bx + 150 + rng() * 70;
     if (r === 0) { ftCookie(F, y, 1.15, 1.0 / K, K, cx0); return 2.8 / K; }
-    if (r === 1) { ftCookie(F, y - 60, 1.15, 1.0 / K, K, cx0); ftCookie(F, y + 90, 1.05, 1.6 / K, K, cx0 + 60); return 3.6 / K; }
-    ftCookie(F, y - 90, 1.2, 1.0 / K, K, cx0); ftCookie(F, y + 70, 1.0, 1.35 / K, K, cx0 + 80); ftCookie(F, y, 1.1, 2.3 / K, K, cx0 + 20); return 4.0 / K;
+    if (r === 1) { ftCookie(F, y - 60, 1.15, 1.0 / K, K, cx0); ftCookie(F, y + 90, 1.05, 2.1 / K, K, cx0 + 60); return 4.1 / K; }
+    ftCookie(F, y - 90, 1.2, 1.0 / K, K, cx0); ftCookie(F, y + 70, 1.0, 1.8 / K, K, cx0 + 80); ftCookie(F, y, 1.1, 2.7 / K, K, cx0 + 20); return 4.6 / K;
   }
   if (r === 0) { ftCoco(F, y, 0.85, 0.8 / K, K); return 1.9 / K; }   // coconuts thrown from a raised fist, and shockwaves from a stomp
   if (r === 1) { if (duel) { ftCoco(F, y, 0.85, 0.8 / K, K); ftCoco(F, y - 90, 1.0, 1.7 / K, K); return 3.1 / K; } ftWave(F, 0.9 / K, K); ftCoco(F, y, 0.85, 1.0 / K, K); return 2.7 / K; }
@@ -3741,7 +3745,7 @@ function drawFight() {
       else { drawBeam(mx, my, a.y, cl); }
     }
     else if (!a.live && (a.k === 'waf' || a.k === 'fist')) { ex = a.k === 'waf' && F.n === 1 ? mx - 34 : mx - 12; ctx.globalAlpha = 0.25 + 0.3 * f; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([8, 10]); ctx.beginPath(); ctx.moveTo(ex, a.y); ctx.lineTo(0, a.y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#fff2a0'; ctx.beginPath(); ctx.arc(ex, my, 4 + 8 * f, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }   // the dotted line shows the shot; the muzzle glows
-    else if (a.k === 'cook' && !a.live) { al = cl ? 0.7 : 0.5 + 0.4 * Math.abs(Math.sin(time * 12)); ctx.globalAlpha = al * 0.7; ctx.save(); ctx.translate(a.x0, 156); ART.mg.draw(ctx, 'wafer', 0, 0, undefined, 1); ctx.restore(); ctx.globalAlpha = al; outlined('!', a.x0, 132, 30, '#ffd93b'); ctx.globalAlpha = 1; }   // a cookie is about to fall in from up here
+    else if (a.k === 'cook' && !a.live) { ftRing(a); al = cl ? 0.7 : 0.5 + 0.4 * Math.abs(Math.sin(time * 12)); ctx.globalAlpha = al * 0.7; ctx.save(); ctx.translate(a.x0, 156); ART.mg.draw(ctx, 'wafer', 0, 0, undefined, 1); ctx.restore(); ctx.globalAlpha = al; outlined('!', a.x0, 132, 30, '#ffd93b'); ctx.globalAlpha = 1; }   // a cookie is about to fall in from up here
     else if (a.k === 'wave' && !a.live) { ctx.globalAlpha = 0.5 + 0.4 * f; outlined('!', W - 26, GROUND_Y - 30, 30, '#ffd93b'); ctx.fillStyle = '#e8d0a0'; for (g = 0; g < 4; g++) { ctx.beginPath(); ctx.arc(mx - g * 16 + Math.sin(time * 20 + g) * 2, GROUND_Y - 6 - f * 8, 6 + g, 0, 7); ctx.fill(); } ctx.globalAlpha = 1; }
   }
   for (i = 0; i < F.list.length; i++) {   // a wafer or fist that has just left its barrel or arm is still inside it: drawn behind the boss
@@ -3768,7 +3772,7 @@ function drawFight() {
     if (a.k === 'waf') { if (a.x < p.x + a.ox - 46) ART.mg.draw(ctx, 'wafer', a.x, a.y, undefined, 1); }
     else if (a.k === 'fist') { fl = cl ? 0 : Math.sin(time * 40) * 5; ctx.fillStyle = 'rgba(200,205,225,0.4)'; for (g = 0; g < 3; g++) { ctx.beginPath(); ctx.arc(a.x + 54 + g * 17, a.y + Math.sin(time * 9 + g * 2) * 3, 6 + g * 2, 0, 7); ctx.fill(); }
       ctx.fillStyle = 'rgba(255,140,50,0.85)'; ctx.beginPath(); ctx.moveTo(a.x + 12, a.y - 9); ctx.quadraticCurveTo(a.x + 30, a.y - 6, a.x + 50 + fl, a.y); ctx.quadraticCurveTo(a.x + 30, a.y + 6, a.x + 12, a.y + 9); ctx.fill(); ctx.fillStyle = '#ffe27a'; ctx.beginPath(); ctx.moveTo(a.x + 12, a.y - 5); ctx.quadraticCurveTo(a.x + 24, a.y - 3, a.x + 36 + fl * .6, a.y); ctx.quadraticCurveTo(a.x + 24, a.y + 3, a.x + 12, a.y + 5); ctx.fill(); if (a.x < p.x + a.ox - 46) ART.fxs(ctx, 'fist', a.x, a.y, 0); }
-    else if (a.k === 'cook') { ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(cl ? 0 : time * 7); ART.mg.draw(ctx, 'wafer', 0, 0, undefined, 1); ctx.restore(); }
+    else if (a.k === 'cook') { if (a.x > bx) ftRing(a); ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(cl ? 0 : time * 7); ART.mg.draw(ctx, 'wafer', 0, 0, undefined, 1); ctx.restore(); }
     else if (a.k === 'coco') { ART.fxs(ctx, 'coco', a.x, a.y, time * 8); if (a.tg) { ctx.lineWidth = 2.4; ctx.strokeStyle = '#9be84a'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(time * 24); ctx.beginPath(); ctx.arc(a.x, a.y, a.r + 5, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; } }
     else if (a.k === 'wave') { ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(a.x - 22, GROUND_Y); ctx.quadraticCurveTo(a.x - 6, GROUND_Y - 62, a.x + 8, GROUND_Y - 46); ctx.quadraticCurveTo(a.x + 16, GROUND_Y - 20, a.x + 24, GROUND_Y); ctx.closePath(); fl = ctx.createLinearGradient(0, GROUND_Y - 62, 0, GROUND_Y); fl.addColorStop(0, '#fff8d0'); fl.addColorStop(0.6, '#ffd95a'); fl.addColorStop(1, '#f0a830'); ctx.fillStyle = fl; ctx.fill(); ctx.stroke();
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.moveTo(a.x - 12, GROUND_Y - 30); ctx.quadraticCurveTo(a.x - 4, GROUND_Y - 54, a.x + 4, GROUND_Y - 44); ctx.stroke();
@@ -5198,7 +5202,7 @@ function homeBuild() {
     } else if (i === 4) { drawPieces(g, x, y + 2, 0.42); }
     else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
     else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
-    else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; g.translate(x, y - 12); bunchDraw(g, 0.36); }
+    else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; g.translate(x, y - 1); bunchDraw(g, 0.5); }
     else if (i === 10) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ff5a1f'; g.beginPath(); g.moveTo(x - 8, y + 10); g.lineTo(x - 3, y - 2); g.lineTo(x + 3, y - 2); g.lineTo(x + 8, y + 10); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); g.fillStyle = '#ffd93b'; g.beginPath(); g.ellipse(x, y - 2, 3.5, 1.6, 0, 0, 6.2832); g.fill(); }
     else if (i === 9) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x - 4, y + 5, 4.2, 0, 6.2832); g.arc(x + 1, y + 2.5, 5, 0, 6.2832); g.arc(x + 6, y + 5, 3.8, 0, 6.2832); g.fill(); g.lineWidth = 1.4; g.stroke(); }
     else { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.translate(x, y + 5); g.scale(0.42, 0.42); g.beginPath(); g.moveTo(-17, 6); g.quadraticCurveTo(-4, -2, 0, -15); g.quadraticCurveTo(4, -2, 17, 6); g.quadraticCurveTo(2, 3, 0, -6); g.quadraticCurveTo(-2, 3, -17, 6); g.closePath(); g.fillStyle = '#d99a48'; g.fill(); g.lineWidth = 3.4; g.stroke(); }
@@ -5214,7 +5218,7 @@ function homeBuild() {
   // the mirror (it opens the costume picker)
   g.fillStyle = '#7a4a26'; g.fillRect(124, 446, 8, 8); g.fillRect(164, 446, 8, 8); g.fillStyle = '#d9a441'; g.beginPath(); g.ellipse(148, 402, 32, 48, 0, 0, 6.2832); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
   g.fillStyle = '#d8efff'; g.beginPath(); g.ellipse(148, 402, 26, 42, 0, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke();
-  if (bunchOn()) { g.save(); g.translate(131, 398); bunchDraw(g, 0.42); g.restore(); }
+  if (bunchOn()) { g.save(); g.translate(131, 404); g.rotate(-0.15); bunchDraw(g, 0.25); g.restore(); }
   ART.banana(g, 148, 406, -0.05, 0.58, 0, 0.4, wearFlags(), 0); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 3; g.beginPath(); g.arc(148, 402, 33.5, 3.5, 4.5); g.stroke(); T('Costumes', 148, 459 - 4, 9, '#ffffff', 'center', 1); z.push([116, 356, 64, 96, 'mirror', 0]);
   // the bookshelf
   g.fillStyle = '#8a5a33'; g.fillRect(236, 354, 108, 98); g.fillStyle = '#5e3a1c'; g.fillRect(242, 360, 96, 40); g.fillRect(242, 406, 96, 40); g.lineWidth = 2; g.strokeStyle = INK; g.strokeRect(236, 354, 108, 98);
@@ -5621,25 +5625,26 @@ function drawWind() {
 }
 var TRC1 = [], TRC2 = [];
 (function () { for (var i = 0; i <= 24; i++) { TRC1.push('rgba(255,190,50,' + (i / 24 * 0.5).toFixed(3) + ')'); TRC2.push('rgba(255,255,230,' + (i / 24 * 0.85).toFixed(3) + ')'); } })();   // colour strings made once: nothing new for the garbage collector each frame
-var BUNCH = null;
-function bunchDraw(g, s) {   // the Banana Bunch: six little banana friends joined on one stem, hanging from the crown at (0, 0)
-  var i, a, L = 52, p0x, p1x, p1y, cx, cy, ang = [-0.98, 0.98, -0.62, 0.62, -0.24, 0.24], ex, ey, tx, ty;
+var BUNCH = null, BUNCH_S = 0.42;
+function bunchDraw(g, s) {   // the Banana Bunch: a little brown rucksack with banana friends poking out of the top (origin: the middle of the pack)
+  var i, bx0, by0, a, tipx, tipy;
   g.save(); g.scale(s, s); g.lineCap = 'round'; g.lineJoin = 'round';
-  for (i = 0; i < 6; i++) {   // the outer ones first, the middle ones in front
-    a = ang[i]; p0x = Math.sin(a) * 2; cx = Math.sin(a) * L * 0.5; cy = Math.cos(a) * L * 0.66; p1x = Math.sin(a) * L * 0.95 - Math.sign(a) * 5; p1y = Math.cos(a) * L * 0.92;
-    g.beginPath(); g.moveTo(p0x, 4); g.quadraticCurveTo(cx, cy, p1x, p1y); g.strokeStyle = INK; g.lineWidth = 14; g.stroke();
-    g.strokeStyle = i < 2 ? '#e8b92a' : i < 4 ? '#f6cd33' : '#ffdf4a'; g.lineWidth = 10; g.stroke();
-    g.save(); g.translate(-1.4, -1.2); g.beginPath(); g.moveTo(p0x, 6); g.quadraticCurveTo(cx, cy, p1x, p1y - 3); g.strokeStyle = 'rgba(255,248,190,.8)'; g.lineWidth = 2.4; g.stroke(); g.restore();
-    g.fillStyle = '#5a3a14'; g.beginPath(); g.arc(p1x, p1y, 3.4, 0, 6.2832); g.fill(); g.lineWidth = 1.6; g.strokeStyle = INK; g.stroke();
-    ex = 0.25 * p0x + 0.5 * cx + 0.25 * p1x; ey = 0.25 * 4 + 0.5 * cy + 0.25 * p1y; tx = 0.8 * cx - 0.8 * p0x; ty = 0.8 * cy;
-    g.fillStyle = INK; g.beginPath(); g.arc(ex - 2.8, ey - 1, 1.5, 0, 6.2832); g.arc(ex + 2.8, ey - 1, 1.5, 0, 6.2832); g.fill();
-    g.beginPath(); g.arc(ex, ey + 1.2, 2.2, 0.15, 3, false); g.lineWidth = 1.2; g.stroke();
+  for (i = 0; i < 3; i++) {   // three bananas, fanned, behind the flap
+    a = (i - 1) * 0.42; bx0 = (i - 1) * 8; by0 = -12; tipx = bx0 + Math.sin(a) * 21 + (i - 1) * 2; tipy = by0 - Math.cos(a) * 21;
+    g.beginPath(); g.moveTo(bx0, by0); g.quadraticCurveTo(bx0 + Math.sin(a) * 22 + (i - 1) * 6, by0 - Math.cos(a) * 14, tipx, tipy); g.strokeStyle = INK; g.lineWidth = 14; g.stroke(); g.strokeStyle = i === 1 ? '#ffdf4a' : '#f6cd33'; g.lineWidth = 10; g.stroke();
+    g.fillStyle = '#5a3a14'; g.beginPath(); g.arc(tipx, tipy, 3.2, 0, 6.2832); g.fill();
+    g.fillStyle = INK; g.beginPath(); g.arc(bx0 + Math.sin(a) * 12 - 2.6, by0 - Math.cos(a) * 12, 1.5, 0, 6.2832); g.arc(bx0 + Math.sin(a) * 12 + 2.6, by0 - Math.cos(a) * 12, 1.5, 0, 6.2832); g.fill();
   }
-  g.fillStyle = '#7fa332'; g.beginPath(); g.roundRect(-6, -10, 12, 17, 4); g.fill(); g.lineWidth = 2.6; g.strokeStyle = INK; g.stroke(); g.fillStyle = '#5a3a14'; g.beginPath(); g.roundRect(-5, -13, 10, 6, 2); g.fill(); g.lineWidth = 2; g.stroke();
+  g.fillStyle = '#b06a2e'; g.beginPath(); g.roundRect(-18, -14, 36, 40, 9); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();   // the pack
+  g.fillStyle = '#c98a45'; g.beginPath(); g.roundRect(-13, 6, 26, 15, 5); g.fill(); g.lineWidth = 2.2; g.stroke();   // the front pocket
+  g.fillStyle = '#8a4e20'; g.beginPath(); g.roundRect(-18, -14, 36, 17, 8); g.fill(); g.lineWidth = 3; g.stroke();   // the flap
+  g.fillStyle = '#ffd93b'; g.beginPath(); g.roundRect(-4, -3, 8, 8, 2); g.fill(); g.lineWidth = 1.8; g.stroke();   // the buckle
+  g.strokeStyle = 'rgba(255,230,170,.55)'; g.lineWidth = 2; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(-14, -9); g.lineTo(14, -9); g.stroke(); g.setLineDash([]);   // stitching
   g.restore();
 }
-function bunchPic() { if (!BUNCH || BUNCH.kk !== k) { var c = document.createElement('canvas'), g; c.width = Math.round(80 * k); c.height = Math.round(80 * k); g = c.getContext('2d', CRF); g.scale(k, k); g.translate(40, 14); bunchDraw(g, 1); c.kk = k; BUNCH = c; } return BUNCH; }
-function drawBuddies() { var rot = clamp(-vy / 2200, -0.3, 0.3) + Math.sin(time * 3.2) * 0.07; ctx.save(); ctx.translate(bx - 26, by - 10); ctx.rotate(rot); ctx.drawImage(bunchPic(), -40, -14, 80, 80); ctx.restore(); }   // worn like a backpack: it hangs from Fancy's back and swings as he climbs and falls
+function bunchPic() { if (!BUNCH || BUNCH.kk !== k) { var c = document.createElement('canvas'), g; c.width = Math.round(60 * BUNCH_S * k); c.height = Math.round(80 * BUNCH_S * k); g = c.getContext('2d', CRF); g.scale(k, k); g.translate(30 * BUNCH_S, 46 * BUNCH_S); bunchDraw(g, BUNCH_S); c.kk = k; BUNCH = c; } return BUNCH; }
+function drawBuddies(ey) { var sw = clamp(-vy / 3000, -0.2, 0.2) + Math.sin(time * 3.2) * 0.04, ca = Math.cos(angle), sa = Math.sin(angle); ctx.save(); ctx.translate(bx - 30 * ca + 4 * sa, by + ey - 30 * sa - 4 * ca); ctx.rotate(angle - 0.3 + sw); ctx.drawImage(bunchPic(), -30 * BUNCH_S, -46 * BUNCH_S, 60 * BUNCH_S, 80 * BUNCH_S); ctx.restore(); }   // worn like a rucksack on his back
+function bunchStrap(ey) { ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-19, -9); ctx.quadraticCurveTo(-9, 3, -13, 13); ctx.strokeStyle = INK; ctx.lineWidth = 3.8; ctx.stroke(); ctx.strokeStyle = '#8a4e20'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }   // the strap across his middle
 function drawTrail() {
   var n = trail.length, i, p, q, a, pw = state === 'launch' ? clamp((launchT / CFG.launchSecs - 0.12) / 0.4, 0, 1) : state === 'play' ? 0.25 + 0.75 * clamp(boost / CFG.boostV + kCh, 0, 1) : 0, qa;
   if (n < 2 || pw <= 0) return;
@@ -5868,9 +5873,9 @@ function render() {
   else {
     if (cardT >= 0 && state === 'play') { if (mir) { ctx.save(); ctx.translate(0, H); ctx.scale(1, -1); } hudM(1); stageCard(); hudM(0); if (mir) ctx.restore(); lap('card'); }   // drawn before Fancy, so Fancy always stays in view
     fl2 = flipB();   // ...and so are Fancy, his trail and the sparkles (the stage card, the counters and every word are not)
-    zm = zoomOn(); drawTrail(); if ((state === 'play' || state === 'paused') && flagsOn()) drawFlags(); if ((state === 'play' || state === 'paused') && bunchOn()) drawBuddies(); lap('trail'); drawSpeedLines(); lap('speedlines');
+    zm = zoomOn(); drawTrail(); if ((state === 'play' || state === 'paused') && flagsOn()) drawFlags(); if ((state === 'play' || state === 'paused') && bunchOn()) drawBuddies(ey); lap('trail'); drawSpeedLines(); lap('speedlines');
     if (kEcho.length && !zm) kEchoes();
-    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); if (sKch > 0.02 && state === 'play') drawSuperK(ey); else if (sKarm && kHoldT > 0.12 && state === 'play' && sKused !== stage && empOwn(E.superK)) drawSuperK(ey, kHoldT / 0.55); }
+    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); if ((state === 'play' || state === 'paused') && bunchOn()) bunchStrap(ey); ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); if (sKch > 0.02 && state === 'play') drawSuperK(ey); else if (sKarm && kHoldT > 0.12 && state === 'play' && sKused !== stage && empOwn(E.superK)) drawSuperK(ey, kHoldT / 0.55); }
     lap('fancy'); drawShield();
     if (zm) { ctx.restore(); if (!blinkOff()) drawFancy(zoomX + (bx - zoomX) * zoomK, GROUND_Y + (by - GROUND_Y) * zoomK, angle, 1); }   // in the swoop-in Fancy follows the zoomed track but is stamped at his normal size (a scaled stamp was the costly one)
   }
