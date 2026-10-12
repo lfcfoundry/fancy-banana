@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2040';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2059';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -3000,7 +3000,7 @@ function buy(u) {
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
 /* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
-var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10, keyBoom: 11, superK: 12 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
 var EMP = [
   { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
   { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
@@ -3013,7 +3013,8 @@ var EMP = [
   { id: 'perkH', k: 'perk', g: 3, name: 'Spare heart', desc: 'One extra heart in Chimp\'s Navy for your next run.', cost: 20 },
   { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 },
   { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 },
-  { id: 'keyBoom', k: 'up', g: 4, name: 'Boomerang key', desc: 'Opens a secret boss at the end of Chimp\'s Navy: Boomerang Chimp. Dodge his boomerangs and watch them swing back (all hearts needed).', cost: 300 }
+  { id: 'keyBoom', k: 'up', g: 4, name: 'Boomerang key', desc: 'Opens a secret boss at the end of Chimp\'s Navy: Boomerang Chimp. Dodge his boomerangs and watch them swing back (all hearts needed).', cost: 300 },
+  { id: 'superK', k: 'up', g: 1, need: 'potassium', name: 'Super Potassium', desc: 'Needs Potassium Power. Hold the tap for half a second away from a gate lane: Fancy blasts forward for a few seconds and smashes everything he touches without a scratch. Once per stage.', cost: 250 }
 ], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks', 'Keys to secret places'];
 function empOn() { return save.stats.balClears >= CFG.empClears; }
 function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
@@ -3036,11 +3037,11 @@ function refreshEmp() {
 }
 function empTile(box, i) {
   var e = EMP[i], b = document.createElement('button'), nm = document.createElement('b'), sm = document.createElement('small'), em = document.createElement('em'), stock = e.k === 'perk' ? lvl(e.id) : 0,
-    own = e.k !== 'perk' && e.k !== 'gift' && empOwn(i), can = bal() >= e.cost && !(e.k === 'perk' && stock >= 9);
+    own = e.k !== 'perk' && e.k !== 'gift' && empOwn(i), lock = !!e.need && !lvl(e.need) && !own, can = bal() >= e.cost && !(e.k === 'perk' && stock >= 9) && !lock;
   b.className = 'ut' + (!own && !can ? ' off' : ''); nm.textContent = e.name; b.appendChild(nm);
   sm.textContent = e.desc + (stock ? ' You have ' + stock + '.' : ''); b.appendChild(sm);
   if (own) { em.textContent = e.k === 'up' ? 'Yours!' : empNow(i) ? (e.k === 'wear' ? 'Wearing it' : 'Using it') : (e.k === 'wear' ? 'Tap to wear' : 'Tap to use'); if (e.k !== 'up') b.addEventListener('click', function () { empToggle(i); }); else b.classList.add('done'); }
-  else { em.textContent = can ? 'Buy for ' + e.cost : bal() < e.cost ? e.cost - bal() + ' more to go' : 'Stock is full'; if (can) b.addEventListener('click', function () { empBuy(i); }); else b.disabled = true; }
+  else { em.textContent = lock ? 'Needs Potassium Power first' : can ? 'Buy for ' + e.cost : bal() < e.cost ? e.cost - bal() + ' more to go' : 'Stock is full'; if (can) b.addEventListener('click', function () { empBuy(i); }); else b.disabled = true; }
   b.appendChild(em); box.appendChild(b);
 }
 function empRedo(msg) { persist(); var sc = $('epList').scrollTop; refreshEmp(); $('epList').scrollTop = sc; syncUp(); $('epMsg').textContent = msg; }
@@ -3049,7 +3050,7 @@ function empToggle(i) {
   empRedo(e.name + (empNow(i) ? ' is on.' : ' is off.'));
 }
 function empBuy(i) {
-  var e = EMP[i], m, a, b; if (bal() < e.cost) return;
+  var e = EMP[i], m, a, b; if (bal() < e.cost || (e.need && !lvl(e.need))) return;
   if (e.k === 'perk') { if (lvl(e.id) >= 9) return; save.boosts[e.id] = lvl(e.id) + 1; m = e.name + ' is packed for your next run!'; }
   else if (e.k === 'gift') {
     a = Math.random() < 0.5 ? 'perkB' : 'perkH'; b = Math.random() < 0.5 ? 'perkB' : 'perkH';
@@ -3283,7 +3284,7 @@ function spawnOb(x) {
   var lo = CFG.minObH + gap / 2, hi = GROUND_Y - CFG.minObH - gap / 2;
   var pc = lastC, c = clamp(lastC + (rng() * 2 - 1) * CFG.maxShift, lo, hi);
   if (spawned > 0 && spawned === gateStart(gs)) c = clamp(CFG.rsgY + (rng() * 2 - 1) * 25, lo, hi);   // the first gate after a stage break opens right where Fancy waits, so GO never starts with a scramble
-  if (lvl('potassium') && !BAL && !runFight && spawned > gateStart(gs)) {   // with Potassium Power, now and then a few gates in a row line up (so the move has something to ride)
+  if (lvl('potassium') && !BAL && !fightStage(gs) && spawned > gateStart(gs)) {   // with Potassium Power, now and then a few gates in a row line up (so the move has something to ride)
     if (kRunN > 0) { kRunN--; c = clamp(kRunC + (rng() * 2 - 1) * 13, lo, hi); }
     else if (rng() < 0.2) { kRunN = 2; kRunC = lastC; c = clamp(kRunC + (rng() * 2 - 1) * 13, lo, hi); }
   }
@@ -3313,9 +3314,10 @@ function flap() { vy = CFG.flapV; flapAnim = 0.18; runFlaps++; fallD = 0; if (em
    the lane and flies up to 25% faster, leaving fading echoes of himself. Not in the water level, boss fights, the balloon stage or the vault. */
 var kHeld = { ptr: false, key: false, pad: false }, kHoldT = 0, kOn = false, kCh = 0, kLane = null, kAvail = null, kEcho = [], kEchoT = 0, kRunN = 0, kRunC = 0, kHint = 0, kBy0 = 0;
 function kHolding() { return kHeld.ptr || kHeld.key || kHeld.pad; }
-function kOk() { return lvl('potassium') > 0 && state === 'play' && !BAL && !FT && !VAULT && !runFight && spinT <= 0 && !rsgHold() && grace <= 0 && !MG; }
+function fightStage(g) { return !!runFight && themeOf(g) === CFG.finalTheme; }   // Potassium (both kinds) works in every stage except the last one of a run that ends in a boss fight
+function kOk() { return lvl('potassium') > 0 && state === 'play' && !BAL && !FT && !VAULT && !fightStage(stage) && spinT <= 0 && !rsgHold() && (grace <= 0 || sKon) && !MG; }
 function kLook() {   // how far ahead gates are made: with the upgrade, enough of them are in place to see a lane coming (never past the end of a stage, and not near the boss)
-  if (!lvl('potassium') || BAL || FT || runFight || stageOfGate(spawned) !== stage) return 0;
+  if (!lvl('potassium') || BAL || FT || fightStage(stage) || stageOfGate(spawned) !== stage) return 0;
   if (themeOf(stage) === CFG.finalTheme && spawned >= gateStart(stage + 1) - 4) return 0;
   return 2 * CFG.spacing;
 }
@@ -3336,11 +3338,24 @@ function kReach(L) {   // can he get to the first opening in time (the glide eas
   if (d > 68) { t1 = (d - 68) / 540; e = tg <= t1 ? d - 540 * tg : 68 * Math.exp(-8 * (tg - t1)); } else e = d * Math.exp(-8 * tg);
   return e < (o.gb - o.gt) / 2 - CFG.bananaR - 8;
 }
+var sKpop = -9;
+function kSmash() {   // Super Potassium: every gate Fancy touches while blasting breaks apart (and counts as passed, for nothing extra)
+  var i, o, n = 0;
+  for (i = 0; i < obs.length; i++) {
+    o = obs[i]; if (o.smash || o.passed || o.x > CFG.bananaX + CFG.bananaR + 10 || o.x + CFG.obW < CFG.bananaX - CFG.bananaR) continue;
+    o.smash = time; o.kg = true; o.rects = []; n++;
+    burst(o.x + CFG.obW / 2, o.gt - 16, 16, ['#ffffff', '#ffe27a', '#ff9a3c', '#c98a3c'], 300, 240); burst(o.x + CFG.obW / 2, o.gb + 16, 16, ['#ffffff', '#ffe27a', '#ff9a3c', '#c98a3c'], 300, 240);
+  }
+  if (n) { punchT = CFG.punchSecs * 0.5; if (time - sKpop > 0.5) { sKpop = time; pop('SMASH!', '#ffe27a', 24); } }
+}
 function kEnd() { kOn = false; kLane = null; grace = 0.2; vy = clamp(vy, -120, 120); }
 function kStep(dt) {   // runs once per step while flying; returns the speed multiplier
   var ok = kOk(), i, o, a = null, b = null, u, tgt, mv, k;
-  if (kHolding() && state === 'play') kHoldT += dt; else kHoldT = 0;
-  if (ok && !kOn) {
+  if (kHolding() && state === 'play') { if (kHoldT === 0) sKarm = !kOn && !sKon && !(ok && (kAvail = kLaneFind()) && kReach(kAvail)); kHoldT += dt; } else kHoldT = 0;
+  if (sKon) {
+    sKt -= dt; if (!ok || sKt <= 0) { sKon = false; sKused = stage; grace = 0.2; vy = clamp(vy, -120, 120); if (ok) pop('Phew!', '#ffe27a', 18); } else { by = clamp(by, 70, GROUND_Y - 70); kBy0 = by; vy = 0; fallD = 0; angle = 0; grace = Math.max(grace, 0.05); invuln = Math.max(invuln, 0.08); }
+  } else if (ok && !kOn && sKarm && kHoldT >= 0.55 && empOwn(E.superK) && sKused !== stage) { sKon = true; sKt = 2.6; sKarm = false; sKused = 0; kEchoT = 0; pop('SUPER POTASSIUM!', '#ffe27a', 26); burst(CFG.bananaX, by, 30, ['#ffe27a', '#ffffff', '#fff2a0', '#ff9a3c'], 300, 220); punchT = CFG.punchSecs; }
+  if (ok && !kOn && !sKon) {
     kAvail = kLaneFind(); if (kAvail && !kReach(kAvail)) kAvail = null;
     if (kAvail && kHoldT >= 0.15) { kOn = true; kLane = kAvail; for (i = 0; i < kLane.length; i++) kLane[i].kg = true; kEchoT = 0; pop('POTASSIUM POWER!', '#ffe27a', 22); burst(CFG.bananaX, by, 16, ['#ffe27a', '#ffffff', '#fff2a0'], 220, 180); }
   } else if (!ok) kAvail = null;
@@ -3356,14 +3371,16 @@ function kStep(dt) {   // runs once per step while flying; returns the speed mul
       }
     }
   }
-  kCh = clamp(kCh + (kOn ? dt / 0.6 : -dt / 0.45), 0, 1); k = kCh * kCh * (3 - 2 * kCh);
+  sKch = clamp(sKch + (sKon ? dt / 0.35 : -dt / 0.4), 0, 1);
+  kCh = clamp(kCh + (kOn || sKon ? dt / 0.6 : -dt / 0.45), 0, 1); k = kCh * kCh * (3 - 2 * kCh);
   for (i = 0; i < kEcho.length; i++) { kEcho[i].t += dt; kEcho[i].x -= curSpeed * dt; }
   while (kEcho.length && kEcho[0].t > 0.5) kEcho.shift();
   if (kCh > 0.12) { kEchoT -= dt; if (kEchoT <= 0) { kEchoT = 0.07; kEcho.push({ x: bx, y: by, r: angle, t: 0, k: k }); if (kEcho.length > (qLvl >= 1 ? 4 : 7)) kEcho.shift(); } }
   kHint += ((kAvail && !kOn ? 1 : 0) - kHint) * Math.min(1, dt * 8);
-  return 1 + 0.25 * k;
+  return (1 + 0.25 * k) * (1 + 0.7 * sKch * sKch * (3 - 2 * sKch));
 }
-function kReset() { kOn = false; kCh = 0; kHoldT = 0; kLane = null; kAvail = null; kEcho.length = 0; kRunN = 0; kHint = 0; }
+var sKon = false, sKt = 0, sKch = 0, sKused = 0, sKarm = false;   // Super Potassium: blasting now, seconds left, the blast's ramp (0 to 1), the stage it was last used in, and whether this hold began away from a gate lane
+function kReset() { sKon = false; sKt = 0; sKch = 0; sKarm = false; kOn = false; kCh = 0; kHoldT = 0; kLane = null; kAvail = null; kEcho.length = 0; kRunN = 0; kHint = 0; }
 function kEchoes() {   // fading copies of Fancy, left behind where he was: they stay in the world, so the faster he goes the further apart they sit
   for (var i = 0; i < kEcho.length; i++) { var e = kEcho[i]; ctx.globalAlpha = 0.6 * e.k * (1 - e.t / 0.5); drawFancy(e.x, e.y, e.r, 1); }
   ctx.globalAlpha = 1;
@@ -3373,6 +3390,13 @@ function kRing(ey) {   // the potassium meter, filling in a ring around Fancy
   var r = 27, f = kCh, full = f >= 0.999, pu = full ? 0.5 + 0.5 * Math.sin(time * 24) : 1;
   ctx.lineCap = 'round'; ctx.lineWidth = 7; ctx.strokeStyle = 'rgba(58,42,77,0.7)'; ctx.beginPath(); ctx.arc(bx, by + ey, r, -Math.PI / 2, -Math.PI / 2 + 6.2832 * f); ctx.stroke();
   ctx.lineWidth = 4; ctx.strokeStyle = full ? (pu > 0.5 ? '#ffffff' : '#ffe27a') : '#ffd93b'; ctx.stroke(); ctx.lineCap = 'butt';
+}
+function drawSuperK(ey, f) {   // the blast: a hot glow and speed streaks round Fancy (or, while the hold is building, a ring that fills)
+  var i, g, r;
+  if (f !== undefined) { ctx.lineCap = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(58,42,77,0.7)'; ctx.beginPath(); ctx.arc(bx, by + ey, 33, -Math.PI / 2, -Math.PI / 2 + 6.2832 * clamp(f, 0, 1)); ctx.stroke(); ctx.lineWidth = 3.4; ctx.strokeStyle = '#ff9a3c'; ctx.stroke(); ctx.lineCap = 'butt'; return; }
+  r = 44 + Math.sin(time * 30) * 3; g = ctx.createRadialGradient(bx, by + ey, 4, bx, by + ey, r); g.addColorStop(0, 'rgba(255,240,170,' + (0.8 * sKch) + ')'); g.addColorStop(0.5, 'rgba(255,154,60,' + (0.45 * sKch) + ')'); g.addColorStop(1, 'rgba(255,154,60,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bx, by + ey, r, 0, 6.2832); ctx.fill();
+  if (!calmOn()) { ctx.strokeStyle = 'rgba(255,255,255,' + (0.7 * sKch) + ')'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; for (i = 0; i < 6; i++) { var yy = by + ey - 30 + i * 12 + Math.sin(time * 40 + i) * 3, xx = bx - 30 - ((time * 900 + i * 53) % 90); ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx - 26, yy); ctx.stroke(); } ctx.lineCap = 'butt'; }
 }
 function drawKHint() {
   if (kHint < 0.05) return;
@@ -3900,7 +3924,7 @@ function drawHug() {   // a hint for those who look: a faint shimmer on the edge
 }
 function die() {
   if (secondWind()) return;
-  kOn = false; kCh = 0; kEcho.length = 0; kHint = 0;
+  kOn = false; kCh = 0; kEcho.length = 0; kHint = 0; sKon = false; sKch = 0;
   state = 'dead'; deadT = 0; vy = -200; cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0;
   
   if (pracN) { pracEnd = 'lose'; newBest = false; } else recordRun(); 
@@ -4057,6 +4081,7 @@ function update(dt) {
     if (FT) ftStep(dt, sp); if (BAL) { if (washA > 0) washA = Math.max(0, washA - dt / 0.7); updateBalloons(dt, sp); } if (flagsOn()) flagStep(dt, sp);
     if (BALR && (rsgT < 0 || rsgT >= CFG.cardSecs)) BALR = null;
     if (by + CFG.bananaR > GROUND_Y - 2) { by = GROUND_Y - CFG.bananaR; if (FT && FT.ph !== 'wait') { vy = -420; ftHit(); } else if (VAULT) { vy = VAULT.kind === 'drawer' ? -600 : -330; VAULT.bz = 1; burst(CFG.bananaX, by + 8, 8, ['#ffffff', '#ffd93b'], 120, 140); } else if (shield > 0) { shield--; boing(-CFG.bounceVy); } else if (bngT > 0) { bngT = 0; vy = -420; hurtT = 0.4; } else { die(); return; } }
+    if (sKon) kSmash();
     var bonk = null;
     for (i = 0; i < obs.length && !bonk; i++) { var o = obs[i]; if (((o.x < CFG.bananaX + CFG.bananaR && o.x + CFG.obW > CFG.bananaX - CFG.bananaR) || (o.waf && Math.abs(o.x + o.waf.dx - CFG.bananaX) < 44)) && hits(o)) bonk = o; }
     if (bonk && invuln <= 0) {
@@ -4811,7 +4836,7 @@ function homeTap(pl) {
 }
 function homeUps() {
   var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
-  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 }, { n: 'Boomerang key', d: EMP[E.keyBoom].desc, l: empOwn(E.keyBoom) ? 1 : 0, m: 1 }, { n: 'Super Potassium', d: EMP[E.superK].desc, l: empOwn(E.superK) ? 1 : 0, m: 1 });
   return o;
 }
 function homeCos() {
@@ -5506,7 +5531,7 @@ function render() {
   drawBack(); lap('back'); drawLife(); lap('life'); drawWind(); lap('wind');
   drawVaultBack();
   if (ex) for (i = 0; i < obs.length; i++) obs[i].x -= ex;
-  for (i = 0; i < obs.length; i++) { ART.obstacle(ctx, obs[i]); if (obs[i].gold && !obs[i].passed) drawGold(obs[i]); if (obs[i].waf) drawWafer(obs[i]); }
+  for (i = 0; i < obs.length; i++) { if (obs[i].smash) { var sa = 1 - (time - obs[i].smash) / 0.3; if (sa > 0) { ctx.globalAlpha = sa; ART.obstacle(ctx, obs[i]); ctx.globalAlpha = 1; } continue; } ART.obstacle(ctx, obs[i]); if (obs[i].gold && !obs[i].passed) drawGold(obs[i]); if (obs[i].waf) drawWafer(obs[i]); }
   if (BAL || shd.length) drawBalloons(); if (FT && FT.ph !== 'wait') drawFight();
   lap('obstacles'); drawCoins(); lap('coins'); if (ex) for (i = 0; i < obs.length; i++) obs[i].x += ex;
   var zm = zoomOn();
@@ -5522,7 +5547,7 @@ function render() {
     fl2 = flipB();   // ...and so are Fancy, his trail and the sparkles (the stage card, the counters and every word are not)
     zm = zoomOn(); drawTrail(); if ((state === 'play' || state === 'paused') && flagsOn()) drawFlags(); if ((state === 'play' || state === 'paused') && bunchOn()) drawBuddies(); lap('trail'); drawSpeedLines(); lap('speedlines');
     if (kEcho.length && !zm) kEchoes();
-    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); }
+    if (!zm && !blinkOff()) { if (calmOn() && invuln > 0 && spinT <= 0) ctx.globalAlpha = 0.6; drawFancy(bx, by + ey, angle, 1); ctx.globalAlpha = 1; if (kCh > 0.02 && state === 'play') kRing(ey); if (sKch > 0.02 && state === 'play') drawSuperK(ey); else if (sKarm && kHoldT > 0.12 && state === 'play' && sKused !== stage && empOwn(E.superK)) drawSuperK(ey, kHoldT / 0.55); }
     lap('fancy'); drawShield();
     if (zm) { ctx.restore(); if (!blinkOff()) drawFancy(zoomX + (bx - zoomX) * zoomK, GROUND_Y + (by - GROUND_Y) * zoomK, angle, 1); }   // in the swoop-in Fancy follows the zoomed track but is stamped at his normal size (a scaled stamp was the costly one)
   }
