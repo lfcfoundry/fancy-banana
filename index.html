@@ -2373,7 +2373,7 @@ function mgglints(g, off, t, p) {   // sun sparkles twinkling on the water
 }
 function mgwater(g, off) { if (!MGW) { MGW = mk(W, 320); waterTile(MGW.g, 320); } var y = ((off % 320) + 320) % 320 - 320; for (; y < 640; y += 320) put(g, MGW.c, 0, y); }
 
-function init(k) { K = k; BOSSP = {}; FXP = {}; HNDP = {}; ARN = null; ARS = null; MGCA = null; MGCP = 0; JTL = null; CRP = null; CHP = {}; BALP = {}; WAFP = null; PARTY = null; BALW = false; SET = {}; PLAN = {}; QUEUE = []; MGQ = []; MGSH = null; TASKQ = []; MGC = {}; MGW = null; COIN = null; initBanana(); coinFrames(); [[.78, 0], [.42, 1], [.56, 2], [1.15, 2]].forEach(function (c) { TASKQ.push(function () { chimpPic(c[0], c[1]); }); }); }   // the chimp pictures for the Oops and stage cards are built early, a few ms per frame
+function init(k) { K = k; BOSSP = {}; FXP = {}; HNDP = {}; ARN = null; ARS = null; MGCA = null; MGCP = 0; JTL = null; CRP = null; CHP = {}; BALP = {}; WAFP = null; PARTY = null; PARTYN = null; BALWN = false; BALW = false; SET = {}; PLAN = {}; QUEUE = []; MGQ = []; MGSH = null; TASKQ = []; MGC = {}; MGW = null; COIN = null; initBanana(); coinFrames(); [[.78, 0], [.42, 1], [.56, 2], [1.15, 2]].forEach(function (c) { TASKQ.push(function () { chimpPic(c[0], c[1]); }); }); }   // the chimp pictures for the Oops and stage cards are built early, a few ms per frame
 function keep(list) { for (var key in SET) if (list.indexOf(+key) < 0) delete SET[key]; }
 
 /* ---------- the launch track: a huge loop-de-loop, drawn live as vectors (so it is big and sharp, and costs no memory) ----------
@@ -2566,7 +2566,7 @@ function coin(g, x, y, t) {
 }
 
 /* ===================== SPECIALS: party balloons, vanilla wafers, the party sky ===================== */
-var BALW = false, BALC = ['#ff4d6d', '#ff9a3c', '#ffd93b', '#4fd36a', '#2fc7c0', '#4d9bff', '#9a6cff', '#ff7ad0', '#ffc43a'], BALP = {}, WAFP = null, PARTY = null;   // the last balloon is the gold one
+var BALW = false, BALC = ['#ff4d6d', '#ff9a3c', '#ffd93b', '#4fd36a', '#2fc7c0', '#4d9bff', '#9a6cff', '#ff7ad0', '#ffc43a'], BALP = {}, WAFP = null, PARTY = null, PARTYN = null, BALWN = false;   // the last balloon is the gold one
 function meshPic(w, h, ol, build) {   // a toon-lit 3D picture w x h (units): build(R, s) draws the meshes; finished with the dark outline all round, like Fancy
   var m = mk(w, h), sx = m.c.width / w, sy = m.c.height / h, ss = sx * SS, R = new Rast(Math.ceil(w * ss), Math.ceil(h * ss)), S = document.createElement('canvas'), sg, B, Bg;
   build(R, ss); S.width = R.w; S.height = R.h; sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0);
@@ -2611,35 +2611,37 @@ function waferPic() {   // a round vanilla wafer: a thin beige dome with a press
   g.globalCompositeOperation = 'destination-over'; circ(g, 19.2, 19.6, 15.6); fs(g, '#a06c32', OUTK, 1.5); g.globalCompositeOperation = 'source-over';   // the thick edge peeks out below and to the right
   return (WAFP = m);
 }
-function partyBuild() {   // the balloon party's sky: sunny gradient, soft hills and clouds, a string of bunting, and a picnic-cloth floor that scrolls
+function partyBuild(nt) {   // the balloon party's sky: sunny gradient, soft hills and clouds, a string of bunting, and a picnic-cloth floor that scrolls
   var P = { }, g, i, x, m;
-  m = mk(W, GY); g = m.g; g.fillStyle = lg(g, 0, 0, 0, GY, [[0, '#62c4ff'], [.55, '#b8e8ff'], [1, '#fff1d6']]); g.fillRect(0, 0, W, GY);
-  g.fillStyle = rg(g, 280, 92, 4, 280, 92, 150, [[0, 'rgba(255,250,200,.95)'], [.4, 'rgba(255,240,170,.35)'], [1, 'rgba(255,240,170,0)']]); g.fillRect(0, 0, W, GY);
-  g.fillStyle = '#fff6b8'; circ(g, 280, 92, 22); g.fill(); P.sky = m;
+  m = mk(W, GY); g = m.g; g.fillStyle = lg(g, 0, 0, 0, GY, nt ? [[0, '#0b1540'], [.55, '#2b2a6b'], [1, '#8a4f94']] : [[0, '#62c4ff'], [.55, '#b8e8ff'], [1, '#fff1d6']]); g.fillRect(0, 0, W, GY);
+  g.fillStyle = nt ? rg(g, 280, 92, 4, 280, 92, 150, [[0, 'rgba(210,225,255,.7)'], [.4, 'rgba(160,190,255,.25)'], [1, 'rgba(160,190,255,0)']]) : rg(g, 280, 92, 4, 280, 92, 150, [[0, 'rgba(255,250,200,.95)'], [.4, 'rgba(255,240,170,.35)'], [1, 'rgba(255,240,170,0)']]); g.fillRect(0, 0, W, GY);
+  if (nt) { for (i = 0; i < 46; i++) { g.fillStyle = 'rgba(255,255,255,' + (0.4 + 0.5 * ((i * 37) % 10) / 10).toFixed(2) + ')'; circ(g, (i * 97 + 13) % W, ((i * 61 + 7) % (GY * 0.62)), 0.7 + (i % 3) * 0.5); g.fill(); } g.fillStyle = '#f6f1d6'; circ(g, 280, 92, 22); g.fill(); g.fillStyle = 'rgba(150,140,110,.35)'; circ(g, 272, 86, 5); g.fill(); circ(g, 288, 100, 4); g.fill(); circ(g, 286, 82, 3); g.fill(); } else { g.fillStyle = '#fff6b8'; circ(g, 280, 92, 22); g.fill(); }
+  P.sky = m;
   function hills(base, amp, col, col2, ph) { var c = mk(W, 150); c.g.beginPath(); c.g.moveTo(0, 150); for (x = 0; x <= W; x += 6) c.g.lineTo(x, 150 - base - amp * Math.sin(x / W * PI2 * 2 + ph) - amp * .5 * Math.sin(x / W * PI2 * 3 + ph * 2)); c.g.lineTo(W, 150); c.g.closePath(); c.g.fillStyle = lg(c.g, 0, 150 - base - amp * 1.6, 0, 150, [[0, col2], [1, col]]); c.g.fill(); return { c: c.c, P: W, y: GY - 150 }; }
-  P.far = hills(60, 18, '#a8dd96', '#c6f0b0', .7); P.mid = hills(30, 14, '#6fc668', '#92dd80', 2.1);
+  P.far = nt ? hills(60, 18, '#2f4f86', '#4a6fa8', .7) : hills(60, 18, '#a8dd96', '#c6f0b0', .7); P.mid = nt ? hills(30, 14, '#264a5e', '#3b6e80', 2.1) : hills(30, 14, '#6fc668', '#92dd80', 2.1);
   function clouds(spec) { var c = mk(W, 110), cg = c.g; spec.forEach(function (q) { var j, cx = q[0], cy = q[1], r = q[2]; [[-1.1, .25, .8], [-.45, -.2, 1.05], [.35, -.28, 1.15], [1.1, .15, .85], [0, .35, 1]].forEach(function (b) { circ(cg, cx + b[0] * r, cy + b[1] * r, r * b[2]); cg.fillStyle = rg(cg, cx + b[0] * r - r * .2, cy + b[1] * r - r * .3, 1, cx + b[0] * r, cy + b[1] * r, r * b[2], [[0, '#ffffff'], [.7, '#f4f9ff'], [1, '#cfe0f5']]); cg.fill(); }); }); return { c: c.c, P: W, y: 0 }; }
   P.cl1 = clouds([[78, 40, 17], [262, 66, 14]]); P.cl2 = clouds([[170, 50, 22]]); P.cl1.y = 60; P.cl2.y = 150;
+  if (nt) [P.cl1, P.cl2].forEach(function (q) { var cg = q.c.getContext('2d'); cg.globalCompositeOperation = 'source-atop'; cg.fillStyle = 'rgba(40,40,110,.6)'; cg.fillRect(0, 0, q.c.width, q.c.height); });
   m = mk(W, 56); g = m.g; g.lineWidth = 1.6; g.strokeStyle = INK; var seg = W / 4, cols = ['#ff4d6d', '#ffd93b', '#4d9bff', '#4fd36a', '#ff9a3c', '#9a6cff'], n = 0;
   for (i = 0; i < 4; i++) { var x0 = i * seg, x1 = x0 + seg; g.beginPath(); g.moveTo(x0, 6); g.quadraticCurveTo((x0 + x1) / 2, 24, x1, 6); g.stroke();
     for (var j = 1; j < 6; j++) { var t = j / 6, bx = x0 + seg * t, by0 = 6 * (1 - t) * (1 - t) + 2 * 24 * t * (1 - t) + 6 * t * t; g.beginPath(); g.moveTo(bx - 7, by0); g.lineTo(bx + 7, by0); g.lineTo(bx, by0 + 17); g.closePath(); fs(g, cols[n++ % cols.length], INK, 1.5); } }
   P.bun = { c: m.c, P: W, y: 0 };
-  m = mk(72, 72); g = m.g; for (i = 0; i < 6; i++) for (x = 0; x < 6; x++) { g.fillStyle = (i + x) % 2 ? '#ffffff' : '#ff6b81'; g.fillRect(x * 12, i * 12, 12, 12); }
+  m = mk(72, 72); g = m.g; for (i = 0; i < 6; i++) for (x = 0; x < 6; x++) { g.fillStyle = (i + x) % 2 ? (nt ? '#8a7ad8' : '#ffffff') : (nt ? '#3a2f7a' : '#ff6b81'); g.fillRect(x * 12, i * 12, 12, 12); }
   g.fillStyle = lg(g, 0, 0, 0, 72, [[0, 'rgba(255,255,255,.35)'], [.25, 'rgba(255,255,255,0)'], [1, 'rgba(60,20,40,.3)']]); g.fillRect(0, 0, 72, 72); g.fillStyle = INK; g.fillRect(0, 0, 72, 3); P.floor = m;
-  return (PARTY = P);
+  return nt ? (PARTYN = P) : (PARTY = P);
 }
-function party() { return PARTY || partyBuild(); }
-function balBack(g, off) { var P = party(); put(g, P.sky.c, 0, 0); layer(g, P.cl1, off * .1); layer(g, P.far, off * .2); layer(g, P.cl2, off * .16); layer(g, P.mid, off * .45); layer(g, P.bun, off * .8); }
-function balGround(g, off) { var F = party().floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
-function balWarm() { var i; if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
+function party(nt) { return nt ? PARTYN || partyBuild(true) : PARTY || partyBuild(); }
+function balBack(g, off, nt) { var P = party(nt); put(g, P.sky.c, 0, 0); layer(g, P.cl1, off * .1); layer(g, P.far, off * .2); layer(g, P.cl2, off * .16); layer(g, P.mid, off * .45); layer(g, P.bun, off * .8); }
+function balGround(g, off, nt) { var F = party(nt).floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
+function balWarm(nt) { var i; if (nt && !BALWN) { BALWN = true; TASKQ.push(function () { party(true); }); } if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2018';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2028';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2660,7 +2662,7 @@ var CFG = {
   topFreeSecs: 0.8, topPull: 420,        // Fancy may fly off the top this long, then is pulled back down
   easyStages: 2, easyGap: 12, easySpeed: 9,   // the first two stages are gentler: wider gaps and slower by this much, fading out by stage 3
   friendsPerStage: 5, bowStage: 3,       // friends freed per stage cleared; stage that unlocks the bow tie
-  miniAfter: 3, balAfter: 2, finalTheme: 5, winBonus: 10,   // the water mini game follows the stage with this look (Silverware Drawer); the jungle is the finale, clearing it gives a bonus
+  miniAfter: 3, balAfter: 2, bal2After: 4, finalTheme: 5, winBonus: 10,   // the water mini game follows the stage with this look (Silverware Drawer); the jungle is the finale, clearing it gives a bonus
   magnetR: 80, magnetV: 520, stageCoins: 5,   // coin magnet reach and pull speed; coins paid for clearing a stage
   coinR: 14, perfectFrac: 0.15, closeCall: 7, streakEvery: 3, streakBonus: 3,   // coins: pick-up radius; a perfect gate is within this share of the gap's middle; a close call skims within this many px; every Nth perfect in a row pays a bonus
   hugSecs: 0.8, hugExtra: 1.8, goldStreak: 8, vaultN: 24, goldN: 30, drawerN: 20, wafCap: 5,   // secrets: seconds to hug the top or floor, extra quiet seconds after a stage on repeat runs, the perfect streak that makes a gold gate, coins in each bonus room, the most a wafer clear can pay
@@ -2998,7 +3000,7 @@ function buy(u) {
   save.boosts.spent = (save.boosts.spent || 0) + u.costs[l]; save.boosts[u.id] = l + 1; persist(); var sc = $('upList').scrollTop; refreshUp(); $('upList').scrollTop = sc; syncUp(); $('upMsg').textContent = 'Yay! ' + u.name + ' is now level ' + (l + 1) + '!';
 }
 /* --- The Emporium: a secret shop, open once the Balloon Party has been cleared twice --- */
-var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
+var E = { hat: 0, shades: 1, mega: 2, gheart: 3, stars: 4, hearts: 5, confetti: 6, perkB: 7, perkH: 8, gift: 9, keyBal: 10 }, runPB = 0, runPH = 0, EMP_DOOR = [276, 338, 56, 66];
 var EMP = [
   { id: 'hat', k: 'wear', g: 0, name: 'Top hat', desc: 'A tall black hat with a red band.', cost: 150 },
   { id: 'shades', k: 'wear', g: 0, name: 'Cool shades', desc: 'Very dark. Very cool.', cost: 100 },
@@ -3009,8 +3011,9 @@ var EMP = [
   { id: 'confetti', k: 'spark', g: 2, name: 'Confetti flaps', desc: 'Every flap pops a puff of confetti.', cost: 90 },
   { id: 'perkB', k: 'perk', g: 3, name: 'Spare bounce', desc: 'One extra free bounce for your next run.', cost: 25 },
   { id: 'perkH', k: 'perk', g: 3, name: 'Spare heart', desc: 'One extra heart in Chimp\'s Navy for your next run.', cost: 20 },
-  { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 }
-], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks'];
+  { id: 'gift', k: 'gift', g: 3, name: 'Surprise gift', desc: 'A wrapped box with two random perks inside.', cost: 35 },
+  { id: 'keyBal', k: 'up', g: 4, name: 'Night Balloon key', desc: 'Opens a second Balloon Party at night, right after the Fruit Garden: more balloons, a faster sky and a bigger bonus.', cost: 200 }
+], EMP_H = ['Costumes', 'Special upgrades', 'Trails and sparks', 'Gifts and one-run perks', 'Keys to secret places'];
 function empOn() { return save.stats.balClears >= CFG.empClears; }
 function empOwn(i) { return ((save.unlocks.emp | 0) >> i & 1) === 1; }
 function empWorn(i) { return empOwn(i) && ((save.unlocks.empOff | 0) >> i & 1) === 0; }
@@ -3025,7 +3028,7 @@ function usePerks() {   // a new run spends the one-run perks that were bought
 function refreshEmp() {
   $('epBal').textContent = bal(); var box = $('epList'), g, i;
   box.textContent = '';
-  for (g = 0; g < 4; g++) {
+  for (g = 0; g < EMP_H.length; g++) {
     var h = document.createElement('h3'); h.textContent = EMP_H[g]; box.appendChild(h);
     for (i = 0; i < EMP.length; i++) if (EMP[i].g === g) empTile(box, i);
   }
@@ -3935,7 +3938,8 @@ function drawClock(cx, ax) {   // the run timer under the pause button, with the
 function stageUp() {
   var done = themeOf(stage); cardStage = stage; split('S' + stage); stage++; save.stats.friends += CFG.friendsPerStage;
   giveCoins(CFG.stageCoins, bx + 20, by); burst(bx + 20, by, 26, ['#ffd93b', '#ff6b81', '#7ad8ff', '#8ae28a', '#ffffff'], 300, 340); pop('Stage bonus +' + CFG.stageCoins + '!', '#ffd93b', 22);   // a little fanfare
-  pendNext = done === CFG.miniAfter ? 'mini' : done === CFG.finalTheme ? 'win' : done === CFG.balAfter && save.unlocks.balloons && !pracN ? 'balloons' : '';
+  pendNext = done === CFG.miniAfter ? 'mini' : done === CFG.finalTheme ? 'win' : done === CFG.balAfter && save.unlocks.balloons && !pracN ? 'balloons' : done === CFG.bal2After && empOwn(E.keyBal) && !pracN ? 'balloons' : '';
+  balNight = pendNext === 'balloons' && done === CFG.bal2After;
   if (pendNext !== 'mini' && pendNext !== 'balloons') { bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist; }   // before the water bonus the scene stays put (no glimpse of the next stage): it washes out to white into the mini game
   if (stage >= CFG.bowStage && !save.unlocks.bow) { save.unlocks.bow = true; toast('New costume unlocked: a bow tie for Fancy!'); }
   if (pendNext === 'win') { save.stats.wins++; save.stats.friends += CFG.winBonus; nextT = 0.8; if (runChal && !pracN) { var bk = 'b_' + runChal; if (!save.unlocks[bk]) { save.unlocks[bk] = 1; badgeNew = CHAL[chalIdx() - 1][1]; } } }   // the finale gets its own victory screen instead of a stage card
@@ -4041,7 +4045,7 @@ function update(dt) {
     kBy0 = by; by += vy * dt; if (vy > 0 && grace <= 0) fallD += vy * dt; else fallD = 0; if (hurtT > 0) hurtT -= dt; if (bngT > 0) bngT -= dt;
     angle = clamp(vy / 700, -0.5, 1.1);
     if (rsgT < 0 || !rsgWait && rsgK >= 1) rsgK = 1; else if (!rsgWait) rsgK = Math.min(1, rsgK + dt / 0.45);
-    var sp = (speedFor(stage) + boost) * (rsgK >= 1 ? 1 : rsgK * rsgK * (3 - 2 * rsgK)) * (VAULT && VAULT.kind === 'gold' ? 1.35 : 1) * (lvl('potassium') ? kStep(dt) : 1); if (boostT < CFG.boostSecs) { boostT += dt; boost = boostT >= CFG.boostSecs ? 0 : CFG.boostV * (0.5 + 0.5 * Math.cos(Math.PI * boostT / CFG.boostSecs)); }   // the blast-off speed eases away slowly and smoothly (no sudden slow-down)
+    var sp = (speedFor(stage) + boost) * (rsgK >= 1 ? 1 : rsgK * rsgK * (3 - 2 * rsgK)) * (VAULT && VAULT.kind === 'gold' ? 1.35 : 1) * (BAL && BAL.night ? 1.12 : 1) * (lvl('potassium') ? kStep(dt) : 1); if (boostT < CFG.boostSecs) { boostT += dt; boost = boostT >= CFG.boostSecs ? 0 : CFG.boostV * (0.5 + 0.5 * Math.cos(Math.PI * boostT / CFG.boostSecs)); }   // the blast-off speed eases away slowly and smoothly (no sudden slow-down)
     var still = !!(FT && FT.n === 3 && FT.ph !== 'wait' && ART.arena.ready()), sp0 = sp;   // fight 3 happens in a clearing that does not scroll: the gorilla is squatting, so the world slows to a stop (the trail still streams back)
     ftStill = clamp(ftStill + (still ? dt : -dt) / 0.6, 0, 1); if (ftStill > 0) sp = sp0 * (1 - ss(ftStill));
     if (FT && FT.n === 3) { var cm = FT.ph === 'retry' ? 1 : FT.ph === 'between' ? 2 : FT.ph === 'won' ? 3 : 0; if (cm !== crowd.m) { crowd.p = crowd.m; crowd.m = cm; crowd.t = 0; } else crowd.t += dt; }
@@ -4073,7 +4077,7 @@ function update(dt) {
         o.passed = true; score++; rateGate(o); if (o.gold && !VAULT) warp = true;
         if (score === gateStart(stage + 1)) { if (pracN) pracWin(); else stageUp(); }
         if (!pracN && runStartBest > 0 && score === runStartBest + 1) { pop('NEW BEST!', '#ffd93b', 26); burst(CFG.bananaX + 30, by, 22, ['#ffd93b', '#ffffff', '#ff6b81'], 240, 240); }   // past the old record
-        if (score - gateStart(stage) === 1) { if (themeOf(stage) === CFG.finalTheme) warmFight(); if (themeOf(stage) === CFG.balAfter && save.unlocks.balloons && !pracN) ART.bal.warm(); if (themeOf(stage) === CFG.miniAfter) ART.mg.warm(); else if (themeOf(stage + 1) !== bgTheme) ART.warm(themeOf(stage + 1)); }   // build the next stage's pictures early (right after the first gate, in small steps), in a calm moment
+        if (score - gateStart(stage) === 1) { if (themeOf(stage) === CFG.finalTheme) warmFight(); if (themeOf(stage) === CFG.balAfter && save.unlocks.balloons && !pracN) ART.bal.warm(); if (themeOf(stage) === CFG.bal2After && empOwn(E.keyBal) && !pracN) ART.bal.warm(true); if (themeOf(stage) === CFG.miniAfter) ART.mg.warm(); else if (themeOf(stage + 1) !== bgTheme) ART.warm(themeOf(stage + 1)); }   // build the next stage's pictures early (right after the first gate, in small steps), in a calm moment
         if (score - gateStart(stage) === 3) cardWarm();   // and the words for the stage card, one picture per frame, so the card does not land on one frame
       }
     }
@@ -4571,7 +4575,7 @@ $('wCopy').addEventListener('click', function () { copyText(resultText(), functi
 $('wKeep').addEventListener('click', winKeep); $('wTitle').addEventListener('click', winTitle); $('wFresh').addEventListener('click', winFresh);
 
 /* ===== Specials: Prince Chimp's balloons (Balloon Party stage), pennant flags, and the big victory card ===== */
-var BAL = null, BALR = null, shd = [], BAL_DUR = 25, BAL_END = 22;   // the balloon stage now running, its result card, pieces of popped balloons
+var balNight = false, BAL = null, BALR = null, shd = [], BAL_DUR = 25, BAL_END = 22;   // the balloon stage now running, its result card, pieces of popped balloons
 var fl = [], flAcc = 0, FLC = ['#ff4d6d', '#ffd93b', '#4d9bff', '#4fd36a', '#ff9a3c', '#9a6cff'];   // the pennant string: where Fancy's tail has been
 var giftT = 0, giftS = 0, giftSt = 0, fwk = [], fwkT = 0;   // the balloon hand-over scene (step, seconds in step); victory fireworks
 function rainOk() { return save.stats.streak >= 10; }   // earned by a best perfect streak of 10
@@ -4605,10 +4609,10 @@ function drawFlags() {   // a thin string drawn as one smooth curve, with small 
 }
 
 /* --- Balloon Party: a calm flight between the Ice Cream Parlor and the Silverware Drawer. No obstacles; pop balloons. Only the floor hurts. --- */
-function balPlan() {
-  var p = [], cur = 1.0, k, i, n, y, d, A, c;
+function balPlan(nt) {   // nt: the night party packs in 40% more balloons (the same plan, squeezed into the same time)
+  var p = [], cur = 1.0, k, i, n, y, d, A, c, dn = nt ? 1.4 : 1;
   function add(t, yy, gold) { p.push({ t: t, y: clamp(yy, 135, 500), ci: gold ? 8 : Math.floor(rng() * 8), gold: !!gold }); }
-  while (cur < BAL_END) {
+  while (cur < BAL_END * dn) {
     k = rng();
     if (k < 0.3) { n = 5 + Math.floor(rng() * 3); c = 200 + rng() * 200; A = 50 + rng() * 40; for (i = 0; i < n; i++) add(cur + i * 0.42, c + A * Math.sin(i * 0.95)); cur += n * 0.42 + 0.5; }   // a wave
     else if (k < 0.55) { n = 4 + Math.floor(rng() * 3); y = 170 + rng() * 280; d = (rng() < 0.5 ? -1 : 1) * 38; for (i = 0; i < n; i++) add(cur + i * 0.4, y + d * i); cur += n * 0.4 + 0.5; }   // a slope
@@ -4617,12 +4621,13 @@ function balPlan() {
     else { add(cur, 420 + rng() * 80, true); cur += 1.2; }   // a gold one, low and tempting
   }
   add(7 + rng() * 2, 250 + rng() * 150, true); add(15 + rng() * 2, 250 + rng() * 150, true);
+  if (nt) p.forEach(function (q) { q.t /= dn; });
   p.sort(function (a, b) { return a.t - b.t; }); return p;
 }
 function startBalloons() {
-  flipV = 0; ART.bal.warm();
+  flipV = 0; ART.bal.warm(balNight);
   state = 'play'; pendNext = ''; nextT = 0; cardT = -1; celT = 0; obs = []; fx.length = 0; trail.length = 0; fl.length = 0; pops.length = 0; shd.length = 0;
-  split('Balloons'); BAL = { t: 0, ph: 'play', plan: balPlan(), pi: 0, list: [], popped: 0, total: 0, combo: 0, comboT: 0, coins: 0, pw: [] }; BAL.total = BAL.plan.length;
+  split(balNight ? 'Balloons2' : 'Balloons'); BAL = { night: balNight, t: 0, ph: 'play', plan: balPlan(balNight), pi: 0, list: [], popped: 0, total: 0, combo: 0, comboT: 0, coins: 0, pw: [] }; BAL.total = BAL.plan.length;
   rsgT = 0; rsgGo = false; rsgTap = false; vy = 0; grace = 0; boost = 0; boostT = 99; trackOn = false; invuln = 0; spinT = 0; by = CFG.rsgY; bx = CFG.bananaX; washA = calmOn() ? 0.4 : 1;
 }
 function balPop(b) {
@@ -4661,10 +4666,11 @@ function updateBalloons(dt, sp) {
   if (B.t >= BAL_DUR && !B.list.length && B.pi >= B.plan.length) balFinish();
 }
 function balFinish() {
-  var B = BAL, perfect = B.popped === B.total, bonus = perfect ? 15 : B.popped >= B.total * 0.7 ? 5 : 0;
+  var B = BAL, perfect = B.popped === B.total, bonus = (perfect ? 15 : B.popped >= B.total * 0.7 ? 5 : 0) * (B.night ? 2 : 1);
   if (bonus) giveCoins(bonus, bx + 20, by);
-  save.stats.balClears = Math.min(999, save.stats.balClears + 1); if (save.stats.balClears === CFG.empClears) toast('A secret door appeared! Tap it to enter the Emporium.', 5200); persist();
-  BALR = { popped: B.popped, total: B.total, coins: B.coins + bonus, perfect: perfect, bonus: bonus }; runPopsOf += B.total;
+  if (!B.night) save.stats.balClears = Math.min(999, save.stats.balClears + 1); if (!B.night && save.stats.balClears === CFG.empClears) toast('A secret door appeared! Tap it to enter the Emporium.', 5200); persist();
+  BALR = { night: B.night, popped: B.popped, total: B.total, coins: B.coins + bonus, perfect: perfect, bonus: bonus }; runPopsOf += B.total;
+  if (B.night) ART.bal.free();
   BAL = null; rsgT = 0; rsgGo = false; rsgTap = false; celT = CFG.celSecs; vy = 0; grace = 0; invuln = 0; lastAfter = 0;
   bgFrom = bgTheme; bgTheme = themeOf(stage); bgT = bgFrom === bgTheme ? 1 : 0; if (bgTheme === ART.journeyTheme) gardenD0 = dist;
   nextX = W + CFG.obW + speedFor(stage) * (rsgGoAt() + 0.4);   // the first gate of the Silverware Drawer arrives well after GO
@@ -4700,13 +4706,13 @@ function drawBalHud() {
   var B = BAL, w = 150, x0 = W / 2 - w / 2;
   ctx.lineWidth = 2.5; ctx.strokeStyle = INK; rrect(x0, 108, w, 11, 5.5); ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fill(); ctx.stroke();
   if (B.t > 0) { rrect(x0 + 1, 109, Math.max(8, (w - 2) * clamp(B.t / BAL_DUR, 0, 1)), 9, 4.5); ctx.fillStyle = '#ff6b81'; ctx.fill(); }
-  outlined('Balloon Party  -  ' + B.popped + ' of ' + B.total, W / 2, 133, 14, '#ffffff');
+  outlined((B.night ? 'Night Balloon Party  -  ' : 'Balloon Party  -  ') + B.popped + ' of ' + B.total, W / 2, 133, 14, '#ffffff');
   if (B.combo >= 2 && B.comboT > 0) { outlinedC('x' + B.combo, W / 2, 158, 20, '#ffd93b'); ctx.lineWidth = 2; ctx.strokeStyle = INK; rrect(W / 2 - 30, 168, 60, 7, 3.5); ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fill(); ctx.stroke(); rrect(W / 2 - 29, 169, Math.max(5, 58 * clamp(B.comboT / 1.2, 0, 1)), 5, 2.5); ctx.fillStyle = '#ffd93b'; ctx.fill(); }   // the chain meter: pop the next one before it runs out
 }
 function balIntro() {   // the title and the one rule, before Ready, Set, Go
   if (!BAL || BAL.t > 0 || rsgT < 0 || rsgT >= CFG.cardSecs) return;
   var a = clamp(Math.min(rsgT / 0.3, (CFG.cardSecs - rsgT) / 0.3), 0, 1);
-  ctx.globalAlpha = a; outlined('Balloon Party!', W / 2, 168, 40, '#ffd93b'); outlined('Prince Chimp is sorry. Pop his balloons!', W / 2, 212, 16, '#ffffff'); outlined('Nothing can hurt you up here. Only the floor.', W / 2, 236, 16, '#ffffff'); ctx.globalAlpha = 1;
+  ctx.globalAlpha = a; outlined(BAL.night ? 'Night Party!' : 'Balloon Party!', W / 2, 168, 40, '#ffd93b'); outlined(BAL.night ? 'More balloons, a faster sky. Pop them all!' : 'Prince Chimp is sorry. Pop his balloons!', W / 2, 212, 16, '#ffffff'); outlined('Nothing can hurt you up here. Only the floor.', W / 2, 236, 16, '#ffffff'); ctx.globalAlpha = 1;
 }
 function drawEmpDoor(cx, by0) {   // the Emporium door on the Balloon Party card: an arched wooden door with a gold star
   var w = 34, h = 48, x = cx - w / 2, y = by0 - h, lit = 0.5 + 0.5 * Math.sin(time * 4);
@@ -4767,7 +4773,7 @@ function homeTap(pl) {
 }
 function homeUps() {
   var o = UPS.map(function (u) { return { n: XSHORT[u.id] || u.name, d: u.desc, l: lvl(u.id), m: u.costs.length }; });
-  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 });
+  o.push({ n: 'Mega magnet', d: EMP[E.mega].desc, l: empOwn(E.mega) ? 1 : 0, m: 1 }, { n: 'Golden heart', d: EMP[E.gheart].desc, l: empOwn(E.gheart) ? 1 : 0, m: 1 }, { n: 'Night key', d: EMP[E.keyBal].desc, l: empOwn(E.keyBal) ? 1 : 0, m: 1 });
   return o;
 }
 function homeCos() {
@@ -4868,7 +4874,7 @@ function renderHome() {
 }
 function balResultCard() {
   var t = rsgT, a = clamp(Math.min(t / 0.3, (CFG.cardSecs - t) / 0.3), 0, 1), e = a * a * (3 - 2 * a), dx = (t < CFG.cardSecs / 2 ? 1 : -1) * (1 - e) * 400, y = 336, R = BALR, i;
-  ctx.save(); ctx.translate(dx, 0); cardFrame(30, y, 300, 200, '#ff7aa8', 'Balloon Party!', 28, 46);
+  ctx.save(); ctx.translate(dx, 0); cardFrame(30, y, 300, 200, R.night ? '#7a6cff' : '#ff7aa8', R.night ? 'Night Party!' : 'Balloon Party!', 28, 46);
   for (i = 0; i < 5; i++) ART.bal.draw(ctx, (i * 2 + 1) % 8, 62 + i * 59, y + 84 + Math.sin(time * 3 + i) * 4, 0.5);
   if (empOn()) drawEmpDoor(EMP_DOOR[0] + 28, EMP_DOOR[1] + 62);
   outlined('You popped ' + R.popped + ' of ' + R.total + '!', W / 2, y + 128, 20, '#ffffff');
@@ -5149,8 +5155,8 @@ function bkDraw(th, d) {
   for (i = 0; i < bkBands.length; i++) { o = (d * bkBands[i].f) % bkBands[i].pc; x = (-o * cpl).toFixed(3); if (bkLast[i] !== x) { bkLast[i] = x; bkBands[i].el.style.transform = 'translate3d(' + x + 'px,0,0)'; } }
   ctx.clearRect(0, 0, W, H); return true;
 }
-function drawBack() { if (BAL) { bkHide(); ART.bal.back(ctx, dist); return; } if (ftStill >= 0.5) { bkHide(); crowd.time = time; if (ART.arena.draw(ctx, crowd)) return; } var th = shownTheme(); if (bkWant(th) && bkDraw(th, bd(th))) return; bkHide(); ART.back(ctx, th, bd(th)); }
-function drawGround() { if (BAL) { ART.bal.ground(ctx, dist); return; } var th = shownTheme(); ART.ground(ctx, th, bd(th)); }
+function drawBack() { if (BAL) { bkHide(); ART.bal.back(ctx, dist, BAL.night); return; } if (ftStill >= 0.5) { bkHide(); crowd.time = time; if (ART.arena.draw(ctx, crowd)) return; } var th = shownTheme(); if (bkWant(th) && bkDraw(th, bd(th))) return; bkHide(); ART.back(ctx, th, bd(th)); }
+function drawGround() { if (BAL) { ART.bal.ground(ctx, dist, BAL.night); return; } var th = shownTheme(); ART.ground(ctx, th, bd(th)); }
 function spinPhase() { return (1 - spinT / CFG.spinSecs) * CFG.spinRolls * 6.2832; }
 function drawFancy(x, y, rot, sc) {   // a little squash and stretch: taller on a flap, long and thin in the launch
   var f = flapAnim > 0 ? flapAnim / 0.18 : 0, st = state === 'launch' ? clamp((launchT / CFG.launchSecs - 0.3) / 0.5, 0, 1) : 0;
@@ -5323,7 +5329,7 @@ function stageCard() {
   ART.chimp(ctx, 62, y + 168, 0.42, 1, time);
   var bk = !pendNext && stage === backStage && !pracN;
   if (bk) { ctx.save(); ctx.translate(205, y + 150); ctx.rotate(Math.sin(time * 5) * 0.04); outlined('Whoa! It flips backward!', 0, 0, 15, '#ff9ad0'); ctx.restore(); }
-  outlined(pendNext === 'mini' ? 'Bonus: Chimp\'s Navy!' : pendNext === 'balloons' ? 'Bonus: Balloon Party!' : 'Next: ' + ART.names[themeOf(stage)], 205, y + (bk ? 176 : 170), 17, '#ffd93b');
+  outlined(pendNext === 'mini' ? 'Bonus: Chimp\'s Navy!' : pendNext === 'balloons' ? (balNight ? 'Bonus: Night Balloon Party!' : 'Bonus: Balloon Party!') : 'Next: ' + ART.names[themeOf(stage)], 205, y + (bk ? 176 : 170), 17, '#ffd93b');
   ctx.restore();
 }
 function pracCard(da) {   // a practiced stage ended
