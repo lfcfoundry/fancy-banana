@@ -189,7 +189,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <button class="opt" id="wPlain"><canvas id="cvPlain" width="176" height="120"></canvas><span>Plain Fancy<small>Cape only</small></span></button>
 <button class="opt" id="wBow"><canvas id="cvBow" width="176" height="120"></canvas><span>Bow tie<small id="bowNote"></small></span></button>
 <button class="opt" id="wRain"><span>Rainbow trail<small id="rainNote"></small></span></button>
-<button class="opt" id="wBunch"><span>Banana Bunch<small id="bunchNote"></small></span></button>
+<button class="opt" id="wBunch"><canvas id="cvBunch" width="176" height="120"></canvas><span>Banana Bunch<small id="bunchNote"></small></span></button>
 <button class="opt" id="wCrown"><span>Banana Crown<small id="crownNote"></small></span></button>
 <button class="opt" id="wFlags"><span>Pennant flags<small id="flagNote"></small></span></button>
 <h3>Scarf color</h3><div class="swr" id="scRow"></div>
@@ -2641,7 +2641,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.2201';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.2332';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2948,11 +2948,12 @@ function refreshWear() {
     var g = $(p[0]).getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 176, 120); g.setTransform(2, 0, 0, 2, 0, 0);
     ART.banana(g, 54, 32, -0.05, 0.95, 0, 0.4, p[1], 0);
   });
+  var bg = $('cvBunch').getContext('2d'); bg.setTransform(1, 0, 0, 1, 0, 0); bg.clearRect(0, 0, 176, 120); bg.setTransform(2, 0, 0, 2, 0, 0); bg.globalAlpha = bunchOk() ? 1 : 0.3; bg.save(); bg.translate(40, 22); bunchDraw(bg, 0.58); bg.restore(); ART.banana(bg, 58, 30, -0.05, 0.8, 0, 0.4, false, 0); bg.globalAlpha = 1;
   refreshColors();
   $('wPlain').classList.toggle('on', !on); $('wBow').classList.toggle('on', on);
   $('wRain').disabled = !rainOk(); $('wRain').classList.toggle('on', rainOn()); $('rainNote').textContent = rainOk() ? (rainOn() ? 'A rainbow behind Fancy' : 'Off') : 'A secret: a perfect streak of 10';
   var fu = !!save.unlocks.flags; $('wFlags').disabled = !fu; $('wFlags').classList.toggle('on', flagsOn()); $('flagNote').textContent = fu ? (flagsOn() ? 'Flying behind Fancy' : 'Off') : 'A secret: beat Prince Chimp';
-  $('wBunch').disabled = !bunchOk(); $('wBunch').classList.toggle('on', bunchOn()); $('bunchNote').textContent = bunchOk() ? (bunchOn() ? 'Flying with Fancy' : 'Off') : 'A secret: find all six lost friends';
+  $('wBunch').disabled = !bunchOk(); $('wBunch').classList.toggle('on', bunchOn()); $('bunchNote').textContent = bunchOk() ? (bunchOn() ? 'Worn on his back' : 'Off') : 'A secret: find all six lost friends';
   var cu = !!save.unlocks.crown; $('wCrown').disabled = !cu; $('wCrown').classList.toggle('on', wearsCrown()); $('crownNote').textContent = cu ? (wearsCrown() ? 'Wearing it' : 'Off') : 'A secret: win the Crown Duel';
   $('wBow').disabled = !bow; $('bowNote').textContent = bow ? (on ? 'Wearing it' : 'Unlocked') : 'Reach stage ' + CFG.bowStage + ' to unlock';
 }
@@ -3843,7 +3844,7 @@ function secretsAll() { var n = 0, i; for (i = 0; i < SEC_KEYS.length; i++) if (
 function secretFound(k, msg) { if (!save.unlocks[k]) { save.unlocks[k] = 1; persist(); if (msg) toast(msg, 4500); } }
 function frCollect(i) {
   save.unlocks['f' + i] = 1; giveCoins(3, bx + 20, by); burst(bx + 20, by, 26, ['#ffd93b', '#ffffff', '#7be07b'], 260, 260); pop('Found ' + FR_NAMES[i] + '!', '#7be07b', 24);
-  if (bunchOk()) { toast('All six lost friends found! The Banana Bunch now flies with Fancy (see Costume).', 6000); giveCoins(10, bx + 20, by); }
+  if (bunchOk()) { toast('All six lost friends found! The Banana Bunch now hangs on the back of Fancy (see Costume).', 6000); giveCoins(10, bx + 20, by); }
   else toast('A lost friend: ' + FR_NAMES[i] + '! ' + frCount() + ' of 6 found.', 3500);
   persist();
 }
@@ -5197,7 +5198,7 @@ function homeBuild() {
     } else if (i === 4) { drawPieces(g, x, y + 2, 0.42); }
     else if (i === 5) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.4; for (j = 0; j < 2; j++) { g.beginPath(); g.moveTo(x - 5 + j * 11, y + 14); g.quadraticCurveTo(x - 2 + j * 11, y + 2, x - 5 + j * 11, y - 3); g.stroke(); g.fillStyle = j ? '#4fb8ff' : '#ff6b81'; g.lineWidth = 2; g.beginPath(); g.ellipse(x - 6 + j * 12, y - 8, 7, 9, 0, 0, 6.2832); g.fill(); g.stroke(); g.lineWidth = 1.4; } }
     else if (i === 6) { g.globalAlpha = it.own ? 1 : 0.22; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x - 17, y - 8); g.quadraticCurveTo(x, y + 2, x + 17, y - 8); g.stroke(); ['#e8453c', '#ffd93b', '#4fb8ff'].forEach(function (cl, q) { var px = x - 12 + q * 12, py = y - 4 + (q === 1 ? 2 : 0); g.fillStyle = cl; g.beginPath(); g.moveTo(px - 5, py); g.lineTo(px + 5, py); g.lineTo(px, py + 13); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); }); }
-    else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; for (j = 0; j < 3; j++) ART.friend(g, x - 8 + j * 8, y + 2 + (j === 1 ? -4 : 0), 0, 0.34, FR_V[j]); }
+    else if (i === 7) { g.globalAlpha = it.own ? 1 : 0.22; g.translate(x, y - 12); bunchDraw(g, 0.36); }
     else if (i === 10) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ff5a1f'; g.beginPath(); g.moveTo(x - 8, y + 10); g.lineTo(x - 3, y - 2); g.lineTo(x + 3, y - 2); g.lineTo(x + 8, y + 10); g.closePath(); g.fill(); g.lineWidth = 1.4; g.stroke(); g.fillStyle = '#ffd93b'; g.beginPath(); g.ellipse(x, y - 2, 3.5, 1.6, 0, 0, 6.2832); g.fill(); }
     else if (i === 9) { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x - 4, y + 5, 4.2, 0, 6.2832); g.arc(x + 1, y + 2.5, 5, 0, 6.2832); g.arc(x + 6, y + 5, 3.8, 0, 6.2832); g.fill(); g.lineWidth = 1.4; g.stroke(); }
     else { g.globalAlpha = it.own ? 1 : 0.22; g.fillStyle = '#f0bf45'; g.beginPath(); g.arc(x, y + 3, 12, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke(); g.translate(x, y + 5); g.scale(0.42, 0.42); g.beginPath(); g.moveTo(-17, 6); g.quadraticCurveTo(-4, -2, 0, -15); g.quadraticCurveTo(4, -2, 17, 6); g.quadraticCurveTo(2, 3, 0, -6); g.quadraticCurveTo(-2, 3, -17, 6); g.closePath(); g.fillStyle = '#d99a48'; g.fill(); g.lineWidth = 3.4; g.stroke(); }
@@ -5213,6 +5214,7 @@ function homeBuild() {
   // the mirror (it opens the costume picker)
   g.fillStyle = '#7a4a26'; g.fillRect(124, 446, 8, 8); g.fillRect(164, 446, 8, 8); g.fillStyle = '#d9a441'; g.beginPath(); g.ellipse(148, 402, 32, 48, 0, 0, 6.2832); g.fill(); g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
   g.fillStyle = '#d8efff'; g.beginPath(); g.ellipse(148, 402, 26, 42, 0, 0, 6.2832); g.fill(); g.lineWidth = 2; g.stroke();
+  if (bunchOn()) { g.save(); g.translate(131, 398); bunchDraw(g, 0.42); g.restore(); }
   ART.banana(g, 148, 406, -0.05, 0.58, 0, 0.4, wearFlags(), 0); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 3; g.beginPath(); g.arc(148, 402, 33.5, 3.5, 4.5); g.stroke(); T('Costumes', 148, 459 - 4, 9, '#ffffff', 'center', 1); z.push([116, 356, 64, 96, 'mirror', 0]);
   // the bookshelf
   g.fillStyle = '#8a5a33'; g.fillRect(236, 354, 108, 98); g.fillStyle = '#5e3a1c'; g.fillRect(242, 360, 96, 40); g.fillRect(242, 406, 96, 40); g.lineWidth = 2; g.strokeStyle = INK; g.strokeRect(236, 354, 108, 98);
@@ -5619,9 +5621,25 @@ function drawWind() {
 }
 var TRC1 = [], TRC2 = [];
 (function () { for (var i = 0; i <= 24; i++) { TRC1.push('rgba(255,190,50,' + (i / 24 * 0.5).toFixed(3) + ')'); TRC2.push('rgba(255,255,230,' + (i / 24 * 0.85).toFixed(3) + ')'); } })();   // colour strings made once: nothing new for the garbage collector each frame
-var BUD = [];
-function budPic(i) { var c = BUD[i], g; if (!c || c.kk !== k) { c = document.createElement('canvas'); c.width = Math.round(40 * k); c.height = Math.round(30 * k); g = c.getContext('2d', CRF); g.scale(k, k); ART.friend(g, 20, 16, 0, 0.62, FR_V[i]); c.kk = k; BUD[i] = c; } return c; }
-function drawBuddies() { for (var i = 0; i < 6; i++) put0(budPic(i), bx - 46 - (i >> 1) * 24 - 20, by + (i % 2 ? 20 : -20) + Math.sin(time * 5 + i * 1.3) * 5 - 15, 40, 30); }   // the Banana Bunch: six little friends flying along behind Fancy
+var BUNCH = null;
+function bunchDraw(g, s) {   // the Banana Bunch: six little banana friends joined on one stem, hanging from the crown at (0, 0)
+  var i, a, L = 52, p0x, p1x, p1y, cx, cy, ang = [-0.98, 0.98, -0.62, 0.62, -0.24, 0.24], ex, ey, tx, ty;
+  g.save(); g.scale(s, s); g.lineCap = 'round'; g.lineJoin = 'round';
+  for (i = 0; i < 6; i++) {   // the outer ones first, the middle ones in front
+    a = ang[i]; p0x = Math.sin(a) * 2; cx = Math.sin(a) * L * 0.5; cy = Math.cos(a) * L * 0.66; p1x = Math.sin(a) * L * 0.95 - Math.sign(a) * 5; p1y = Math.cos(a) * L * 0.92;
+    g.beginPath(); g.moveTo(p0x, 4); g.quadraticCurveTo(cx, cy, p1x, p1y); g.strokeStyle = INK; g.lineWidth = 14; g.stroke();
+    g.strokeStyle = i < 2 ? '#e8b92a' : i < 4 ? '#f6cd33' : '#ffdf4a'; g.lineWidth = 10; g.stroke();
+    g.save(); g.translate(-1.4, -1.2); g.beginPath(); g.moveTo(p0x, 6); g.quadraticCurveTo(cx, cy, p1x, p1y - 3); g.strokeStyle = 'rgba(255,248,190,.8)'; g.lineWidth = 2.4; g.stroke(); g.restore();
+    g.fillStyle = '#5a3a14'; g.beginPath(); g.arc(p1x, p1y, 3.4, 0, 6.2832); g.fill(); g.lineWidth = 1.6; g.strokeStyle = INK; g.stroke();
+    ex = 0.25 * p0x + 0.5 * cx + 0.25 * p1x; ey = 0.25 * 4 + 0.5 * cy + 0.25 * p1y; tx = 0.8 * cx - 0.8 * p0x; ty = 0.8 * cy;
+    g.fillStyle = INK; g.beginPath(); g.arc(ex - 2.8, ey - 1, 1.5, 0, 6.2832); g.arc(ex + 2.8, ey - 1, 1.5, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(ex, ey + 1.2, 2.2, 0.15, 3, false); g.lineWidth = 1.2; g.stroke();
+  }
+  g.fillStyle = '#7fa332'; g.beginPath(); g.roundRect(-6, -10, 12, 17, 4); g.fill(); g.lineWidth = 2.6; g.strokeStyle = INK; g.stroke(); g.fillStyle = '#5a3a14'; g.beginPath(); g.roundRect(-5, -13, 10, 6, 2); g.fill(); g.lineWidth = 2; g.stroke();
+  g.restore();
+}
+function bunchPic() { if (!BUNCH || BUNCH.kk !== k) { var c = document.createElement('canvas'), g; c.width = Math.round(80 * k); c.height = Math.round(80 * k); g = c.getContext('2d', CRF); g.scale(k, k); g.translate(40, 14); bunchDraw(g, 1); c.kk = k; BUNCH = c; } return BUNCH; }
+function drawBuddies() { var rot = clamp(-vy / 2200, -0.3, 0.3) + Math.sin(time * 3.2) * 0.07; ctx.save(); ctx.translate(bx - 26, by - 10); ctx.rotate(rot); ctx.drawImage(bunchPic(), -40, -14, 80, 80); ctx.restore(); }   // worn like a backpack: it hangs from Fancy's back and swings as he climbs and falls
 function drawTrail() {
   var n = trail.length, i, p, q, a, pw = state === 'launch' ? clamp((launchT / CFG.launchSecs - 0.12) / 0.4, 0, 1) : state === 'play' ? 0.25 + 0.75 * clamp(boost / CFG.boostV + kCh, 0, 1) : 0, qa;
   if (n < 2 || pw <= 0) return;
