@@ -2639,7 +2639,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.11.1815';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.11.1959';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2870,12 +2870,20 @@ function copyCode() {
   var fallback = function () { codeEl.focus(); codeEl.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { } say(ok ? 'Copied.' : 'Select the code above and copy it.'); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say('Copied.'); }, fallback); else fallback();
 }
+var dlHold = 0;   // a native Save or Open dialog is on screen: the browser keeps the page's drawing and the dialog fighting for the screen, so the game rests (no steps, no drawing) until you are back
+function holdForDialog() {
+  var t0 = performance.now(), seenBlur = false, tm = 0;
+  var done = function () { if (!dlHold) return; dlHold = 0; removeEventListener('blur', onB); removeEventListener('focus', done); removeEventListener('pointermove', back, true); removeEventListener('pointerdown', back, true); removeEventListener('keydown', back, true); clearInterval(tm); };
+  var onB = function () { seenBlur = true; }, back = function () { if (performance.now() - t0 > 400) done(); };   // input only counts once the dialog has had time to open
+  dlHold = 1; addEventListener('blur', onB); addEventListener('focus', done); addEventListener('pointermove', back, true); addEventListener('pointerdown', back, true); addEventListener('keydown', back, true);
+  tm = setInterval(function () { var age = performance.now() - t0; if ((!seenBlur && age > 2500) || age > 90000) done(); }, 500);   // no dialog took the focus (a browser that saves straight to Downloads): carry on after a moment
+}
 function downloadFile() {
   try {
     var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
     var name = 'fancy-save-' + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '.json';
     var url = URL.createObjectURL(new Blob([JSON.stringify(save, null, 1)], { type: 'application/json' }));
-    var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); holdForDialog(); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
     say('Save file started: ' + name + '. If nothing downloads, copy the save code instead.');
   } catch (e) { logError('download', e); say('This browser blocked the download. Copy the save code instead.'); }
@@ -2911,7 +2919,7 @@ if (RM && RM.addEventListener) RM.addEventListener('change', function () { if (!
 
 /* ===== Costumes and upgrades ===== */
 /* ===== The Banana Museum (five quick taps on Fancy on the title screen, once the game has been beaten) ===== */
-var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.']];
+var MUSE = [['balloons', 'Balloon Party', 'Beat Prince Chimp once.'], ['flags', 'Pennant flags', 'He gives them up with the balloons.'], ['wafers', 'Vanilla wafers', 'Thrown in the Navy from the third playthrough.'], ['vault', 'Sky Vault', 'In the quiet at the start of a run or after a stage, fly along the very top edge. Look for a shimmer.'], ['gold', 'Golden Gate', 'A long perfect streak makes one gate glow. Fly through it.'], ['drawer', 'Junk Drawer', 'In the quiet before the Silverware Drawer, skim the floor.'], ['raft', 'Treasure Raft', 'In the Navy, time three barrel leaps just right in a row.'], ['cove', 'Secret Cove', 'Near the end of the Navy, fly through the little rock arch in the water.'], ['boss', 'Boss Sub', 'Sail the whole Navy without losing a heart.']];
 var museN = 0, museT = -9, museW = 0;
 var TOFF = 40;   // the title picture sits this far lower: the news ticker has the top of the screen
 function museHit(pl) {
@@ -2960,7 +2968,7 @@ var UPS = [
   { id: 'wind', name: 'Second wind', desc: 'Once per run, a crash restarts the current stage instead of ending the run', costs: [100] },
   { id: 'rope', name: 'Rope cutter', desc: 'In Chimp\'s Navy, a helper chimp snips the rope: barrel groups split apart before they reach you', costs: [40] },
   { id: 'wshield', name: 'Wafer shield', desc: 'In Chimp\'s Navy, blocks one thrown wafer per run', costs: [30] },
-  { id: 'limes', name: 'Lime defense', desc: 'In boss fights, little rocket limes shoot down a coconut that is about to hit you (2 per fight, per level)', costs: [150, 300] },
+  { id: 'limes', name: 'Lime defense', desc: 'Little rocket limes shoot down a coconut in boss fights, or a seagull in Chimp\'s Navy, that is about to hit you (2 per fight or Navy run, per level)', costs: [150, 300] },
   { id: 'practice', name: 'Practice Chimp\'s Navy', desc: 'Play the water level any time from the title screen (nothing is earned)', costs: [40] }
 ];
 function magR() { return CFG.magnetR * (1 + 0.35 * lvl('magnet') + (empOwn(E.mega) ? 1 : 0)); }
@@ -3118,7 +3126,7 @@ $('sClose').addEventListener('click', closePanels);
 $('bCopy').addEventListener('click', copyCode);
 $('bDown').addEventListener('click', downloadFile);
 $('bLoadCode').addEventListener('click', function () { stage1Load(codeEl.value); });
-$('bLoadFile').addEventListener('click', function () { fileEl.value = ''; fileEl.click(); });
+$('bLoadFile').addEventListener('click', function () { fileEl.value = ''; holdForDialog(); fileEl.click(); });
 fileEl.addEventListener('change', function () {
   var f = fileEl.files && fileEl.files[0]; if (!f) return;
   if (f.size > 100000) { say('That file is too big to be a Fancy, the Banana save.'); return; }
@@ -3804,11 +3812,11 @@ function frCollect(i) {
   else toast('A lost friend: ' + FR_NAMES[i] + '! ' + frCount() + ' of 6 found.', 3500);
   persist();
 }
-/* Bonus rooms: a few seconds of nothing but golden bananas. The sky vault (hug the top edge) and the junk drawer (skim the floor) open in the quiet stretch after a stage; the golden gate warps you in. */
+/* Bonus rooms: a few seconds of nothing but golden bananas. The sky vault (hug the top edge) and the junk drawer (skim the floor) open in the quiet stretch at the start of a run or after a stage (the drawer only before the Silverware Drawer); the golden gate warps you in. */
 var VAULT = null, hugT = 0, hugKind = '', goldNext = 8;
 function quietAhead() { for (var i = 0; i < obs.length; i++) { var o = obs[i]; if (o.x < bx + 170 && o.x + CFG.obW > bx - 50) return false; } return true; }
 function hugWant() {
-  if (VAULT || !runSec() || pracN || BAL || FT || pendNext || cardT >= 0 || rsgHold() || spinT > 0 || grace > 0 || (score === 0 && stage === 1) || !quietAhead()) return '';
+  if (VAULT || !runSec() || pracN || BAL || FT || pendNext || cardT >= 0 || rsgHold() || spinT > 0 || grace > 0 || !quietAhead()) return '';
   if (by < 60) return 'sky';
   if (by + CFG.bananaR > GROUND_Y - 90 && themeOf(stage) === CFG.miniAfter && score === gateStart(stage)) return 'drawer';   // the junk drawer: only in the quiet stretch before the Silverware Drawer's first gate
   return '';
@@ -3879,7 +3887,7 @@ function drawGold(o) {
   for (i = 0; i < 4; i++) { sx = x + 6 + ((i * 37 + time * 40) % (w - 12)); sy = o.gt + 8 + ((i * 53 + time * 30) % (o.gb - o.gt - 16)); ctx.fillStyle = '#fffbe0'; ctx.fillRect(sx - 1, sy - 4, 2, 8); ctx.fillRect(sx - 4, sy - 1, 8, 2); }
 }
 function drawHug() {   // a hint for those who look: a faint shimmer on the edge, and a bar that fills while you hold still
-  if (state !== 'play' || VAULT || !runSec() || pracN || BAL || pendNext || cardT >= 0 || rsgHold() || !quietAhead() || (score === 0 && stage === 1)) return;
+  if (state !== 'play' || VAULT || !runSec() || pracN || BAL || pendNext || cardT >= 0 || rsgHold() || !quietAhead()) return;
   var top = by < 130, flr = themeOf(stage) === CFG.miniAfter && score === gateStart(stage) && by > GROUND_Y - 170, fy = GROUND_Y - 3, a;
   if (top) { a = 0.12 + 0.1 * Math.sin(time * 5); ctx.fillStyle = 'rgba(255,217,59,' + a.toFixed(2) + ')'; ctx.fillRect(0, 0, W, 6); }
   if (flr) { a = 0.1 + 0.08 * Math.sin(time * 5); ctx.fillStyle = 'rgba(255,107,129,' + a.toFixed(2) + ')'; ctx.fillRect(0, fy - 4, W, 6); }
@@ -4102,7 +4110,7 @@ var MG_INTRO = 2.6;   // seconds the title and instructions show before Ready, S
 var mgDn = null;      // where the finger went down, relative to Fancy: a tap only leaps, a drag steers
 function startMini(practice) {
   flipV = 0; if (!practice) split('Water'); CFG.mgSpeed = MG_V0 * relaxK() * plusK(); var h = CFG.mgHearts + lvl('heart') + (empOwn(E.gheart) ? 1 : 0) + runPH; state = 'mini'; setBar(false); cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0; fx.length = 0; ART.warm(themeOf(stage));
-  MG = { ph: 'intro', pt: 0, t: 0, scroll: 0, x: W / 2, y: CFG.mgY0, tx: W / 2, ty: CFG.mgY0, leap: -1, buf: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: null, pi: 0, saved: 0, leaps: 0, slow: 0, practice: !!practice, wcd: 1.4, wc: 0, bonus: 0, wsh: lvl('wshield'), pl: 0, lh: h, lid: 0, lw: 0, lb: 0, pay: null, off: 0, boss: null, bossDone: false, cove: 70 + rng() * 220, coveHit: false, life: [], lifeAt: 0 };
+  MG = { ph: 'intro', pt: 0, t: 0, scroll: 0, x: W / 2, y: CFG.mgY0, tx: W / 2, ty: CFG.mgY0, leap: -1, buf: 0, hearts: h, maxH: h, inv: 0, ents: [], plan: null, pi: 0, saved: 0, leaps: 0, slow: 0, practice: !!practice, wcd: 1.4, wc: 0, bonus: 0, wsh: lvl('wshield'), pl: 0, lh: h, lid: 0, lw: 0, lb: 0, pay: null, off: 0, lm: lvl('limes') * 2, lt: 0, limes: [], boss: null, bossDone: false, cove: 70 + rng() * 220, coveHit: false, life: [], lifeAt: 0 };
   MG.plan = mgPlan();
 }
 /* The level is planned up front: a list of things, each with the moment it enters at the top. Obstacle rows are 1.4 to 2 seconds apart (a leap takes 0.8). A seagull is only put into a gap long enough to leave room to dodge it. */
@@ -4188,6 +4196,28 @@ function bossStep(dt) {
   b.drop -= dt; if (b.drop <= 0 && b.t < 8.5) { b.drop = 3.2; mgAddEnt({ k: 'barrels', n: 3, vert: false, x: 70 + rng() * 220, y: -70, vo: 30 }); }
   if (b.t >= 12) { b.end = 'won'; b.et = 0; m.bonus += 10; pop('GIANT SUB SUNK! +10', '#ffd93b', 24); burst(b.x, 110, 40, ['#ffffff', '#bfe8ff', '#7ad8ff', '#ffd93b'], 300, 260); secretFound('boss', 'Secret found: the Boss Sub!'); }
 }
+function mgLimes(m, dt) {   // Lime defense in Chimp's Navy: a seagull that will reach Fancy within about half a second (he cannot leap it) gets a rocket lime shot at it; the lime steers onto the gull and pops it
+  var i, j, e, L, t, x, y, d, dx, dy, hr = CFG.mgHitR + 14, vS = CFG.mgSpeed, sp = 560;
+  if (m.lt > 0) m.lt -= dt;
+  if (m.lm > 0 && m.lt <= 0 && m.ph === 'play' && m.inv <= 0 && !(lvl('superleap') > 0 && mgOver(m))) {
+    for (i = 0; i < m.ents.length; i++) {
+      e = m.ents[i]; if (e.k !== 'gull' || e.tg || e.sink >= 0 || e.y > m.y + 10) continue;
+      for (t = 0; t < 0.55; t += 1 / 30) { x = e.x + e.vx * t; y = e.y + (vS + e.vy) * t; dx = m.x - x; dy = m.y - y; if (dx * dx + dy * dy < hr * hr) break; }
+      if (t < 0.55) { e.tg = 1; m.lm--; m.lt = 0.45; m.limes.push({ x: m.x + 14, y: m.y - 8, vx: 160, vy: -200, a: e, t: 0 }); burst(m.x + 12, m.y - 8, 8, ['#9be84a', '#ffffff'], 150, 80); pop('Lime shot!', '#9be84a', 20); break; }
+    }
+  }
+  for (i = m.limes.length - 1; i >= 0; i--) {
+    L = m.limes[i]; L.t += dt; e = L.a; if (e && m.ents.indexOf(e) < 0) e = L.a = null;
+    if (e) { dx = e.x - L.x; dy = e.y - L.y; d = Math.sqrt(dx * dx + dy * dy) || 1; L.vx += (dx / d * sp - L.vx) * Math.min(1, dt * 10); L.vy += (dy / d * sp - L.vy) * Math.min(1, dt * 10); } else L.vy += 500 * dt;
+    L.x += L.vx * dt; L.y += L.vy * dt;
+    if (!calmOn() && frng() < 0.8) fxAdd(L.x - L.vx * 0.03, L.y - L.vy * 0.03, -L.vx * 0.12 + (frng() - 0.5) * 30, -L.vy * 0.12 + (frng() - 0.5) * 30, 0.32, frng() < 0.5 ? '#ffffff' : '#fff2a0', 2 + frng() * 2, false, 0);
+    if (e && (e.x - L.x) * (e.x - L.x) + (e.y - L.y) * (e.y - L.y) < 30 * 30) {
+      j = m.ents.indexOf(e); if (j >= 0) m.ents.splice(j, 1); m.limes.splice(i, 1);
+      burst(e.x, e.y, 22, ['#ffffff', '#d8d8d8', e.red ? '#e05a4a' : '#9be84a', '#ffd93b'], 260, 170); pop('ZAP!', '#9be84a', 28); if (!calmOn()) punchT = CFG.punchSecs * 0.3; continue;
+    }
+    if (L.t > 1.6 || L.x > W + 40 || L.x < -40 || L.y > H + 40 || L.y < -40) { burst(L.x, L.y, 8, ['#9be84a', '#ffffff'], 140, 60); m.limes.splice(i, 1); }
+  }
+}
 function updateMini(dt) {
   if (MG && MG.paused) return;   // paused: nothing moves
   if (washA > 0) washA = Math.max(0, washA - dt / 0.7);
@@ -4204,6 +4234,7 @@ function updateMini(dt) {
   // the leap
   if (m.leap >= 0) { m.leap += dt; if (m.buf > 0) m.buf -= dt; if (m.leap >= mgLeapT()) { m.pay = { lh: m.lh, w: m.lw, b: m.lb, bp: mgPerfect(m) }; m.leap = -1; burst(m.x, m.y + 8, 7, ['#ffffff', '#bfe8ff'], 110, 130); mgRip.push({ x: m.x, y: m.y, t: time }); if (m.buf > 0) { m.buf = 0; mgLeap(); } } }
   flapAnim = m.leap >= 0 ? Math.max(flapAnim, 0.05) : 0.1; bx = m.x; by = m.y;   // (the pop-up words follow Fancy)
+  if (m.lm > 0 || m.limes.length) mgLimes(m, dt);
   // things come in at the top
   while (m.pi < m.plan.length && m.plan[m.pi].t <= lt) {
     q = m.plan[m.pi++]; mgAddEnt(q);
@@ -4471,10 +4502,12 @@ function renderMini0() {
   if (!(m.inv > 0 && !calmOn() && Math.floor(time * 14) % 2)) { if (calmOn() && m.inv > 0) ctx.globalAlpha = 0.6; mgHero(ctx, m.x, m.y - mgLeapHt() * z, 0.9 * (1 + 0.45 * z), m.bk || 0, time); ctx.globalAlpha = 1; }   // Fancy seen from above, nose up the screen, leaning into a turn
   if (m.boss) mgBoss(m.boss);
   for (i = 0; i < m.ents.length; i++) { e = m.ents[i]; if (e.k === 'gull') { var gf = Math.floor((time * 9 + e.f) % 4); ctx.globalAlpha = .5; ART.mg.draw(ctx, 'gullShadow', e.x + 16, e.y + 30, gf); ctx.globalAlpha = 1; ART.mg.draw(ctx, 'gull', e.x, e.y, gf + (e.red ? 4 : 0)); } }
+  if (m.limes.length) drawLimes(m);
   drawFx();
   var mlh = opt('lefty'), mhx = function (x) { return mlh ? W - x : x; };
   for (i = 0; i < m.maxH; i++) ART.mg.draw(ctx, 'heart', mhx(26 + i * 28), 30, i < m.hearts, 1);
   if (m.wsh > 0) { ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.fillStyle = '#4a9bd8'; ctx.beginPath(); ctx.arc(mhx(26 + m.maxH * 28 + 6), 30, 10, 0, 7); ctx.fill(); ctx.stroke(); }   // the wafer shield is ready
+  if (m.lm > 0) { var lx = mhx(26 + m.maxH * 28 + (m.wsh > 0 ? 34 : 6)); ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.fillStyle = '#7ccc2e'; ctx.beginPath(); ctx.arc(lx, 30, 10, 0, 7); ctx.fill(); ctx.stroke(); outlined(String(m.lm), lx, 30, 13, '#ffffff'); }   // the limes left
   ctx.fillStyle = 'rgba(30,20,50,0.55)'; rrect(mhx(350), 70, 10, 480, 5); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
   var ry = 540 - clamp(lt / CFG.mgSecs, 0, 1) * 470; ctx.fillStyle = '#ffd93b'; rrect(mhx(350), ry, 10, 540 - ry + 10, 5); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(mhx(350) + 2.4, ry + 4, 2, Math.max(0, 540 - ry - 4));   // the way done so far fills with gold
   ART.coin(ctx, mhx(342), ry, time);
@@ -4844,17 +4877,17 @@ function victoryCard() {
 }
 function victoryTap() { if (vicT < 0.7) return; if (vicT < vicDone()) vicT = vicDone(); else if (pWin.hidden) openWin(); }   // a tap in the first moments (one aimed at the flight) cannot skip the celebration
 
-/* ===== Title screen news ticker: the story and some banana jokes ===== */
-var TICKS = ['BREAKING NEWS: Evil Prince Chimp has banana-napped every banana friend!', 'Hero SuperBanana Fancy takes to the skies to rescue them!', 'Each time Fancy dodges the Prince\'s obstacles, 5 friends escape!',
-  'Why did the banana go to the doctor? It wasn\'t peeling well!', 'What do you call two bananas? A pair of slippers!', 'Why did the banana wear sunscreen? So it wouldn\'t peel!', 'What\'s a banana\'s favorite game? Hide and go peel!',
-  'Why are bananas never lonely? They hang out in bunches!', 'What did the banana say to the vacuum? I\'m not afraid of you, I\'m a-peeling!', 'How do you make a banana split? Cut it in half!'];
+/* ===== Title screen news ticker: the story, the news, a few little known facts and rumors (the banana jokes were taken out on request) ===== */
+var TICKS = ['BREAKING NEWS: Evil Prince Chimp has banana-napped every banana friend!', 'Hero SuperBanana Fancy takes to the skies to rescue them!', 'Each time Fancy dodges the Prince\'s obstacles, 5 friends escape!'];
+
 var NEWS2 = ['Bananas are going missing! Citizens ask Fancy, the Banana to investigate.', 'Grocery stores raided across the land.', 'Vanilla wafer stores depleted.', 'Coconut supply drops by 90%.', 'Prince Chimp claims no knowledge as to the causes of all the mysterious events.', 'When asked about the missing bananas, Prince Chimp states, "No comment."'];
+var FACTS = ['Fancy, the Banana, wants everyone to know that the situation is under control.', 'Little known fact: potassium gives SuperBananas cool new powers.', 'Little known fact: one of the historical enemies of all bananas is the vanilla wafer, so be careful out there.', 'Little known fact: coconuts can be blown out of the air with lime missiles.'];   // mixed into the news: three of the four each time, a different three as you play
 var RUMOR_A = ['RUMOR: Win once and Prince Chimp may give up a big surprise!', 'RUMOR: Winners say the game keeps secrets. Can you find them?'];
-var RUMOR_B = ['RUMOR: A shimmer at the very top of the sky hides a vault!', 'RUMOR: A long PERFECT streak can make one gate glow gold!', 'RUMOR: Stay low before the Silverware Drawer. Something rattles!', 'RUMOR: In Chimp\'s Navy, three perfect barrel leaps call up a raft!', 'RUMOR: A rock arch near the Navy\'s end hides a secret cove!', 'RUMOR: Sail the whole Navy with no hits and the Boss Sub awaits!', 'RUMOR: Five quick taps on Fancy open a little secret door!', 'RUMOR: Six banana friends are still lost. Look closely!', 'RUMOR: Beat the game in a Challenge for a badge and new colors!', 'RUMOR: Prince Chimp wants a rematch. Look in Challenges after your second win!', 'RUMOR: Beat all his machines and his crown might be yours!'];
+var RUMOR_B = ['RUMOR: A shimmer at the very top of the sky hides a vault!', 'RUMOR: A long PERFECT streak can make one gate glow gold!', 'RUMOR: Stay low before the Silverware Drawer. Something rattles!', 'RUMOR: In Chimp\'s Navy, three perfect barrel leaps call up a raft!', 'RUMOR: A rock arch near the Navy\'s end hides a secret cove!', 'RUMOR: Sail the whole Navy with no hits and the Boss Sub awaits!', 'RUMOR: Five quick taps on Fancy open a little secret door!', 'RUMOR: Six banana friends are still lost. Look closely!', 'RUMOR: Beat the game in a Challenge for a badge and new colors!', 'RUMOR: Prince Chimp wants a rematch. After your second win he waits at the end of the jungle!', 'RUMOR: Beat all his machines and his crown might be yours!'];
 var TKLIST = null, TKW = -1;
-function tickList() {   // the headlines: the news, a few jokes (a different few each time you play), and rumors that hint at the secrets
-  var w = save.stats.wins > 0 ? 1 : 0, j = TICKS.slice(3), o = TICKS.slice(0, 3), i, st = save.stats.runs % j.length;
-  o = o.concat(NEWS2); for (i = 0; i < 3; i++) o.push(j[(st + i * 2) % j.length]);
+function tickList() {   // the headlines: the story, the news, and rumors that hint at the secrets
+  var w = save.stats.wins > 0 ? 1 : 0, o = TICKS.slice(0, 3), i, st = save.stats.runs % FACTS.length;
+  o = o.concat(NEWS2); for (i = 0; i < 3; i++) o.push(FACTS[(st + i) % FACTS.length]);
   if (!w) return o.concat(RUMOR_A);
   for (i = 0; i < 5; i++) o.push(RUMOR_B[(save.stats.runs * 3 + i * 2) % RUMOR_B.length]);   // five of the eleven rumors, a different five now and then (the strip must stay short enough for one picture)
   return o;
@@ -5510,7 +5543,7 @@ var LAYER = '', LAYERD = false, DPRFORCE = 0;   // Test Lab: '' normal, 'wc' = w
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
 function frame(t) {
   requestAnimationFrame(frame);
-  if (!autoRun) { last = t; return; }
+  if (!autoRun || dlHold) { last = t; return; }
   var fs = performance.now(), ri = t - last, dt = Math.min(0.05, evenDt(ri) / 1000 || 0), p0 = REC ? fs : 0; last = t; acc += dt; wlSync(); govStep(ri, t); if (padOn || padTest) padStep();
   var sn = 0; try { if (STEPMODE) { sn = Math.ceil(acc / 0.0167 - 1e-6); if (sn > 0) { var sd = acc / sn; for (var si = 0; si < sn; si++) update(sd); acc = 0; } } else while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; sn++; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
 }
