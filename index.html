@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4aa8'/%3E%3Cpath d='M11 6.2 12.4 2.6 16 4.2' fill='%237a5320' stroke='%233a1f10' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M11.5 5.4C21 3.6 28.5 11 27 20.2 25.8 27.6 16 30.4 9.2 25.6 3.6 21.6 4.4 8.6 11.5 5.4Z' fill='%23ffd93b' stroke='%233a1f10' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M9.2 12.4Q11 9 15 8.2' fill='none' stroke='%23fff4b0' stroke-width='1.5' stroke-linecap='round'/%3E%3Cellipse cx='12.2' cy='15.6' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Cellipse cx='20.6' cy='14.9' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Ccircle cx='12.9' cy='16.4' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='21.3' cy='15.7' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='13.6' cy='15.5' r='.8' fill='%23fff'/%3E%3Ccircle cx='22' cy='14.8' r='.8' fill='%23fff'/%3E%3Cpath d='M13 22.8Q17 25.6 21 22.4' fill='none' stroke='%233a1f10' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:#2b2140;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--lb,#2b2140);overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
 body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);display:flex;align-items:center;justify-content:center;font-family:"Arial Rounded MT Bold","Trebuchet MS",system-ui,"Segoe UI",Roboto,sans-serif;color:#3a2a4d}
 @supports (height:100dvh){html,body{height:100dvh}}
 [hidden]{display:none!important}
@@ -38,6 +38,26 @@ button.pf,button:focus-visible,textarea:focus-visible{outline:calc(3*var(--u)) s
 #bCont:active{transform:translateX(-50%) translateY(calc(2*var(--u)))}
 #bar2{pointer-events:none;position:absolute;left:0;right:0;bottom:calc(14*var(--u));display:flex;justify-content:center;gap:calc(10*var(--u))}
 #bar2 button{pointer-events:auto}
+
+/* X84: an invisible real button over each canvas-drawn button (pause, card buttons): a keyboard, a screen reader, Voice Access or Switch Access can reach them. A finger still lands on the canvas underneath. */
+#twin{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#twin button.tw{position:absolute;pointer-events:none;min-width:0;min-height:0;padding:0;border:0;background:none;box-shadow:none;opacity:0}
+#twin button.tw:focus-visible{opacity:1;outline:calc(4*var(--u)) solid #7a4dff;outline-offset:calc(1*var(--u));border-radius:calc(14*var(--u))}
+/* X08: a ring around the pressed button from the first frame, wider than a fingertip (the button's own dip is 2 px, which a finger covers). :active is enough here: buttons are touch-action: manipulation, so the press is never lost */
+button:not(:disabled):active{outline:calc(5*var(--u)) solid #ffd93b;outline-offset:calc(1*var(--u))}
+/* Sideways on a phone the picture is small: the buttons go beside it, the windows are bigger than it, and the letterbox is the stage's own colors (body.wide is set by resize()) */
+body.wide #stage{contain:none;overflow:visible;border-radius:0}
+body.wide #c,body.wide #bk{border-radius:calc(14*var(--u))}
+body.wide .panel,body.wide #tabWarn{--u:var(--ui);left:50%;right:auto;width:min(calc(340*var(--ui)),calc(100vw - 24px));transform:translateX(-50%)}
+body.wide #pSet{--u:var(--su);width:min(calc(340*var(--su)),calc(100vw - 24px))}
+body.wide #toast{--u:var(--ui);left:50%;right:auto;width:max-content;max-width:calc(340*var(--ui));transform:translateX(-50%)}
+body.wide #bar,body.wide #bar2{position:fixed;--u:var(--ui);left:calc(50% + var(--sw)/2 + 10*var(--ui));right:auto;max-width:calc(var(--room) - 20*var(--ui));align-items:flex-start}
+body.wide .brow{justify-content:flex-start}
+body.wide #bar{top:calc(10*var(--ui))}
+body.wide #bar2{bottom:calc(14*var(--ui));flex-wrap:wrap;justify-content:flex-start}
+body.wide.lefty #bar,body.wide.lefty #bar2{left:auto;right:calc(50% + var(--sw)/2 + 10*var(--ui));align-items:flex-end}
+body.wide.lefty #bar2,body.wide.lefty .brow{justify-content:flex-end}
+body.wide #bCont,body.wide #bCont:active{transform:translateX(-50%) scale(var(--kk));transform-origin:50% 0}
 .opt{display:flex;align-items:center;gap:calc(10*var(--u));width:100%;min-height:calc(78*var(--u));text-align:left;margin:calc(6*var(--u)) 0;background:#fff}
 .opt.on{background:#ffd93b}
 .opt:disabled{opacity:.6;cursor:default}
@@ -130,6 +150,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <div id="stage">
 <div id="bk" hidden></div>
 <canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
+<div id="twin" aria-label="Game buttons"></div>
 <div id="bar">
 <div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
 <div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bSky" class="alt sm" hidden>Clouds</button><button id="bVolc" class="alt sm" hidden>Volcano</button><button id="bUp" class="alt sm">Upgrades</button></div>
@@ -2658,7 +2679,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.14.1211';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.14.1352';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2814,12 +2835,43 @@ var bar = $('bar'), toastEl = $('toast');
 var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pEmp = $('pEmp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), pAssist = $('pAssist'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
 var toastTimer = 0;
 function toast(t, ms) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 3200); }
-function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden || !pAssist.hidden; }
-function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pEmp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pAssist.hidden = true; pending = null; bConfirm.hidden = true; syncInert(); }
+var PL = [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal, pAssist];   // every window; pWin (the win card) is first because Esc and Close never close it
+function panelOpen() { return PL.some(function (p) { return !p.hidden; }); }
+function closable() { return PL.some(function (p, i) { return i && !p.hidden; }); }
+function closePanels() { for (var i = 1; i < PL.length; i++) PL[i].hidden = true; pending = null; bConfirm.hidden = true; syncInert(); }
 /* Q23: a window open = the game behind it is inert (panelOpen() checks stay as a second guard) */
-var INERT = [cv, bar, bar2, $('bCont')];
-function syncInert() { var on = panelOpen(), i; for (i = 0; i < INERT.length; i++) if (INERT[i] && INERT[i].inert !== on) INERT[i].inert = on; }
-if (window.MutationObserver) { var inertMo = new MutationObserver(syncInert); [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal, pAssist].forEach(function (p) { inertMo.observe(p, { attributes: true, attributeFilter: ['hidden'] }); }); }
+var twinEl = $('twin'), INERT = [cv, bar, bar2, $('bCont'), twinEl];
+function syncInert() { var on = panelOpen(), i; for (i = 0; i < INERT.length; i++) if (INERT[i] && INERT[i].inert !== on) INERT[i].inert = on; bcSync(); }
+/* X16: the phone's back swipe (and the back button) closes the open window, like Esc does, instead of leaving the page. CloseWatcher: Chrome 126+, Firefox 149+; elsewhere nothing happens and the Close buttons still work. */
+var bcw = null;
+function bcSync() {
+  if (typeof CloseWatcher !== 'function') return;
+  if (closable()) { if (!bcw) { try { bcw = new CloseWatcher(); } catch (e) { bcw = null; return; } bcw.onclose = function () { bcw = null; try { closePanels(); } catch (e) { } if (closable()) bcSync(); }; } }
+  else if (bcw) { try { bcw.destroy(); } catch (e) { } bcw = null; }
+}
+/* X84: the buttons that exist only as canvas drawings (pause, the card buttons) each get an invisible real button over them, so a keyboard, a screen reader, Voice Access or Switch Access can reach them. A finger still lands on the canvas underneath (the twin ignores the pointer); an assistive click replays the tap through the game's own hit tests. */
+var TWL = [], twSig = '';
+function twinAdd(x, y, w, h, label, off) { TWL.push(x, y, w, h, label, off ? 1 : 0); }
+function twinSync() {
+  var n = TWL.length, sig = cssF + '|' + TWL.join('|'), i, b, x;
+  if (sig === twSig) return;
+  twSig = sig;
+  while (twinEl.firstChild) twinEl.removeChild(twinEl.firstChild);
+  for (i = 0; i < n; i += 6) {
+    b = document.createElement('button'); b.className = 'tw'; b.setAttribute('aria-label', TWL[i + 4]); if (TWL[i + 5]) b.setAttribute('aria-disabled', 'true');
+    x = cssF ? W - TWL[i] - TWL[i + 2] : TWL[i];   // a canvas turned over for the backward stage draws the buttons mirrored
+    b.style.left = (x / W * 100) + '%'; b.style.top = (TWL[i + 1] / H * 100) + '%'; b.style.width = (TWL[i + 2] / W * 100) + '%'; b.style.height = (TWL[i + 3] / H * 100) + '%';
+    b.dataset.cx = TWL[i] + TWL[i + 2] / 2; b.dataset.cy = TWL[i + 1] + TWL[i + 3] / 2;
+    twinEl.appendChild(b);
+  }
+}
+twinEl.addEventListener('click', function (e) {
+  var t = e.target.closest ? e.target.closest('button.tw') : null, r, o;
+  if (!t) return;
+  r = cv.getBoundingClientRect(); o = { bubbles: true, button: 0, clientX: r.left + (cssF ? W - +t.dataset.cx : +t.dataset.cx) / W * r.width, clientY: r.top + (+t.dataset.cy) / H * r.height };
+  o.buttons = 1; cv.dispatchEvent(new PointerEvent('pointerdown', o)); o.buttons = 0; dispatchEvent(new PointerEvent('pointerup', o));
+});
+if (window.MutationObserver) { var inertMo = new MutationObserver(syncInert); PL.forEach(function (p) { inertMo.observe(p, { attributes: true, attributeFilter: ['hidden'] }); }); }
 function fmtTime(s) { var m = Math.floor(s / 60); return m < 1 ? s + ' s' : m + ' min ' + (s % 60) + ' s'; }
 function refreshHelp() {
   var r = $('recs'); r.textContent = '';
@@ -4480,6 +4532,7 @@ function mgCard(m) { return m.practice && ((m.ph === 'lose' && m.pt > 0.6) || (m
 function mgIn(l, b) { return l[0] >= b[0] && l[0] <= b[0] + b[2] && l[1] >= b[1] && l[1] <= b[1] + b[3]; }
 function mixc(c, to, t) { var a = parseInt(c.slice(1), 16), b = parseInt(to.slice(1), 16), r = a >> 16 & 255, g = a >> 8 & 255, l = a & 255; return 'rgb(' + Math.round(r + ((b >> 16 & 255) - r) * t) + ',' + Math.round(g + ((b >> 8 & 255) - g) * t) + ',' + Math.round(l + ((b & 255) - l) * t) + ')'; }
 function mgBtn(b, label, col, sub, off) {   // a chunky plastic button (Apple Press recipe): soft shadow, a hard darker lip, a lit gradient face, a white top highlight
+  twinAdd(b[0], b[1], b[2], b[3] + 4, sub ? label + '. ' + sub : label, off);
   if (off) col = '#b9b0c8'; var x = b[0], y = b[1], w = b[2], h = b[3], gr = ctx.createLinearGradient(0, y, 0, y + h), hl = ctx.createLinearGradient(0, y, 0, y + h * .55);
   ctx.fillStyle = 'rgba(30,20,50,.2)'; rrect(x + 1, y + 7, w - 2, h, 16); ctx.fill();
   ctx.lineWidth = 3; ctx.strokeStyle = INK; rrect(x, y + 4, w, h, 16); ctx.fillStyle = mixc(col, '#2b1a2e', .5); ctx.fill(); ctx.stroke();
@@ -4538,7 +4591,7 @@ function practiceCard(m) {   // practice ended (won or out of hearts): try it ag
 }
 function startPractice() { ART.mg.warm(); ART.mg.done(); startMini(true); }
 function practiceExit() { exitAt = performance.now(); pracN = 0; resetWorld(); state = 'title'; titleT = 5; closePanels(); setBar(true); }
-function mgOnBtn(l) { return Math.abs(l[0] - MG_PB[0]) < PBR + 8 && Math.abs(l[1] - MG_PB[1]) < PBR + 8; }
+function mgOnBtn(l) { return Math.abs(l[0] - MG_PB[0]) < PBH() && Math.abs(l[1] - MG_PB[1]) < PBH(); }
 function mgPause(on) { var m = MG; if (m && (m.ph === 'play' || m.ph === 'intro')) { var was = !!m.paused; m.paused = on === undefined ? !m.paused : on; if (m.paused && !was) runPauses++; } }
 function miniTap() { var m = MG; if (!m || panelOpen()) return; if (m.paused) { m.paused = false; return; } if (m.ph === 'intro' && tapWaitOn && !m.go && (m.wait || m.pt >= 0.7)) { m.go = true; m.wait = false; m.pt = Math.max(m.pt, MG_INTRO); return; } if (m.practice && mgCard(m)) { startMini(true); return; } if (m.ph === 'lose' && m.pt > 0.6) startMini(m.practice); else mgLeap(); }
 function mgLogical(e) { var r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; }
@@ -5003,7 +5056,7 @@ function skyPointer(pl) {
   var m = SKY; if (!m || panelOpen()) return;
   if (m.paused) { if (mgIn(pl, MG_BT)) { skyExit(); return; } m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { skyExit(); return; } if (mgIn(pl, SKY_BA)) { startSky(); return; } return; }
-  if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { skyPause(true); return; }
+  if (Math.abs(pl[0] - MG_PB[0]) < PBH() && Math.abs(pl[1] - MG_PB[1]) < PBH() && (m.ph === 'play' || m.ph === 'ready')) { skyPause(true); return; }
   skyTap();
 }
 function skyPlane(x, y, col, ghost) {   // a little red, blue or yellow biplane flying left, a chimp in the cockpit and a spinning propeller
@@ -5145,7 +5198,7 @@ function volcPointer(pl) {
   var m = VOLC; if (!m || panelOpen()) return;
   if (m.paused) { if (mgIn(pl, MG_BT)) { volcExit(); return; } m.paused = false; return; }
   if ((m.ph === 'win' || m.ph === 'lose') && m.pt > 0.6) { if (mgIn(pl, SKY_BT)) { volcExit(); return; } if (mgIn(pl, SKY_BA)) { startVolc(); return; } return; }
-  if (Math.abs(pl[0] - MG_PB[0]) < PBR + 8 && Math.abs(pl[1] - MG_PB[1]) < PBR + 8 && (m.ph === 'play' || m.ph === 'ready')) { volcPause(true); return; }
+  if (Math.abs(pl[0] - MG_PB[0]) < PBH() && Math.abs(pl[1] - MG_PB[1]) < PBH() && (m.ph === 'play' || m.ph === 'ready')) { volcPause(true); return; }
   volcTap();
 }
 function volcSlab(x, y0, y1, w, glow) {   // a slab of rock from y0 to y1, with a hot edge where it faces the gap
@@ -5943,10 +5996,12 @@ function drawTapIcon(x, y) {   // a little 'tap' badge: a fingertip dot with two
 var PR = null, prT = 0;
 function lap(n) { if (PR) { var t = performance.now(); PR[n] = (PR[n] || 0) + t - prT; prT = t; } }   // test-only section timer: costs one test per call when off
 var PBR = 16;   // pause button radius (bigger with Large buttons)
-function drawPauseBtn(b, a) { var f = PBR / 16; ctx.beginPath(); ctx.arc(b[0], b[1], PBR, 0, 7); ctx.fillStyle = 'rgba(30,20,50,' + a + ')'; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.4; ctx.stroke(); ctx.fillStyle = '#ffffff'; rrect(b[0] - 6.5 * f, b[1] - 7 * f, 4.4 * f, 14 * f, 1.6); ctx.fill(); rrect(b[0] + 2.1 * f, b[1] - 7 * f, 4.4 * f, 14 * f, 1.6); ctx.fill(); }
+function PBH() { return PBR + (WIDE ? 22 : 8); }   // how far from its middle a tap still counts as the pause button (more sideways, where the picture is small)
+function drawPauseBtn(b, a) { var f = PBR / 16; twinAdd(b[0] - PBH(), b[1] - PBH(), 2 * PBH(), 2 * PBH(), (state === 'paused' || (MG && MG.paused) || (SKY && SKY.paused) || (VOLC && VOLC.paused)) ? 'Resume' : 'Pause', 0); ctx.beginPath(); ctx.arc(b[0], b[1], PBR, 0, 7); ctx.fillStyle = 'rgba(30,20,50,' + a + ')'; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.4; ctx.stroke(); ctx.fillStyle = '#ffffff'; rrect(b[0] - 6.5 * f, b[1] - 7 * f, 4.4 * f, 14 * f, 1.6); ctx.fill(); rrect(b[0] + 2.1 * f, b[1] - 7 * f, 4.4 * f, 14 * f, 1.6); ctx.fill(); }
 function blinkOff() { return invuln > 0 && spinT <= 0 && !calmOn() && Math.floor(time * 14) % 2; }   // after a bump Fancy blinks (Calm mode: steady and a little see-through instead)
 var barTk = false, VCLIP = false;
 function render() {
+  twinSync(); TWL.length = 0; if (lbWant() !== LBT) lbApply();
   var tk = state === 'title' && !opt('noticker'); if (tk !== barTk) { barTk = tk; bar.classList.toggle('tk', tk); }   // the buttons on the title screen sit below the news ticker
   TXF++; if (PR) prT = performance.now(); if (TKS && state !== 'title') TKS = null; if (CFC.length && TXF - CFC[CFC.length - 1].f > 120) { CFC = []; CFP = ''; }   // the news strip is a big picture only the title screen uses
   ctx.setTransform(k, 0, 0, k, 0, 0); ctx.globalAlpha = 1;
@@ -6042,10 +6097,45 @@ function render() {
 }
 
 
+/* X01 + X75: sideways on a phone the picture is small (231 px wide at 892 x 412), so its real buttons were 33 px tall. "Wide" mode puts the buttons in the empty side space, makes the windows about 1.45 times bigger than the picture (they scroll), and keeps the letterbox in the stage's own colors. */
+var UIMIN = 0.97, WIDE = false;
+function sp(k, v) { stageEl.style.setProperty(k, v); }   // 0.97: the Settings rows come out at 48 px, the floor for a grown-up's finger
+function wideSet(aw, s, cssW) {
+  var w = s < UIMIN && (aw - cssW) / 2 >= 150, root = document.body;
+  if (w !== WIDE) { WIDE = w; root.classList.toggle('wide', w); }
+  sp('--ui', (w ? UIMIN : s) + 'px'); sp('--su', s + 'px'); sp('--sw', cssW + 'px'); sp('--room', (aw - cssW) / 2 + 'px'); sp('--kk', w ? UIMIN / s : 1);
+  LBK = '';
+}
+/* X75: the letterbox (the bars beside or above and below the picture) shows the same colors as the picture's edge instead of plain navy: one column of the stage's own sky, hills and ground, read once per stage from a tiny copy, becomes the page background. */
+var LBT = -2, LBK = '', LBC = {};
+function lbWant() { if (' title ready launch play paused dead '.indexOf(' ' + state + ' ') < 0 || BAL) return -1; return bgT >= 1 ? shownTheme() : LBT; }   // during the quick fade between stages the margin keeps the old colors
+function lbColumn(th) {
+  var c, g, d, i, a = [];
+  if (LBC[th]) return LBC[th];
+  if (!ART.sceneReady(th)) return null;   // asking for a stage that is still being built would make it all at once
+  try {
+    c = document.createElement('canvas'); c.width = 8; c.height = 64; g = c.getContext('2d', { willReadFrequently: true }); g.scale(8 / W, 64 / H);
+    ART.back(g, th, 0); ART.ground(g, th, 0); d = g.getImageData(0, 0, 1, 64).data;
+    for (i = 0; i < 256; i += 16) a.push('rgb(' + d[i] + ',' + d[i + 1] + ',' + d[i + 2] + ')');
+  } catch (e) { return null; }
+  LBC[th] = a; return a;
+}
+function lbApply() {
+  var th = lbWant(), col = th >= 0 ? lbColumn(th) : null, r, t, h, st, i, key;
+  LBT = th >= 0 && !col ? -2 : th;   // -2: try again next frame
+  if (!col) { LBK = ''; document.documentElement.style.removeProperty('--lb'); return; }
+  r = stageEl.getBoundingClientRect(); t = Math.round(r.top); h = r.height; key = th + '|' + t + '|' + Math.round(h);
+  if (key === LBK) return;
+  LBK = key; st = [col[0] + ' 0', col[0] + ' ' + t + 'px'];
+  for (i = 0; i < col.length; i++) st.push(col[i] + ' ' + (t + (i + 0.5) / col.length * h).toFixed(1) + 'px');
+  st.push(col[col.length - 1] + ' ' + (t + h).toFixed(1) + 'px', col[col.length - 1] + ' 100%');
+  document.documentElement.style.setProperty('--lb', 'linear-gradient(to bottom,' + st.join(',') + ')');
+}
 function resize() {
   var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0));   // the body keeps clear of notches and rounded corners (safe-area padding)
   var s = Math.min(aw / W, ah / H), cssW = Math.floor(W * s), cssH = Math.floor(H * s);
   stageEl.style.width = cssW + 'px'; stageEl.style.height = cssH + 'px'; stageEl.style.setProperty('--u', s + 'px');
+  wideSet(aw, s, cssW);
   dpr = DPRFORCE || Math.min(devicePixelRatio || 1, dprMax || 2);   // dprMax is lowered by the quality governor
   var nw = Math.max(1, Math.round(cssW * dpr)), nh = Math.max(1, Math.round(cssH * dpr));
   if (dpcb && !DPRFORCE && dpr >= (devicePixelRatio || 1) - 0.001 && Math.abs(dpcb.w - nw) <= 2 && Math.abs(dpcb.h - nh) <= 2) { nw = dpcb.w; nh = dpcb.h; }   // P60
@@ -6053,6 +6143,7 @@ function resize() {
   bkReset();
   var ak = Math.min(k, CFG.artScaleMax);   // art pictures are built at most this sharp, to save memory on big screens
   if (ak !== artK) { artK = ak; ART.init(ak); fWarmed = 0; }   // init drops the fight pictures: build them again
+  LBK = ''; if (LBT !== -2) lbApply();
 }
 /* P13: the visible canvas can be lost to a driver reset (art pictures are in plain memory and survive): pause, then redraw when it comes back */
 var ctxLost = false, ctxLostN = 0;
@@ -6071,7 +6162,7 @@ addEventListener('resize', function () {
 
 /* ===== Input ===== */
 var PB = [326, 30];   // the pause button (top right while flying)
-cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { var rp0 = runPauses; onHidden(); runPauses = rp0; openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBR + 8 && Math.abs(pl[1] - PB[1]) < PBR + 8) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
+cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.button === 0) kHeld.ptr = true; var pl = mgLogical(e); if (!panelOpen() && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused) || (state === 'sky' && SKY && SKY.paused) || (state === 'volc' && VOLC && VOLC.paused)) && mgIn(pl, PS_BT)) { refreshSet(); openPanel(pSet); return; } if (pracN && !panelOpen() && ((state === 'dead' && deadT >= CFG.retryDelay) || (state === 'paused' && resT < 0)) && mgIn(pl, MG_BT)) { practiceExit(); return; } if (state === 'play' && BALR && empOn() && !panelOpen() && rsgT >= 0.3 && rsgT < CFG.cardSecs - 0.3 && mgIn(pl, EMP_DOOR)) { var rp0 = runPauses; onHidden(); runPauses = rp0; openPanel(pEmp); return; } if (state === 'play' && Math.abs(pl[0] - PB[0]) < PBH() && Math.abs(pl[1] - PB[1]) < PBH()) { onHidden(); return; } if (state === 'title' && (museHit(pl) || homeHit(pl))) return; if (state === 'home') { homeTap(pl); return; }
   if (state === 'sky') { skyPointer(pl); return; }
   if (state === 'volc') { volcPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
@@ -6110,7 +6201,7 @@ addEventListener('gamepadconnected', function () { if (!padOn) toast('Controller
 addEventListener('blur', function (e) { if (e.target && e.target.classList) e.target.classList.remove('pf'); }, true);
 function padList() { return padTest || (navigator.getGamepads ? navigator.getGamepads() : []); }
 function padB(g, n) { return !!(g.buttons[n] && g.buttons[n].pressed); }
-function padPanel() { var a = [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal, pAssist], i; for (i = 0; i < a.length; i++) if (!a[i].hidden) return a[i]; return null; }
+function padPanel() { for (var i = 0; i < PL.length; i++) if (!PL[i].hidden) return PL[i]; return null; }
 function padCands(root) {   // the buttons a controller can reach right now: the open panel's, or the title screen's own buttons
   var L = (root === stageEl ? stageEl : root).querySelectorAll('button'), o = [], i, b;
   for (i = 0; i < L.length; i++) { b = L[i]; if (b.disabled || b.classList.contains('pcl') || !b.getClientRects().length) continue; if (root === stageEl && !bar.contains(b) && b.id !== 'bCont') continue; o.push(b); }
