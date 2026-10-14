@@ -2658,7 +2658,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.14.0829';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.14.1211';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -4068,6 +4068,7 @@ function split(label) { if (!pracN) { clkSp.push([label, clk]); if (clkSp.length
 function fmtClk(t) { var m = Math.floor(t / 60), s = t - m * 60; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); }
 function drawClock(cx, ax) {   // the run timer under the pause button, with the last few split times under it
   var lh = opt('lefty'), n = Math.min(4, clkSp.length), i;
+  if (clk >= 600) cx = clamp(cx, 40, W - 40);   // ten minutes or more is one more digit: keep it on the screen
   outlinedC(fmtClk(clk), cx, 29 + PBR + 14, 16, '#ffffff');
   for (i = 0; i < n; i++) { var e = clkSp[clkSp.length - n + i]; outlined(e[0] + ' ' + fmtClk(e[1]), ax !== undefined ? ax : lh ? 8 : W - 8, 29 + PBR + 33 + i * 15, 12.5, '#ffe9a0', lh ? 'left' : 'right'); }   // a finished split never changes: one picture per line
 }
@@ -5586,7 +5587,7 @@ function outlined(text, x, y, size, fill, align, base, lazy) {
   
   var b = base || size, e = textPic(text, Math.round(b), fill, lazy), s, kk = k > 0 ? k : 1, ox;
   if (!e) return;
-  s = size / Math.round(b); ox = align === 'left' ? 0 : e.w / 2;
+  s = size / Math.round(b); ox = align === 'left' ? 0 : align === 'right' ? e.w : e.w / 2;
   ctx.drawImage(e.c, Math.round((x - (ox + e.pad) * s) * kk) / kk, Math.round((y - e.h / 2 * s) * kk) / kk, e.c.width / kk * s, e.c.height / kk * s);
 }
 function outlinedC(text, x, y, size, fill, align, base, lazy) {   // text that changes (scores, counters): every character is its own cached picture, so a new number never builds a new picture
