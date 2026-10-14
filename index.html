@@ -121,6 +121,9 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 .warn{color:#a3260f;font-weight:700}
 @media (forced-colors:active){button{border-width:calc(4*var(--u))}button.alt{border-width:calc(2*var(--u))}.opt.on{outline:calc(4*var(--u)) solid Highlight;outline-offset:calc(-6*var(--u))}.opt:disabled{border-style:dashed}.opt.wo{border-left-color:CanvasText}}
 @media (prefers-contrast:more){button{border-width:calc(4*var(--u))}}
+#tabWarn{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(12*var(--u));z-index:20;display:flex;gap:calc(10*var(--u));align-items:center;justify-content:space-between;background:#3a2a4d;color:#fff;border:calc(3*var(--u)) solid #ffd93b;border-radius:calc(14*var(--u));padding:calc(8*var(--u)) calc(12*var(--u));font-size:calc(14*var(--u));line-height:1.3}
+#tabWarn button{flex:none}
+.panel .sub{font-size:calc(13*var(--u));opacity:.85}
 </style>
 </head>
 <body>
@@ -135,6 +138,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <button id="bCont" hidden>Continue</button>
 <div id="padHint" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="tabWarn" role="alert" hidden><span>Fancy was changed in another tab, so saving is paused here to protect that game.</span><button id="bReload" class="sm">Reload</button></div>
 <section id="pHelp" class="panel" hidden aria-label="Help">
 <div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
 <h2>How to play</h2>
@@ -163,7 +167,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <dl id="recs"></dl>
 <p id="errNote" class="warn" hidden></p>
 <p id="verNote"></p>
-<div class="row"><button id="hClose">Close</button></div>
+<div class="row"><button id="sHelp" class="alt">Ways to make it easier</button><button id="hClose">Close</button></div>
 </section>
 <section id="pPrac" class="panel" hidden aria-label="Practice">
 <div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
@@ -183,6 +187,14 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <button class="opt cmp" id="sTick" aria-pressed="false"><span>News ticker<small>Scrolling news on the title screen.</small></span><b id="sTickN"></b></button>
 <button class="opt cmp" id="sSave" aria-pressed="false"><span>Battery saver<small>About 30 pictures a second; same game.</small></span><b id="sSaveN"></b></button>
 <div class="row"><button id="bFull" class="alt" hidden>Full screen</button><button id="setClose">Close</button></div>
+</section>
+<section id="pAssist" class="panel" hidden aria-label="Help options">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Want a little help?</h2>
+<p id="aText">Anyone can use a little help, and your scores stay yours.</p>
+<button class="opt cmp" id="aSlow"><span>Slow the game down<small id="aSlowNote">Slower speeds keep their own best score.</small></span><b id="aSlowN"></b></button>
+<button class="opt cmp" id="aUps"><span>Look at Upgrades<small>Free bounce, Gentle fall and Roomy gaps make a run easier. Banana credits pay for them.</small></span><b></b></button>
+<div class="row"><button id="aNo">No thanks</button></div>
 </section>
 <section id="pWear" class="panel" hidden aria-label="Costume">
 <div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
@@ -246,6 +258,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
 <h2>Save</h2>
 <p id="storeWarn" class="warn" hidden>This browser is not keeping progress (a private window, perhaps). Copy your save code to keep it.</p>
+<p id="expNote" class="sub"></p>
 <p>Your save code:</p>
 <textarea id="code" spellcheck="false" autocomplete="off" aria-label="Save code"></textarea>
 <div class="row">
@@ -2643,8 +2656,9 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 
 (function () {
 'use strict';
+
 var PHASE = 'beta';
-var STAMP = '2026.10.14.0004';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.14.0829';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2734,9 +2748,10 @@ function loadSave() {
   return defaultSave();
 }
 var save = loadSave();
+var otherTab = false;   // P09: another tab wrote the save, so this tab stops saving (a banner offers Reload)
 var lastBackup = 0, sessionSaved = false, noSave = false;   // noSave is only switched on by checks
 function persist() {
-  if (noSave) return false;
+  if (noSave || otherTab) return false;   // otherTab: another tab changed the save; this one must not write over it
   save.savedAt = Date.now();
   var text = JSON.stringify(save);
   if (!cleanSave(tryParse(text))) { logError('save', 'refused to write an unreadable save'); return false; }
@@ -2796,11 +2811,15 @@ function readText(text) {
 /* ===== Page parts ===== */
 var stageEl = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
 var bar = $('bar'), toastEl = $('toast');
-var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pEmp = $('pEmp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
+var pWin = $('pWin'), pHelp = $('pHelp'), pWear = $('pWear'), pUp = $('pUp'), pEmp = $('pEmp'), pSet = $('pSet'), pPrac = $('pPrac'), pMuse = $('pMuse'), pChal = $('pChal'), pAssist = $('pAssist'), bar2 = $('bar2'), pSave = $('pSave'), codeEl = $('code'), saveMsg = $('saveMsg'), bConfirm = $('bConfirm'), fileEl = $('file');
 var toastTimer = 0;
 function toast(t, ms) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, ms || 3200); }
-function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden; }
-function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pEmp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pending = null; bConfirm.hidden = true; }
+function panelOpen() { return !pWin.hidden || !pHelp.hidden || !pSave.hidden || !pWear.hidden || !pUp.hidden || !pEmp.hidden || !pSet.hidden || !pPrac.hidden || !pMuse.hidden || !pChal.hidden || !pAssist.hidden; }
+function closePanels() { pHelp.hidden = true; pSave.hidden = true; pWear.hidden = true; pUp.hidden = true; pEmp.hidden = true; pSet.hidden = true; pPrac.hidden = true; pMuse.hidden = true; pChal.hidden = true; pAssist.hidden = true; pending = null; bConfirm.hidden = true; syncInert(); }
+/* Q23: a window open = the game behind it is inert (panelOpen() checks stay as a second guard) */
+var INERT = [cv, bar, bar2, $('bCont')];
+function syncInert() { var on = panelOpen(), i; for (i = 0; i < INERT.length; i++) if (INERT[i] && INERT[i].inert !== on) INERT[i].inert = on; }
+if (window.MutationObserver) { var inertMo = new MutationObserver(syncInert); [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal, pAssist].forEach(function (p) { inertMo.observe(p, { attributes: true, attributeFilter: ['hidden'] }); }); }
 function fmtTime(s) { var m = Math.floor(s / 60); return m < 1 ? s + ' s' : m + ' min ' + (s % 60) + ' s'; }
 function refreshHelp() {
   var r = $('recs'); r.textContent = '';
@@ -2847,10 +2866,10 @@ function helpSecrets() {   // before the first win: a teaser; after it: a rumor 
   MUSE.forEach(function (r) { if (!save.unlocks[r[0]]) add(SEC_ICON[r[0]] || 'star', 'Rumor: ' + r[1] + '. ' + r[2]); });
 }
 function refreshCode() {
-  $('storeWarn').hidden = storageOK; refreshOld();
+  $('storeWarn').hidden = storageOK; refreshOld(); refreshExport(); askKeep();
   makeCode().then(function (c) { codeEl.value = c; }, function (e) { logError('code', e); });
 }
-function openPanel(p) { closePanels(); p.hidden = false; saveMsg.textContent = ''; if (p === pSave) refreshCode(); else if (p === pWear) refreshWear(); else if (p === pUp) refreshUp(); else if (p === pEmp) refreshEmp(); else if (p === pSet) refreshSet(); else if (p === pPrac) refreshPrac(); else if (p === pChal) refreshChal(); else if (p === pMuse) refreshMuse(); else refreshHelp(); }
+function openPanel(p) { closePanels(); p.hidden = false; syncInert(); saveMsg.textContent = ''; if (p === pSave) refreshCode(); else if (p === pWear) refreshWear(); else if (p === pUp) refreshUp(); else if (p === pEmp) refreshEmp(); else if (p === pSet) refreshSet(); else if (p === pPrac) refreshPrac(); else if (p === pChal) refreshChal(); else if (p === pMuse) refreshMuse(); else if (p === pAssist) refreshAssist(); else refreshHelp(); }
 function describe(c) { return 'best score ' + c.best + ', best stage ' + c.bestStage + ', ' + c.stats.runs + ' runs, ' + c.stats.friends + ' friends freed'; }
 
 var pending = null;
@@ -2865,7 +2884,7 @@ function stage1Load(text) {
   }, function (e) { if (mySeq !== loadSeq) return; pending = null; bConfirm.hidden = true; say(e.message); });
 }
 function applyLoaded() {
-  if (!pending) return;
+  if (!pending || blockedByTab()) return;
   var old = sget(K.main); if (old !== null) sset(K.before, old);
   save = pending; pending = null; bConfirm.hidden = true;
   persist(); syncOpts(); refreshCode(); syncUp(); say('Loaded: ' + describe(save) + '.');
@@ -2874,11 +2893,23 @@ var oldSave = null, oldArmed = false;   // the game that the last Load or Start 
 function oldCopy() { var t = sget(K.before), c = t === null ? null : cleanSave(tryParse(t)); return c && t !== sget(K.main) ? c : null; }
 function refreshOld() { oldArmed = false; oldSave = oldCopy(); $('bOld').hidden = !oldSave; $('bOld').textContent = 'Put my old game back'; }
 function putOldBack() {
-  if (!oldSave) return;
+  if (!oldSave || blockedByTab()) return;
   if (!oldArmed) { oldArmed = true; $('bOld').textContent = 'Yes, put it back'; say('Your old game: ' + describe(oldSave) + '. Press again to swap it in. The game you have now is kept, so you can swap back.'); return; }
   var cur = sget(K.main), back = oldSave; if (cur !== null) sset(K.before, cur);
   save = back; persist(); syncOpts(); refreshCode(); syncUp(); say('Your old game is back: ' + describe(save) + '. The one you had before is kept; press the button again to swap back.');
 }
+/* P09: another tab wrote the save: stop saving here and say so */
+function otherTabWrote() {
+  if (otherTab) return;
+  otherTab = true; $('tabWarn').hidden = false;
+  if (inRun()) onHidden();
+}
+addEventListener('storage', function (e) {
+  try { if (e.storageArea && e.storageArea !== localStorage) return; } catch (x) { return; }
+  if (e.key === null || e.key === K.main) otherTabWrote();   // null: the other tab cleared everything
+});
+$('bReload').addEventListener('click', function () { location.reload(); });
+function blockedByTab() { if (!otherTab) return false; say('Saving is paused because the game changed in another tab. Reload this page first.'); return true; }
 function copyText(t, done) {   // to the clipboard; if the browser says no, a short-lived text box does it
   var fb = function () { var ta = document.createElement('textarea'), ok = false; ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:absolute;left:-999px;top:0'; stageEl.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } stageEl.removeChild(ta); done(ok); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { done(true); }, fb); else fb();
@@ -2889,8 +2920,8 @@ function resultText() {
 }
 function copyCode() {
   var t = codeEl.value;
-  var fallback = function () { codeEl.focus(); codeEl.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { } say(ok ? 'Copied.' : 'Select the code above and copy it.'); };
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say('Copied.'); }, fallback); else fallback();
+  var fallback = function () { codeEl.focus(); codeEl.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { } say(ok ? 'Copied.' : 'Select the code above and copy it.'); if (ok) noteExport(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { say('Copied.'); noteExport(); }, fallback); else fallback();
 }
 var holdDone = null, dlHold = 0;   // a native Save or Open dialog is on screen: the browser keeps the page's drawing and the dialog fighting for the screen, so the game rests (no steps, no drawing) until you are back
 function holdForDialog() {
@@ -2901,6 +2932,23 @@ function holdForDialog() {
   dlHold = 1; holdDone = done; addEventListener('blur', onB); addEventListener('focus', done); addEventListener('pointermove', back, true); addEventListener('pointerdown', back, true); addEventListener('keydown', back, true);
   tm = setInterval(function () { var age = performance.now() - t0; if ((!seenBlur && age > 2500) || age > 90000) done(); }, 500);   // no dialog took the focus (a browser that saves straight to Downloads): carry on after a moment
 }
+/* P28: when the save was last copied or saved to a file is kept in its own key (not in the save) */
+var EXPK = K.main + '-exp', expHinted = false, keepAsked = false;
+function lastExport() { var v = parseInt(sget(EXPK), 10); return v > 0 ? v : 0; }
+function noteExport() { sset(EXPK, String(Date.now())); refreshExport(); }
+function refreshExport() {
+  var t = lastExport(), d = t ? Math.floor((Date.now() - t) / 864e5) : -1, el = $('expNote');
+  el.textContent = !t ? 'You have not copied your save code or saved a file yet. A copy outside this browser keeps your game safe if the browser clears its data.' : d < 1 ? 'You copied or saved a copy today.' : 'You last copied or saved a copy ' + (d === 1 ? 'yesterday' : d + ' days ago') + '.';
+}
+function askKeep() {   // asked on a tap on Save
+  if (keepAsked) return; keepAsked = true;
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(function (p) { if (!p) navigator.storage.persist().catch(function () { }); }, function () { }); } catch (e) { }
+}
+function exportHint() {
+  if (expHinted || save.bestStage < 3 || saveAtRisk()) return;
+  var t = lastExport(); if (t && Date.now() - t < 14 * 864e5) return;
+  expHinted = true; toast('Tip: your game lives only in this browser. Open Save and copy your save code now and then.', 7000);
+}
 function downloadFile() {
   try {
     var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
@@ -2908,7 +2956,7 @@ function downloadFile() {
     var url = URL.createObjectURL(new Blob([JSON.stringify(save, null, 1)], { type: 'application/json' }));
     var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); holdForDialog(); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-    say('Save file started: ' + name + '. If nothing downloads, copy the save code instead.');
+    say('Save file started: ' + name + '. If nothing downloads, copy the save code instead.'); noteExport();
   } catch (e) { logError('download', e); say('This browser blocked the download. Copy the save code instead.'); }
 }
 
@@ -2932,6 +2980,27 @@ function refreshSet() {
 }
 function speedLocked() { return state === 'play' || state === 'paused' || state === 'launch' || state === 'mini' || state === 'sky' || state === 'volc'; }
 $('sSpeed').addEventListener('click', function () { if (speedLocked()) return; var i = SPEEDS.indexOf(spdPct()); save.opts.spd = SPEEDS[(i + 1) % SPEEDS.length]; delete save.opts.relaxed; persist(); refreshSet(); if (state === 'ready') resetWorld(); });
+/* Q26: after 5 failed tries at one stage (then every 5 more) offer help; counted in memory only, not in practice or Calm */
+var failN = {}, failNext = {};
+function assistNote() {
+  if (pracN || calmOn() || panelOpen() || otherTab || !stage) return;
+  var k, s = stage | 0; for (k in failN) if ((+k) < s) { delete failN[k]; delete failNext[k]; }   
+  failN[s] = (failN[s] || 0) + 1;
+  if (failN[s] < (failNext[s] || 5)) return;
+  failNext[s] = failN[s] + 5; $('aText').textContent = 'Stage ' + s + ' is a tricky one. Anyone can use a little help, and your scores stay yours.';
+  openPanel(pAssist);
+}
+function nextSlower() { var i = SPEEDS.indexOf(spdPct()); return i >= 0 && i < SPEEDS.length - 1 ? SPEEDS[i + 1] : 0; }
+function refreshAssist() {
+  var n = nextSlower(), lk = speedLocked();
+  $('aSlow').hidden = !n; $('aSlow').disabled = lk; $('aSlowN').textContent = n ? n + '%' : '';
+  $('aSlowNote').textContent = lk ? 'Pick this on the title screen (not during a run).' : 'Slower speeds keep their own best score. Now: ' + spdPct() + '%.';
+  stillDrawn = false;
+}
+$('aSlow').addEventListener('click', function () { var n = nextSlower(); if (!n || speedLocked()) return; save.opts.spd = n; delete save.opts.relaxed; persist(); closePanels(); toast('Game speed is now ' + n + '%. It has its own best score.', 4000); if (state === 'ready') resetWorld(); });
+$('aUps').addEventListener('click', function () { openPanel(pUp); });
+$('aNo').addEventListener('click', closePanels);
+$('sHelp').addEventListener('click', function () { $('aText').textContent = 'Anyone can use a little help, and your scores stay yours.'; openPanel(pAssist); });
 TGS.forEach(function (t) { $(t[0]).addEventListener('click', function () { tgSet(t[1], !tgOn(t[1])); persist(); syncOpts(); refreshSet(); }); });
 $('bSet').addEventListener('click', function () { openPanel(pSet); });
 $('setClose').addEventListener('click', closePanels);
@@ -3970,7 +4039,7 @@ function die() {
   state = 'dead'; deadT = 0; vy = -200; cardT = -1; pendNext = ''; nextT = 0; rsgT = -1; celT = 0;
   
   if (pracN) { pracEnd = 'lose'; newBest = false; } else recordRun(); 
-  setTimeout(persist, 400); setTimeout(function () { if (state === 'dead' && !pracN) { setBar(true); saveHint(); } }, 140);   // storage writes and a DOM change are slow on phones: never on the frame of the hit
+  setTimeout(persist, 400); setTimeout(function () { if (state === 'dead' && !pracN) { setBar(true); saveHint(); exportHint(); assistNote(); } }, 140);   // storage writes and a DOM change are slow on phones: never on the frame of the hit
    ART.warm(themeOf(1), true);   // build the first stage's pictures while the Oops card shows, so the next try starts instantly
   
 }
@@ -4678,6 +4747,7 @@ var freshArmed = false;
 function winTitle() { save.stats.plus = Math.min(CFG.plusMax, save.stats.plus + 1); persist(); pWin.hidden = true; var g = giftNeeded(); if (g) { startGift(g === 2 ? 1 : 0, true); return; } resetWorld(); state = 'title'; titleT = 5; setBar(true); toast('Saved. Welcome back to the title screen!', 3000); }   // keep everything, save, and rest at the title screen instead of going straight to the launch pad
 function winKeep() { save.stats.plus = Math.min(CFG.plusMax, save.stats.plus + 1); persist(); pWin.hidden = true; afterWin(); }
 function winFresh() {
+  if (otherTab) { $('winMsg').textContent = 'Saving is paused because the game changed in another tab. Reload this page first.'; return; }
   if (!freshArmed) { freshArmed = true; setWo('wFresh', 'Tap again to be sure!', 'Upgrades, credits and speed bonus will reset to zero.'); $('wFresh').classList.add('armed'); $('winMsg').textContent = 'Your best score, records and costumes always stay. Your current save is kept as a backup on this device.'; return; }
   var old = sget(K.main); if (old !== null) sset(K.before, old);
   save.boosts = { spent: save.stats.friends + save.stats.coins };   // upgrades back to level 0 and the credit balance to zero; the lifetime count of friends freed stays in the records
@@ -5976,11 +6046,21 @@ function resize() {
   var s = Math.min(aw / W, ah / H), cssW = Math.floor(W * s), cssH = Math.floor(H * s);
   stageEl.style.width = cssW + 'px'; stageEl.style.height = cssH + 'px'; stageEl.style.setProperty('--u', s + 'px');
   dpr = DPRFORCE || Math.min(devicePixelRatio || 1, dprMax || 2);   // dprMax is lowered by the quality governor
-  var nw = Math.max(1, Math.round(cssW * dpr)), nh = Math.max(1, Math.round(cssH * dpr)); if (nw !== cv.width || nh !== cv.height) { cv.width = nw; cv.height = nh; TXC = {}; TXN = 0; FXS = {}; CFC = []; CFP = ''; } k = cv.width / W;   // a resize that changes nothing (a phone's address bar) must not throw away every word picture
+  var nw = Math.max(1, Math.round(cssW * dpr)), nh = Math.max(1, Math.round(cssH * dpr));
+  if (dpcb && !DPRFORCE && dpr >= (devicePixelRatio || 1) - 0.001 && Math.abs(dpcb.w - nw) <= 2 && Math.abs(dpcb.h - nh) <= 2) { nw = dpcb.w; nh = dpcb.h; }   // P60
+  if (nw !== cv.width || nh !== cv.height) { cv.width = nw; cv.height = nh; TXC = {}; TXN = 0; FXS = {}; CFC = []; CFP = ''; } k = cv.width / W;   // a resize that changes nothing (a phone's address bar) must not throw away every word picture
   bkReset();
   var ak = Math.min(k, CFG.artScaleMax);   // art pictures are built at most this sharp, to save memory on big screens
   if (ak !== artK) { artK = ak; ART.init(ak); fWarmed = 0; }   // init drops the fight pictures: build them again
 }
+/* P13: the visible canvas can be lost to a driver reset (art pictures are in plain memory and survive): pause, then redraw when it comes back */
+var ctxLost = false, ctxLostN = 0;
+function onCtxLost(e) { if (e && e.preventDefault) e.preventDefault(); ctxLost = true; ctxLostN++; if (inRun()) onHidden(); toast('The picture was reset by your device. The game is paused.', 4000); }
+function onCtxBack() { ctxLost = false; TXC = {}; TXN = 0; FXS = {}; CFC = []; CFP = ''; FB = null; FBg = null; if (FBmain) { ctx = FBmain; FBmain = null; } stillDrawn = false; try { resize(); render(); } catch (e) { logError('render', e); } }
+cv.addEventListener('contextlost', onCtxLost); cv.addEventListener('contextrestored', onCtxBack);
+/* P60: use the canvas box in real device pixels (within 2 px of our own, governor not lowering sharpness) */
+var dpcb = null;   
+if (window.ResizeObserver) { try { new ResizeObserver(function (L) { var b = L[0] && L[0].devicePixelContentBoxSize && L[0].devicePixelContentBoxSize[0]; if (!b) return; var n = { w: Math.round(b.inlineSize), h: Math.round(b.blockSize) }; if (dpcb && dpcb.w === n.w && dpcb.h === n.h) return; dpcb = n; if (n.w !== cv.width || n.h !== cv.height) { clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { render(); } catch (e) { logError('render', e); } }, 60); } }).observe(cv, { box: 'device-pixel-content-box' }); } catch (e) { dpcb = null; } }
 var rzT = 0, rzRaf = 0;   // phones fire many resize events while the address bar slides: fit the box now (cheap), rebuild the picture once things are quiet
 function fitStage() { bkReset(); var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0)), s = Math.min(aw / W, ah / H); stageEl.style.width = Math.floor(W * s) + 'px'; stageEl.style.height = Math.floor(H * s) + 'px'; stageEl.style.setProperty('--u', s + 'px'); }
 addEventListener('resize', function () {
@@ -6029,7 +6109,7 @@ addEventListener('gamepadconnected', function () { if (!padOn) toast('Controller
 addEventListener('blur', function (e) { if (e.target && e.target.classList) e.target.classList.remove('pf'); }, true);
 function padList() { return padTest || (navigator.getGamepads ? navigator.getGamepads() : []); }
 function padB(g, n) { return !!(g.buttons[n] && g.buttons[n].pressed); }
-function padPanel() { var a = [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal], i; for (i = 0; i < a.length; i++) if (!a[i].hidden) return a[i]; return null; }
+function padPanel() { var a = [pWin, pHelp, pSave, pWear, pUp, pEmp, pSet, pPrac, pMuse, pChal, pAssist], i; for (i = 0; i < a.length; i++) if (!a[i].hidden) return a[i]; return null; }
 function padCands(root) {   // the buttons a controller can reach right now: the open panel's, or the title screen's own buttons
   var L = (root === stageEl ? stageEl : root).querySelectorAll('button'), o = [], i, b;
   for (i = 0; i < L.length; i++) { b = L[i]; if (b.disabled || b.classList.contains('pcl') || !b.getClientRects().length) continue; if (root === stageEl && !bar.contains(b) && b.id !== 'bCont') continue; o.push(b); }

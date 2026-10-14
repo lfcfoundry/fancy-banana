@@ -33,10 +33,10 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 ## Ask the owner first (use the pop-up question, not a guess)
 
 - Anything that changes how the game feels: difficulty, flap strength, speed, scoring, prices, what a stage contains.
-- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 700,000 bytes, player 440,000 bytes) or adds a feature that costs size. Say what it costs, after packing.
+- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 715,000 bytes, player 440,000 bytes) or adds a feature that costs size. Say what it costs, after packing.
 - Anything that changes the save format (`bf1` and its backups) or what is stored on the device.
 - Anything that adds a network request, a library, sound, or a new permission.
-- Adding, removing or renaming a secret, an unlock or a price in the Emporium.
+- Adding, removing or renaming a secret, an unlock or a price in the hidden parts of the game.
 - Changing the license line, the copyright holder or what is public.
 - Deleting files, rewriting history or force-pushing.
 
@@ -48,7 +48,9 @@ The owner pays for every run and waits on it. Use the smallest check that covers
 
 1. `python3 qa/qa.py`: builds, then runs only the quick probes that match the files you changed (about 3 seconds).
 2. `python3 qa/docs_drift.py`: under a second, no browser.
-3. `python3 qa/qa.py full`: the whole Chromium suite (`smoke.py`, 91 checks) and then Firefox (`ffsmoke.mjs`, run with `FIREFOX=<path to Firefox 158>`). It says so and stops if nothing changed since the last green run. Run it once, when the design is final.
+3. Small standing checks, each a few seconds, also run first by `full`: `python3 qa/canvas_budget.py` (drawing calls per frame stay within 5% of `qa/canvas-budget.json`, and `save()`/`restore()` stay balanced), `python3 qa/fixtures_check.py` (frozen old saves and save codes in `qa/fixtures` still load; never edit a fixture to make it pass) and `python3 qa/startup.py` (startup timeline, for looking, not a gate).
+4. When a fuzz run finds something: `python3 qa/fuzzreduce.py <seed>` cuts it to the few operations that matter. When you add a probe: `python3 qa/mutants.py` proves it fails when the code it guards is broken (add a mutant for it). A suite that failed and then passed on the same files is written to `qa/flakes.md` by itself.
+5. `python3 qa/qa.py full`: the whole Chromium suite (`smoke.py`, 91 checks) and then Firefox (`ffsmoke.mjs`, run with `FIREFOX=<path to Firefox 158>`). It says so and stops if nothing changed since the last green run. Run it once, when the design is final.
 
 Never run the two browsers at the same time on this machine: Firefox's timing checks fail every time. `build.py` stamps the page with the current time; pin it with `STAMP=2026.10.14.0004 python3 build.py` for a repeatable build. Report the real time and the CPU time of every run.
 
