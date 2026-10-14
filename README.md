@@ -36,7 +36,7 @@ Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-ha
 - It uses plain HTML canvas and JavaScript with no libraries. There are no image files in the game: all of its art is drawn by code when it starts and built in small background steps so play stays smooth.
 - Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test) and Chromium.
 - Version numbers look like `2026.10.10.2346`: year, month, day and the time (US Eastern). The current one is shown under the title on the title screen.
-- This repository holds the built game (`index.html`), the [changelog](changelog.md) and the screenshots above.
+- This repository holds the built game (`index.html`), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
 
 © 2026 JNFoo. All rights reserved.
 
