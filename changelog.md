@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.14.0004 (beta):** Small comfort fixes. W A S D steering in the water level now works with Caps Lock on and on other keyboard layouts. On a computer, clicking another window or switching with Alt-Tab pauses your run, and unplugging a controller pauses it too. The Save panel has a new "Put my old game back" button that undoes a Load or a Start fresh (the game you replace is kept, so you can swap back). With Windows high-contrast colors, buttons keep clear borders and the selected choice stays visible.
 - **2026.10.12.1257 (beta):** Rebuilt from source with the JNFoo copyright line. No gameplay change.
 - **2026.10.12.1236 (beta):** The title-screen copyright line now reads JNFoo.
 - **2026.10.12.1106 (beta):** The Banana Bunch is packed tighter in the rucksack, and the rucksack and bananas now spin with Fancy in his spiral. Scenery behind any open window (Challenges, Settings, Upgrades and the rest) no longer slows to a crawl.

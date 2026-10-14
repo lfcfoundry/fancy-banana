@@ -119,6 +119,8 @@ body.bt #pSet .opt.cmp{min-height:calc(56*var(--u))}
 textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monospace,Consolas,monospace;border:calc(2*var(--u)) solid #3a2a4d;border-radius:calc(10*var(--u));padding:calc(8*var(--u));background:#fff;color:#3a2a4d;resize:none}
 #saveMsg{min-height:calc(40*var(--u));font-weight:700}
 .warn{color:#a3260f;font-weight:700}
+@media (forced-colors:active){button{border-width:calc(4*var(--u))}button.alt{border-width:calc(2*var(--u))}.opt.on{outline:calc(4*var(--u)) solid Highlight;outline-offset:calc(-6*var(--u))}.opt:disabled{border-style:dashed}.opt.wo{border-left-color:CanvasText}}
+@media (prefers-contrast:more){button{border-width:calc(4*var(--u))}}
 </style>
 </head>
 <body>
@@ -254,6 +256,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 <button id="bLoadCode" class="alt">Load save code</button>
 <button id="bLoadFile" class="alt">Load save file</button>
 </div>
+<div class="row"><button id="bOld" class="alt" hidden>Put my old game back</button></div>
 <p id="saveMsg" role="status" aria-live="polite"></p>
 <div class="row"><button id="bConfirm" hidden>Replace my progress with this</button><button id="sClose">Close</button></div>
 <input id="file" type="file" accept=".json,.txt,text/plain,application/json" hidden>
@@ -2641,7 +2644,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 (function () {
 'use strict';
 var PHASE = 'beta';
-var STAMP = '2026.10.12.1257';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.14.0004';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 
@@ -2844,7 +2847,7 @@ function helpSecrets() {   // before the first win: a teaser; after it: a rumor 
   MUSE.forEach(function (r) { if (!save.unlocks[r[0]]) add(SEC_ICON[r[0]] || 'star', 'Rumor: ' + r[1] + '. ' + r[2]); });
 }
 function refreshCode() {
-  $('storeWarn').hidden = storageOK;
+  $('storeWarn').hidden = storageOK; refreshOld();
   makeCode().then(function (c) { codeEl.value = c; }, function (e) { logError('code', e); });
 }
 function openPanel(p) { closePanels(); p.hidden = false; saveMsg.textContent = ''; if (p === pSave) refreshCode(); else if (p === pWear) refreshWear(); else if (p === pUp) refreshUp(); else if (p === pEmp) refreshEmp(); else if (p === pSet) refreshSet(); else if (p === pPrac) refreshPrac(); else if (p === pChal) refreshChal(); else if (p === pMuse) refreshMuse(); else refreshHelp(); }
@@ -2866,6 +2869,15 @@ function applyLoaded() {
   var old = sget(K.main); if (old !== null) sset(K.before, old);
   save = pending; pending = null; bConfirm.hidden = true;
   persist(); syncOpts(); refreshCode(); syncUp(); say('Loaded: ' + describe(save) + '.');
+}
+var oldSave = null, oldArmed = false;   // the game that the last Load or Start fresh replaced (bf1-before-load): offered back from the Save panel
+function oldCopy() { var t = sget(K.before), c = t === null ? null : cleanSave(tryParse(t)); return c && t !== sget(K.main) ? c : null; }
+function refreshOld() { oldArmed = false; oldSave = oldCopy(); $('bOld').hidden = !oldSave; $('bOld').textContent = 'Put my old game back'; }
+function putOldBack() {
+  if (!oldSave) return;
+  if (!oldArmed) { oldArmed = true; $('bOld').textContent = 'Yes, put it back'; say('Your old game: ' + describe(oldSave) + '. Press again to swap it in. The game you have now is kept, so you can swap back.'); return; }
+  var cur = sget(K.main), back = oldSave; if (cur !== null) sset(K.before, cur);
+  save = back; persist(); syncOpts(); refreshCode(); syncUp(); say('Your old game is back: ' + describe(save) + '. The one you had before is kept; press the button again to swap back.');
 }
 function copyText(t, done) {   // to the clipboard; if the browser says no, a short-lived text box does it
   var fb = function () { var ta = document.createElement('textarea'), ok = false; ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:absolute;left:-999px;top:0'; stageEl.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } stageEl.removeChild(ta); done(ok); };
@@ -3157,6 +3169,7 @@ fileEl.addEventListener('change', function () {
   f.text().then(stage1Load, function () { say('The file could not be read.'); });
 });
 bConfirm.addEventListener('click', applyLoaded);
+$('bOld').addEventListener('click', putOldBack);
 codeEl.addEventListener('input', function () { pending = null; bConfirm.hidden = true; });
 
 /* ===== Game state ===== */
@@ -4030,7 +4043,9 @@ function saveHint() {
   toast('Tip: Safari clears saved games after a week away. Open Save to copy your save code, or add Fancy to your Home Screen.', 8000);
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { }); } catch (e) { }
 }
-addEventListener('blur', function (e) { if (e.target === window) { keys = {}; kHeld.key = false; kHeld.ptr = false; } });
+function inRun() { return state === 'play' || state === 'mini' || state === 'sky' || state === 'volc'; }
+function finePointer() { try { return matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return false; } }
+addEventListener('blur', function (e) { if (e.target === window) { keys = {}; kHeld.key = false; kHeld.ptr = false; if (inRun() && !document.hidden && !dlHold && finePointer()) onHidden(); } });   // alt-tab or a click on another window pauses a run on a computer (the file chooser is exempt: dlHold); a phone keeps going, because a blur there is often only the keyboard or a bar
 document.addEventListener('visibilitychange', function () { if (document.hidden) onHidden(); else wlSync(); });
 addEventListener('pagehide', onHidden);
 
@@ -5980,28 +5995,36 @@ cv.addEventListener('pointerdown', function (e) { e.preventDefault(); if (e.butt
   if (state === 'volc') { volcPointer(pl); return; } if (contCan() && stage > 1 && mgIn([pl[0], pl[1] - DOFF], DC_B)) { payContinue(); return; } if (state === 'mini') mgPointerDown(e); else { if (state === 'play' || state === 'ready' || state === 'launch' || state === 'paused') tapRipple(pl[0], pl[1], tapIgnored()); onAction(); } });
 cv.addEventListener('pointermove', function (e) { if (state === 'mini' && (e.pointerType === 'mouse' || e.buttons)) mgPoint(e); });
 addEventListener('pointerup', function () { kHeld.ptr = false; if (mgDn && mgDn.tap && !mgDn.moved && state === 'mini' && MG && MG.ph === 'play' && !MG.paused && performance.now() - mgDn.t0 < 450) mgLeap(); mgDn = null; }); addEventListener('pointermove', function (e) { if (kHeld.ptr && !e.buttons) kHeld.ptr = false; }); addEventListener('pointercancel', function () { kHeld.ptr = false; mgDn = null; }); addEventListener('blur', function () { kHeld.ptr = kHeld.key = kHeld.pad = false; });
+var STEER = { ArrowLeft: 'l', KeyA: 'l', ArrowRight: 'r', KeyD: 'r', ArrowUp: 'u', KeyW: 'u', ArrowDown: 'd', KeyS: 'd' }, STEERK = { a: 'l', d: 'r', w: 'u', s: 'd' };
+function steerKey(e) { var k = STEER[e.code]; if (k) return k; if (e.code) return null; k = String(e.key); return STEER[k] || STEERK[k.toLowerCase()] || null; }   // steering by the key's place (W A S D stay under the left hand on any layout, and Caps Lock or Shift change nothing); an event without a code (a test, an odd device) falls back to the letter
+function isSpace(e) { return e.code === 'Space' || e.key === ' '; }
 addEventListener('keydown', function (e) {
-  if (e.key === ' ') kHeld.key = true;
+  if (isSpace(e)) kHeld.key = true;
   if (e.key === 'Escape') { if (state === 'home' && !panelOpen()) { homeBack(); return; } if (state === 'sky' && !panelOpen()) { if (SKY && (SKY.paused || SKY.ph === 'win' || SKY.ph === 'lose')) skyExit(); else skyPause(true); return; } if (state === 'volc' && !panelOpen()) { if (VOLC && (VOLC.paused || VOLC.ph === 'win' || VOLC.ph === 'lose')) volcExit(); else volcPause(true); return; } if (pracN && (state === 'dead' || state === 'paused') && !panelOpen()) { practiceExit(); return; } if (state === 'mini' && MG && MG.practice && !panelOpen() && (MG.paused || mgCard(MG))) practiceExit(); else closePanels(); return; }
-  var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[e.key]; if (kk) keys[kk] = true;
+  var kk = steerKey(e); if (kk) keys[kk] = true;
   if (state === 'mini' && e.key === 'ArrowUp') { e.preventDefault(); return; }
   if ((e.key === 'p' || e.key === 'P') && !panelOpen()) { if (e.repeat) return; if (state === 'mini') mgPause(); else if (state === 'sky') skyPause(); else if (state === 'volc') volcPause(); else if (state === 'play') onHidden(); else if (state === 'paused') beginResume(); return; }   // P pauses and resumes   // in the water level the up arrow only steers
   if ((e.key === 'c' || e.key === 'C') && contCan() && !panelOpen()) { payContinue(); return; }
-  if (e.key !== ' ' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+  if (!isSpace(e) && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
   var ae = document.activeElement, t = ae && ae.tagName;
-  if (t === 'BUTTON' && e.key === ' ' && state !== 'title' && !panelOpen()) ae.blur();   // in a run the space bar flaps even if some button still has the focus (a focused button would swallow it and press itself)
+  if (t === 'BUTTON' && isSpace(e) && state !== 'title' && !panelOpen()) ae.blur();   // in a run the space bar flaps even if some button still has the focus (a focused button would swallow it and press itself)
   else if (t === 'BUTTON' || t === 'TEXTAREA' || t === 'INPUT') return;
   e.preventDefault(); if (!e.repeat) { if (state === 'play' || state === 'launch') tapRipple(mx(bx), mirY(by), tapIgnored()); onAction(); }
 });
 // A button that was clicked or tapped lets go of the keyboard focus, so the space bar flaps instead of pressing that same button again (a focused button swallows Space). A keyboard press (detail 0) keeps its focus.
 document.addEventListener('click', function (e) { var b = e.target && e.target.closest ? e.target.closest('button') : null; if (b && e.detail > 0) b.blur(); });
-addEventListener('keyup', function (e) { if (e.key === ' ') kHeld.key = false; var kk = { ArrowLeft: 'l', a: 'l', ArrowRight: 'r', d: 'r', ArrowUp: 'u', w: 'u', ArrowDown: 'd', s: 'd' }[String(e.key).toLowerCase()]; if (kk) keys[kk] = false; });
+addEventListener('keyup', function (e) { if (isSpace(e)) kHeld.key = false; var kk = steerKey(e); if (kk) keys[kk] = false; });
 document.addEventListener('contextmenu', function (e) { if (e.target === cv) e.preventDefault(); });
 
 /* ===== Game controller. In play: any face button or trigger flaps or leaps, Start pauses, the stick or d-pad steers in the water level.
    Menus: the d-pad (or stick) moves a purple focus ring around the buttons, A picks, B goes back, Start closes. Pause: Y or Select opens Settings.
    Only polled once a controller has been plugged in or touched. ===== */
 var padOn = false, padTest = null, padPrev = {}, padDir = { l: 0, r: 0, u: 0, d: 0 }, padRep = {}, padNavT = false, padOpener = null, padPanelWas = null, padPanelAt = 0, padLast = 0, padGuard = 450, padHintAt = 0, padHintEl = $('padHint');
+addEventListener('gamepaddisconnected', function () {   // the last controller was unplugged in the middle of a run: pause instead of letting him fall
+  var L = padList(), i, left = 0; for (i = 0; i < L.length; i++) if (L[i] && L[i].connected) left++;
+  if (left || !padOn || !inRun()) return;
+  onHidden(); toast('Controller disconnected. The game is paused.', 4000);
+});
 addEventListener('gamepadconnected', function () { if (!padOn) toast('Controller found: A flaps, the d-pad steers and moves around menus, Start pauses.', 5000); padOn = true; });
 addEventListener('blur', function (e) { if (e.target && e.target.classList) e.target.classList.remove('pf'); }, true);
 function padList() { return padTest || (navigator.getGamepads ? navigator.getGamepads() : []); }
