@@ -33,7 +33,7 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 ## Ask the owner first (use the pop-up question, not a guess)
 
 - Anything that changes how the game feels: difficulty, flap strength, speed, scoring, prices, what a stage contains.
-- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 715,000 bytes, player 440,000 bytes) or adds a feature that costs size. Say what it costs, after packing.
+- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 718,000 bytes, player 443,000 bytes) or adds a feature that costs size. Say what it costs, after packing.
 - Anything that changes the save format (`bf1` and its backups) or what is stored on the device.
 - Anything that adds a network request, a library, sound, or a new permission.
 - Adding, removing or renaming a secret, an unlock or a price in the hidden parts of the game.
