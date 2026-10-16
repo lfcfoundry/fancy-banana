@@ -1,5 +1,6 @@
 # What's new
 
+- **2026.10.16.1000 (beta):** The bookshelf now says "a story written in the Story Editor", with the old tool name removed. No gameplay change.
 - **2026.10.15.1056 (beta):** The title screen now credits LFC Foundry (MIT licensed) under the copyright line, and the page carries the LFC Foundry license header. No gameplay change.
 - **2026.10.14.1352 (beta):** Every button in the game can now be reached with a keyboard or a screen reader, and a back swipe (or the Back key) closes an open window. Pressing any button shows a yellow ring. On a phone held sideways the buttons sit beside the game at a comfortable size and the windows are bigger. The space around the game now takes on the colors of the current stage instead of plain purple.
 - **2026.10.14.1211 (beta):** Fixed the stage times at the top right (under the pause button) running off the edge of the screen. They now sit fully on screen, including on long runs and in the left-handed layout.
