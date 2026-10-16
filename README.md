@@ -2,7 +2,7 @@
 
 A silent, one-tap, side-scrolling arcade game. Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps and free his banana friends from Evil Prince Chimp.
 
-**Play it: https://jnfoo.github.io/fancy-banana/**
+**Play it: https://lfcfoundry.github.io/fancy-banana/**
 
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
