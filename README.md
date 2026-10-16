@@ -40,7 +40,7 @@ Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-ha
 
 © 2026 JNFoo. All rights reserved.
 
-## More from JNFoo
+## More from LFC Foundry
 
 - [Apple Press](https://github.com/JNFoo/apple-press): a clicker game for kids ([play](https://jnfoo.github.io/apple-press/))
 - [Pineapple Defense](https://github.com/JNFoo/pineapple-defense): a flick-to-throw pineapples-at-penguins game ([play](https://jnfoo.github.io/pineapple-defense/))
