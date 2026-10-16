@@ -2703,7 +2703,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.16.1032';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.16.1651';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 JNFoo. All Rights Reserved.';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -5317,7 +5317,7 @@ function homeTap(pl) {
   if (z[4] === 'back') { homeBack(); return; }
   if (z[4] === 'mirror') { openPanel(pWear); return; }
   if (z[4] === 'apple') { homeSay(HOME_JOKES[h.jk++ % HOME_JOKES.length]); return; }
-  if (z[4] === 'book') { homeSay(HOME_BOOKS[n][0] + ': a story written in the P-See Story Editor.'); return; }
+  if (z[4] === 'book') { homeSay(HOME_BOOKS[n][0] + ': a story written in the Story Editor.'); return; }
   if (z[4] === 'up') { it = homeUps()[n]; homeSay(it.n + (it.m > 1 ? ' (level ' + it.l + ' of ' + it.m + ')' : '') + ': ' + (it.l ? '' : 'not yet bought. ') + it.d); return; }
   if (z[4] === 'cos') { it = homeCos()[n]; homeSay(it.n + (it.own ? (it.on ? ': wearing it. Tap the mirror to change outfits.' : ': you own it. Tap the mirror to wear it.') : ': ' + it.how)); return; }
   if (z[4] === 'prize') { it = homePrizes()[n]; homeSay(it.n + (it.own ? ': ' + it.yes : ': ' + it.how)); }
