@@ -15,7 +15,7 @@ The public repository (`fancy-banana`) holds only the built game (`index.html`),
 | Joins the three files into the page | `build.py` (outputs in `dist/`) |
 | Release history, one row per build | `CHANGELOG.md` (the repository copy is `changelog.md`, which is shorter) |
 | Latest hand-off for a new session | the newest `HANDOFF-fancy-the-banana-*.md` |
-| What the game taught us | `FANCY-BANANA-LESSONS-2026.10.09.md` and `FANCY-BANANA-FOUNDATION-2026.10.13.2334.md` |
+| What the game taught us | the lessons and foundation documents, filed in the private knowledge base under research/2026-10-16-fancy-banana-archive (with the research, audits, QA efficiency notes and all earlier handoffs) |
 | Checks | `qa/` (`qa.py` quick tier, `smoke.py`, `ffsmoke.mjs`, `fuzz.js`, `packed.py`) |
 
 Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/`. The build removes it from the player copy, so never rely on `window.__bf` in shipped code.
