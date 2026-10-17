@@ -30,11 +30,25 @@ A silent, one-tap, side-scrolling arcade game. Guide Fancy, a small flying banan
 
 Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-handed layout, large buttons and text, a battery saver, full screen, a pause button (or the P key), game controller support, and no sound or music at all. Progress is saved in your browser; use **Save** to copy a save code or file and move to another device.
 
+## Tested with
+
+Every release is checked in real browsers, one at a time, and each [changelog](changelog.md) entry ends with the browsers and versions used for that build.
+
+| Builds | Chromium | Firefox | Notes |
+|---|---|---|---|
+| 2026.10.08.2342 | Chromium only, version not recorded | not yet in use | First build. |
+| 2026.10.08.2351 to 2026.10.16.1032 | Version not recorded (early notes name Playwright's Chromium build 1194) | 158.0b5, driven through Puppeteer (WebDriver BiDi) | By the end the automatic checks numbered 91 in Chromium and 26 in Firefox. Firefox 153 was used for some timing and freeze runs on 2026.10.11 to 2026.10.12. Some early entries record no browser check. |
+| 2026.10.16.1651 | not run | not run | Text-only fix, rebuilt from source and compared byte for byte with the live page. |
+| 2026.10.16.2201 | 153 for the title screen before release; ungoogled Chromium 155.0.8059.39: 91 of 91 checks after release | 158.0b5: 26 of 26 checks (third run; two timing checks failed first) | Copyright change. |
+| Rule from 2026.10.17 | Ungoogled Chromium 155.0.8059.39 | Firefox 158.0 | Plus WebKitGTK 2.52.6 and GNOME Web 46.5. Only these browsers, one at a time, versions labeled. |
+
+The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780M) in Firefox, and on a Pixel 7 Pro in Chrome. Those versions are not recorded in the changelog.
+
 ## Technical notes
 
 - The whole game is one HTML file: no install, no sign-in, no network requests, nothing leaves your device, and it works offline. Open `index.html` in any modern browser on a laptop or a phone.
 - It uses plain HTML canvas and JavaScript with no libraries. There are no image files in the game: all of its art is drawn by code when it starts and built in small background steps so play stays smooth.
-- Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test) and Chromium.
+- Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test), ungoogled Chromium and WebKitGTK; see [Tested with](#tested-with).
 - Version numbers look like `2026.10.10.2346`: year, month, day and the time (US Eastern). The current one is shown under the title on the title screen.
 - This repository holds the built game (`index.html`), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
 
