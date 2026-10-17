@@ -56,6 +56,8 @@ Never run the two browsers at the same time on this machine: Firefox's timing ch
 
 **Test browsers (standing rule, 2026-10-17).** Test only with the browsers on the `browsers` branch of the private knowledge-base repository, one at a time, and label every result with its version. Re-read that branch's README before each test run, because versions can change and browsers can be added or removed. At this writing they are Firefox 158.0 (the binary reports 158.0b5), ungoogled Chromium 155.0.8059.39-1 and WebKitGTK 2.52.6 with GNOME Web 46.5. **Every release's `changelog.md` entry ends with `*Tested: ...*` naming the browsers and versions that checked that build (write "not recorded" for anything unknown, and never guess), and the "Tested with" table in `README.md` is updated when the set of browsers changes.**
 
+**Faster, trustworthy testing:** follow the universal QA and browser-testing guide at `build-notes/qa/QA-AND-BROWSER-TESTING-UNIVERSAL-GUIDE.md` in the private knowledgebase-single-file repo (print the real browser version on line 1 of every run; targeted checks while working; full run once when the design is final).
+
 ## Keeping this page true
 
 `python3 qa/docs_drift.py` fails when: a file or command named in backticks on this page, in `README.md` or in the newest hand-off does not exist; a version-stamp placeholder is left in a document; a number on this page (the 91 checks, the two size ceilings, the size of the player copy) disagrees with `qa/counts.json`, `build.py` or `dist/sizes.json`; or the copy of this page in the repository differs from this one. Run it before every push, and when you change this page, copy it to the repository.
