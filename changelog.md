@@ -1,6 +1,6 @@
 # What's new
 
-- **2026.10.16.2159 (beta):** The title screen now reads "Copyright © 2026 LFC Foundry", and the repository now carries an MIT license file. No gameplay change.
+- **2026.10.16.2201 (beta):** The title screen now reads "Copyright © 2026 LFC Foundry", the page header links to github.com/lfcfoundry, and the repository now carries an MIT license file. No gameplay change.
 - **2026.10.16.1651 (beta):** The bookshelf in the home scene now says "a story written in the Story Editor" again. The previous build had brought the old tool name back. No gameplay change.
 - **2026.10.16.1032 (beta):** The share text at the end of a run now links to the game's new home, https://lfcfoundry.github.io/fancy-banana/. No gameplay change.
 - **2026.10.16.1000 (beta):** The bookshelf now says "a story written in the Story Editor", with the old tool name removed. No gameplay change.
