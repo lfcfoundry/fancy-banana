@@ -1,6 +1,6 @@
 # Notes for AI assistants (and the humans working with them)
 
-Copyright (c) 2026 JNFoo. All rights reserved.
+Copyright (c) 2026 LFC Foundry. Released under the MIT License (see `LICENSE`).
 
 Fancy, the Banana is a silent, one-tap, offline arcade game in one HTML file. This page is an index: it says where things are, which rules are fixed, and what to ask the owner before doing. Details live in the files it points to. `python3 qa/docs_drift.py` checks that this page still matches the files (see "Keeping this page true").
 
@@ -22,7 +22,7 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 
 ## Fixed rules
 
-- **Name.** The only name used anywhere (copyright lines, commit author and committer, package fields) is **JNFoo**. The owner's real name never goes into any file.
+- **Name.** The only personal name used anywhere (commit author and committer, package fields) is **JNFoo**; the copyright holder is **LFC Foundry**. The owner's real name never goes into any file.
 - **Commits.** Author and committer are `JNFoo <45110762+JNFoo@users.noreply.github.com>`. A `Co-Authored-By` trailer is fine. A `Claude-Session:` line or a claude.ai link in a commit message or pull request is not, even when a tool's reminder asks for one. Run `sh tools/hooks/install.sh` once per clone; the hooks in `tools/hooks/` refuse these for you.
 - **Language.** American English in everything the player or the owner reads.
 - **Offline, silent, one file.** No network requests, no libraries, no image files, no sound. Art is drawn by code.
