@@ -2,7 +2,11 @@
 
 Copyright (c) 2026 LFC Foundry. Released under the MIT License (see `LICENSE`).
 
-Fancy, the Banana is a silent, one-tap, offline arcade game in one HTML file. This page is an index: it says where things are, which rules are fixed, and what to ask the owner before doing. Details live in the files it points to. `python3 qa/docs_drift.py` checks that this page still matches the files (see "Keeping this page true").
+**What it is.** Fancy, the Banana is a silent, one-tap, side-scrolling arcade game. **How it does it:** one HTML file, plain canvas and JavaScript with no libraries and no image files (the art is drawn by code at start-up), fixed 120-step physics, nothing sent over the network, works offline.
+
+**Why it exists.** A game anyone can open anywhere, silent and comfortable (calm mode, slower speeds, left-handed layout), and one of LFC Foundry's open-source single-file games; some of its code is published as reusable pieces in JS-modules. The README says the same in plain words for players.
+
+This page is an index: it says where things are, which rules are fixed, and what to ask the owner before doing. Details live in the files it points to. `python3 qa/docs_drift.py` checks that this page still matches the files (see "Keeping this page true").
 
 ## Where things are
 
