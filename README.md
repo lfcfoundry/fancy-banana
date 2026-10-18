@@ -1,6 +1,8 @@
 # Fancy, the Banana (beta)
 
-A silent, one-tap, side-scrolling arcade game. Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps and free his banana friends from Evil Prince Chimp.
+**What it is.** A silent, one-tap, side-scrolling arcade game. You guide Fancy, a small flying banana in a hero mask and scarf, through the gaps and free his banana friends from Evil Prince Chimp.
+
+**How it does it.** The whole game is one HTML file that runs in any modern browser on a laptop or a phone: no install, no sign-in, no network requests, and it works offline. It is plain HTML canvas and JavaScript with no libraries and no image files; all of the art is drawn by code when the game starts. One tap, click or Space press flaps, and physics runs at a fixed 120 steps a second.
 
 **Play it: https://lfcfoundry.github.io/fancy-banana/**
 
@@ -11,6 +13,12 @@ A silent, one-tap, side-scrolling arcade game. Guide Fancy, a small flying banan
   <img src="screenshots/water-level.jpg" width="150" alt="Chimp's Navy, the water bonus level">
   <img src="screenshots/fruit-garden.jpg" width="150" alt="Stage 5, the Fruit Garden">
 </p>
+
+## Why it exists
+
+- **A game anyone can open anywhere.** One tap and no sound, so it works anywhere, including places where sound is not welcome, with nothing to install and nothing leaving your device.
+- **Comfortable by design.** Calm mode, slower game speeds, a left-handed layout and no flashing are built in (see [Made to be comfortable](#made-to-be-comfortable)).
+- **A home for single-file games.** It is one of [LFC Foundry](https://github.com/lfcfoundry)'s open-source single-file games and apps, and some of its code has been cut into reusable pieces in [JS-modules](https://github.com/lfcfoundry/JS-modules) so other games can use it.
 
 **Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed and when is in [changelog.md](changelog.md).
 
@@ -51,6 +59,14 @@ The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780
 - Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test), ungoogled Chromium and WebKitGTK; see [Tested with](#tested-with).
 - Version numbers look like `2026.10.10.2346`: year, month, day and the time (US Eastern). The current one is shown under the title on the title screen.
 - This repository holds the built game (`index.html`), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
+
+## Credits and attributions
+
+- **Made by LFC Foundry.** Game design, code and art are by the maker, published under the name LFC Foundry. The title screen credits LFC Foundry and the page header links to github.com/lfcfoundry.
+- **No third-party code or art in the game.** There are no libraries, fonts or image files in `index.html`; the screenshots above were taken from the game itself.
+- **Reusable pieces.** Where a piece of the game's code has been published as a module, it lives in [JS-modules](https://github.com/lfcfoundry/JS-modules) under the same MIT license.
+- **Testing tools and browsers.** Checks are driven with Puppeteer and Playwright (Firefox and Chromium) and with WebDriver (WebKitGTK and GNOME Web). The browsers are Firefox (MPL 2.0), ungoogled-chromium (BSD-3-Clause), WebKitGTK (LGPL-2 and BSD-2) and GNOME Web (GPL-3+); each keeps its own license. Versions used are listed under [Tested with](#tested-with).
+- **License.** MIT; see [LICENSE](LICENSE).
 
 © 2026 LFC Foundry. Released under the [MIT License](LICENSE).
 
