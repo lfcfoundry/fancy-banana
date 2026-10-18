@@ -20,7 +20,7 @@
 - **Comfortable by design.** Calm mode, slower game speeds, a left-handed layout and no flashing are built in (see [Made to be comfortable](#made-to-be-comfortable)).
 - **A home for single-file games.** It is one of [LFC Foundry](https://github.com/lfcfoundry)'s open-source single-file games and apps, and some of its code has been cut into reusable pieces in [JS-modules](https://github.com/lfcfoundry/JS-modules) so other games can use it.
 
-**Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed and when is in [changelog.md](changelog.md).
+**Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed in each version is in [changelog.md](changelog.md), a short list of what you will notice.
 
 ## How to play
 
@@ -40,7 +40,7 @@ Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-ha
 
 ## Tested with
 
-Every release is checked in real browsers, one at a time, and each [changelog](changelog.md) entry ends with the browsers and versions used for that build.
+Every release is checked in real browsers, one at a time. The table lists the browsers and versions used for each build. The full technical changelog, with numbers, is kept by the maker outside this page.
 
 | Builds | Chromium | Firefox | Notes |
 |---|---|---|---|
@@ -50,7 +50,7 @@ Every release is checked in real browsers, one at a time, and each [changelog](c
 | 2026.10.16.2201 | 153 for the title screen before release; ungoogled Chromium 155.0.8059.39: 91 of 91 checks after release | 158.0b5: 26 of 26 checks (third run; two timing checks failed first) | Copyright change. |
 | Rule from 2026.10.17 | Ungoogled Chromium 155.0.8059.39 | Firefox 158.0 | Plus WebKitGTK 2.52.6 and GNOME Web 46.5. Only these browsers, one at a time, versions labeled. |
 
-The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780M) in Firefox, and on a Pixel 7 Pro in Chrome. Those versions are not recorded in the changelog.
+The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780M) in Firefox, and on a Pixel 7 Pro in Chrome. Those versions are not recorded.
 
 ## Technical notes
 

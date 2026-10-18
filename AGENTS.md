@@ -17,7 +17,7 @@ The public repository (`fancy-banana`) holds only the built game (`index.html`),
 | Page shell, styles, panels | `head.html` |
 | Game code | `game.js` (plus `art.js` for the pictures that are drawn by code) |
 | Joins the three files into the page | `build.py` (outputs in `dist/`) |
-| Release history, one row per build | `CHANGELOG.md` (the repository copy is `changelog.md`, which is shorter) |
+| Release history, one row per build (the full, technical one) | `CHANGELOG.md` in the working folder, and the copy kept in the private knowledge base at `changelogs-full/fancy-banana/CHANGELOG-full.md`. Write the full entry there for every release. The repository's `changelog.md` is the short, player-facing one |
 | Latest hand-off for a new session | the newest `HANDOFF-fancy-the-banana-*.md` |
 | What the game taught us | the lessons and foundation documents, filed in the private knowledge base under research/2026-10-16-fancy-banana-archive (with the research, audits, QA efficiency notes and all earlier handoffs) |
 | Checks | `qa/` (`qa.py` quick tier, `smoke.py`, `ffsmoke.mjs`, `fuzz.js`, `packed.py`) |
@@ -32,6 +32,7 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 - **Offline, silent, one file.** No network requests, no libraries, no image files, no sound. Art is drawn by code.
 - **Version stamps** look like `2026.10.14.0004` (year.month.day.HHMM, US Eastern). A built page never keeps the placeholder `__STAMP__`.
 - **Public text** (README, changelog, help text, credits) never names or describes the hidden, unlockable parts of the game beyond "secrets, challenges, costumes and a few surprises".
+- **Two changelogs (owner, 2026-10-18).** The repository's `changelog.md` is short and plain for players: one line per change saying what a player will notice, no tables, numbers or jargon, no test details, and nothing that names the hidden parts of the game. The complete technical entry (what changed, measurements, browsers and versions tested) goes in the full changelog in the knowledge base for every release.
 - **Never force-push.** Fetch and rebase first.
 
 ## Ask the owner first (use the pop-up question, not a guess)
