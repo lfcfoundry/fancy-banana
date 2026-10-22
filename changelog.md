@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.10.22.1905 (beta)
+
+- A few more behind-the-scenes changes; nothing looks different.
+
 ## 2026.10.22.1903 (beta)
 
 - Small behind-the-scenes changes to how the game starts; nothing looks different.
