@@ -49,6 +49,7 @@ Every release is checked in real browsers, one at a time. The table lists the br
 | 2026.10.16.1651 | not run | not run | Text-only fix, rebuilt from source and compared byte for byte with the live page. |
 | 2026.10.16.2201 | 153 for the title screen before release; ungoogled Chromium 155.0.8059.39: 91 of 91 checks after release | 158.0b5: 26 of 26 checks (third run; two timing checks failed first) | Copyright change. |
 | Rule from 2026.10.17 | Ungoogled Chromium 155.0.8059.39 | Firefox 158.0 | Plus WebKitGTK 2.52.6 and GNOME Web 46.5. Only these browsers, one at a time, versions labeled. |
+| 2026.10.22.1855 | Ungoogled Chromium 155.0.8059.39: 91 of 91 checks | Firefox 158.0: 26 of 26 checks | Plus WebKitGTK 2.52.6: 3 of 3 and GNOME Web 46.5: 3 of 3, and the saved-pictures check 4 of 4. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 
 The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780M) in Firefox, and on a Pixel 7 Pro in Chrome. Those versions are not recorded.
 
