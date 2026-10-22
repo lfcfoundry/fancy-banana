@@ -27,7 +27,7 @@
     -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="color-scheme" content="light">
 <title>Fancy, the Banana</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4aa8'/%3E%3Cpath d='M11 6.2 12.4 2.6 16 4.2' fill='%237a5320' stroke='%233a1f10' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M11.5 5.4C21 3.6 28.5 11 27 20.2 25.8 27.6 16 30.4 9.2 25.6 3.6 21.6 4.4 8.6 11.5 5.4Z' fill='%23ffd93b' stroke='%233a1f10' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M9.2 12.4Q11 9 15 8.2' fill='none' stroke='%23fff4b0' stroke-width='1.5' stroke-linecap='round'/%3E%3Cellipse cx='12.2' cy='15.6' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Cellipse cx='20.6' cy='14.9' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Ccircle cx='12.9' cy='16.4' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='21.3' cy='15.7' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='13.6' cy='15.5' r='.8' fill='%23fff'/%3E%3Ccircle cx='22' cy='14.8' r='.8' fill='%23fff'/%3E%3Cpath d='M13 22.8Q17 25.6 21 22.4' fill='none' stroke='%233a1f10' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -321,6 +321,456 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 </section>
 </div>
 <script>
+/* sprite-baker 1.6.1 (API 1), LEAN BUILD without: baking, mesh, ramps, rotation, shapes, sheets. Made by modules/sprite-baker/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+var SpriteBaker = (function () {
+  'use strict';
+  var PI2 = Math.PI * 2;
+  var NO_DEPTH = -1e9;
+  var DEFAULT_CULL = -0.75;
+  var DEFAULT_LIGHT = [-0.42, -0.62, 0.66];
+  function norm3(x, y, z) {
+    var l = Math.sqrt(x * x + y * y + z * z) || 1;
+    return [x / l, y / l, z / l];
+  }
+  function Rast(w, h) {
+    if (!(this instanceof Rast)) return new Rast(w, h);
+    this.w = w | 0;
+    this.h = h | 0;
+    this.z = new Float32Array(this.w * this.h).fill(NO_DEPTH);
+    this.px = new Uint8ClampedArray(this.w * this.h * 4);
+    this.setLight(DEFAULT_LIGHT);
+  }
+  Rast.prototype.setLight = function (x, y, z) {
+    if (Array.isArray(x)) { z = x[2]; y = x[1]; x = x[0]; }
+    var l = norm3(x, y, z), h = norm3(l[0], l[1], l[2] + 1);
+    this.L = l;
+    this.H = h;
+    return this;
+  };
+  Rast.prototype.clear = function () {
+    this.z.fill(NO_DEPTH);
+    this.px.fill(0);
+    return this;
+  };
+  Rast.prototype.toImageData = function () {
+    return makeImage(this.w, this.h, this.px);
+  };
+  function makeImage(w, h, data) {
+    if (typeof ImageData !== 'undefined') {
+      try { return new ImageData(data, w, h); } catch (e) {  }
+    }
+    return { width: w, height: h, data: data };
+  }
+  function pick(v, d) { return v === undefined ? d : v; }
+  function checkTexture(T) {
+    var w = T && T.w, h = T && T.h, d = T && T.data;
+    if (!(w >= 1 && h >= 1 && w === Math.floor(w) && h === Math.floor(h)) || !d || !(d.length >= w * h * 4)) throw new Error('a texture is { w, h, data } with whole-number w and h and w * h * 4 RGBA bytes in data');
+  }
+  function asMaterial(m) {
+    if (m && m.lut) return m;
+    throw new Error('material must be an object with a lut');
+  }
+  function tri(rast, a, b, c, mat, opts) {
+    var cull = opts && opts.cull !== undefined ? opts.cull : DEFAULT_CULL;
+    if (cull !== false && a[5] + b[5] + c[5] < cull) return;
+    if (!isFinite(a[0] + a[1] + a[2] + a[3] + a[4] + a[5] + b[0] + b[1] + b[2] + b[3] + b[4] + b[5] + c[0] + c[1] + c[2] + c[3] + c[4] + c[5])) return;
+    mat = asMaterial(mat);
+    if ((mat.texture || mat.ridge) && a.length > 7 && b.length > 7 && c.length > 7) return triUV(rast, a, b, c, mat);
+    var w = rast.w, h = rast.h, zbuf = rast.z, out = rast.px, lut = mat.lut;
+    var x0 = a[0], y0 = a[1], x1 = b[0], y1 = b[1], x2 = c[0], y2 = c[1];
+    var area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
+    if (area === 0 || !isFinite(area)) return;
+    var minx = Math.max(0, Math.floor(Math.min(x0, x1, x2))), maxx = Math.min(w - 1, Math.ceil(Math.max(x0, x1, x2)));
+    var miny = Math.max(0, Math.floor(Math.min(y0, y1, y2))), maxy = Math.min(h - 1, Math.ceil(Math.max(y0, y1, y2)));
+    var inv = 1 / area;
+    var lx = rast.L[0], ly = rast.L[1], lz = rast.L[2], hx = rast.H[0], hy = rast.H[1], hz = rast.H[2];
+    var kSpec = mat.specular, kBounce = mat.bounce * 0.16, kPool = mat.pool * 0.3, kRim = mat.rimLight * 0.4, kEdge = mat.edge;
+    var x, y, px, py, w0, w1, w2, z, idx, nx, ny, nz, l, wrap, t, rim, sp, ed, i3, o, r, g, bl;
+    var dy0, dy1, dy2, hot, sq, p2, p4, p8, p16, p32, p64, p128, v0, v1, v2;
+    for (y = miny; y <= maxy; y++) {
+      py = y + 0.5; dy0 = y0 - py; dy1 = y1 - py; dy2 = y2 - py;
+      for (x = minx; x <= maxx; x++) {
+        px = x + 0.5;
+        w0 = ((x1 - px) * dy2 - (x2 - px) * dy1) * inv;
+        w1 = ((x2 - px) * dy0 - (x0 - px) * dy2) * inv;
+        w2 = 1 - w0 - w1;
+        if (w0 < -1e-5 || w1 < -1e-5 || w2 < -1e-5) continue;
+        z = w0 * a[2] + w1 * b[2] + w2 * c[2];
+        if (!isFinite(z)) continue;
+        idx = y * w + x;
+        if (z <= zbuf[idx]) continue;
+        zbuf[idx] = z;
+        nx = w0 * a[3] + w1 * b[3] + w2 * c[3];
+        ny = w0 * a[4] + w1 * b[4] + w2 * c[4];
+        nz = w0 * a[5] + w1 * b[5] + w2 * c[5];
+        l = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz + 1e-9);
+        nx *= l; ny *= l; nz *= l;
+        wrap = (nx * lx + ny * ly + nz * lz) * 0.5 + 0.5;
+        t = wrap * wrap * 0.35 + wrap * 0.65;
+        rim = nx * 0.5 + ny * 0.72 + nz * 0.2;
+        t = t * 0.9 + (rim > 0 ? rim * kBounce : 0);
+        sp = nx * 0.55 + ny * 0.8;
+        if (sp > 0.25) t -= (sp - 0.25) * kPool;
+        sp = nx * hx + ny * hy + nz * hz;
+        hot = sp > 0;
+        if (hot) {
+          sq = sp; p2 = sq * sq; p4 = p2 * p2; p8 = p4 * p4; p16 = p8 * p8; p32 = p16 * p16; p64 = p32 * p32; p128 = p64 * p64;
+          sq = (p16 * 0.55 + p64 * p32 * p8 * p4 * p2 * 0.55 + p128 * p128 * p64 * p32 * p16 * p8 * p4 * 0.5) * kSpec;
+        } else sq = 0;
+        if (nz < 0.34) t *= kEdge + (1 - kEdge) * Math.max(0, nz) / 0.34;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        i3 = ((t * 255) | 0) * 3;
+        r = lut[i3]; g = lut[i3 + 1]; bl = lut[i3 + 2];
+        ed = nx > 0 && nz < 0.8 ? nx * Math.pow(1 - (nz > 0 ? nz : 0), 2.2) * kRim : 0;
+        o = idx * 4;
+        v0 = r + sq * 255 + ed * 255; v1 = g + sq * 255 + ed * 255; v2 = bl + sq * 235 + ed * 255;
+        if (hot && (Math.abs(v0 - Math.floor(v0) - 0.5) < 1e-8 || Math.abs(v1 - Math.floor(v1) - 0.5) < 1e-8 || Math.abs(v2 - Math.floor(v2) - 0.5) < 1e-8)) {
+          sq = (Math.pow(sp, 16) * 0.55 + Math.pow(sp, 110) * 0.55 + Math.pow(sp, 380) * 0.5) * kSpec;
+          v0 = r + sq * 255 + ed * 255; v1 = g + sq * 255 + ed * 255; v2 = bl + sq * 235 + ed * 255;
+        }
+        out[o] = v0;
+        out[o + 1] = v1;
+        out[o + 2] = v2;
+        out[o + 3] = 255;
+      }
+    }
+  }
+  function triUV(rast, a, b, c, mat) {
+    if (!isFinite(a[6] + a[7] + b[6] + b[7] + c[6] + c[7])) return;
+    var T = mat.texture, Rg = mat.ridge, tw = 0, th = 0, td = null, uClamp = true, vWrap = PI2, sBase = 0.66, sWrap = 0.5;
+    if (T) {
+      checkTexture(T);
+      tw = T.w; th = T.h; td = T.data; uClamp = pick(T.uClamp, true); vWrap = pick(T.vWrap, PI2); sBase = pick(T.shadeBase, 0.66); sWrap = pick(T.shadeWrap, 0.5); }
+    var rF = 0, rDark = 0, rScale = 1, rLit = 0, rAdd = 0, hasLit = false;
+    if (Rg) { rF = pick(Rg.freq, 5); rDark = pick(Rg.dark, -0.86); rScale = pick(Rg.darkScale, 0.93); hasLit = Rg.lit !== undefined; rLit = hasLit ? Rg.lit : 0; rAdd = pick(Rg.litAdd, 0.06); }
+    var w = rast.w, h = rast.h, zbuf = rast.z, out = rast.px, lut = mat.lut;
+    var x0 = a[0], y0 = a[1], x1 = b[0], y1 = b[1], x2 = c[0], y2 = c[1];
+    var area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
+    if (area === 0 || !isFinite(area)) return;
+    var minx = Math.max(0, Math.floor(Math.min(x0, x1, x2))), maxx = Math.min(w - 1, Math.ceil(Math.max(x0, x1, x2)));
+    var miny = Math.max(0, Math.floor(Math.min(y0, y1, y2))), maxy = Math.min(h - 1, Math.ceil(Math.max(y0, y1, y2)));
+    var inv = 1 / area;
+    var lx = rast.L[0], ly = rast.L[1], lz = rast.L[2], hx = rast.H[0], hy = rast.H[1], hz = rast.H[2];
+    var kSpec = mat.specular, kBounce = mat.bounce * 0.16, kPool = mat.pool * 0.3, kRim = mat.rimLight * 0.4, kEdge = mat.edge;
+    var x, y, px, py, w0, w1, w2, z, idx, nx, ny, nz, l, wrap, t, rim, sp, ed, i3, o, r, g, bl, tu, tv, rd, hot, sq, p2, p4, p8, p16, p32, p64, p128;
+    var tx, ty, x0i, y0i, y1i, fx, fy, i00, i10, i01, i11, w00, w10, w01, w11, al, aa, shade, tr, tg, tb, dmp;
+    for (y = miny; y <= maxy; y++) {
+      for (x = minx; x <= maxx; x++) {
+        px = x + 0.5; py = y + 0.5;
+        w0 = ((x1 - px) * (y2 - py) - (x2 - px) * (y1 - py)) * inv;
+        w1 = ((x2 - px) * (y0 - py) - (x0 - px) * (y2 - py)) * inv;
+        w2 = 1 - w0 - w1;
+        if (w0 < -1e-5 || w1 < -1e-5 || w2 < -1e-5) continue;
+        z = w0 * a[2] + w1 * b[2] + w2 * c[2];
+        if (!isFinite(z)) continue;
+        idx = y * w + x;
+        if (z <= zbuf[idx]) continue;
+        zbuf[idx] = z;
+        nx = w0 * a[3] + w1 * b[3] + w2 * c[3];
+        ny = w0 * a[4] + w1 * b[4] + w2 * c[4];
+        nz = w0 * a[5] + w1 * b[5] + w2 * c[5];
+        l = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz + 1e-9);
+        nx *= l; ny *= l; nz *= l;
+        wrap = (nx * lx + ny * ly + nz * lz) * 0.5 + 0.5;
+        t = wrap * wrap * 0.35 + wrap * 0.65;
+        rim = nx * 0.5 + ny * 0.72 + nz * 0.2;
+        t = t * 0.9 + (rim > 0 ? rim * kBounce : 0);
+        sp = nx * 0.55 + ny * 0.8;
+        if (sp > 0.25) t -= (sp - 0.25) * kPool;
+        sp = nx * hx + ny * hy + nz * hz;
+        hot = sp > 0;
+        if (hot) {
+          sq = sp; p2 = sq * sq; p4 = p2 * p2; p8 = p4 * p4; p16 = p8 * p8; p32 = p16 * p16; p64 = p32 * p32; p128 = p64 * p64;
+          sq = (p16 * 0.55 + p64 * p32 * p8 * p4 * p2 * 0.55 + p128 * p128 * p64 * p32 * p16 * p8 * p4 * 0.5) * kSpec;
+        } else sq = 0;
+        tv = w0 * a[7] + w1 * b[7] + w2 * c[7];
+        if (Rg) { rd = Math.cos(rF * tv); if (rd < rDark) t *= rScale; else if (hasLit && rd > rLit) t += rAdd; }
+        if (nz < 0.34) t *= kEdge + (1 - kEdge) * Math.max(0, nz) / 0.34;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        i3 = ((t * 255) | 0) * 3;
+        r = lut[i3]; g = lut[i3 + 1]; bl = lut[i3 + 2];
+        dmp = 1;
+        if (T) {
+          tu = w0 * a[6] + w1 * b[6] + w2 * c[6];
+          tx = uClamp ? Math.min(tw - 1.001, Math.max(0, tu * tw - 0.5)) : ((tu * tw - 0.5) % tw + tw) % tw;
+          ty = (((tv / vWrap) * th - 0.5) % th + th) % th;
+          x0i = tx | 0; y0i = ty | 0; fx = tx - x0i; fy = ty - y0i; y1i = (y0i + 1) % th;
+          i00 = (y0i * tw + x0i) * 4; i10 = uClamp ? i00 + 4 : (y0i * tw + (x0i + 1) % tw) * 4; i01 = (y1i * tw + x0i) * 4; i11 = uClamp ? i01 + 4 : (y1i * tw + (x0i + 1) % tw) * 4;
+          w00 = (1 - fx) * (1 - fy); w10 = fx * (1 - fy); w01 = (1 - fx) * fy; w11 = fx * fy;
+          aa = td[i00 + 3] * w00 + td[i10 + 3] * w10 + td[i01 + 3] * w01 + td[i11 + 3] * w11;
+          al = aa / 255;
+          if (al > 0) {
+            if (aa < 1) { tr = tg = tb = 0; }
+            else {
+              tr = (td[i00] * td[i00 + 3] * w00 + td[i10] * td[i10 + 3] * w10 + td[i01] * td[i01 + 3] * w01 + td[i11] * td[i11 + 3] * w11) / aa;
+              tg = (td[i00 + 1] * td[i00 + 3] * w00 + td[i10 + 1] * td[i10 + 3] * w10 + td[i01 + 1] * td[i01 + 3] * w01 + td[i11 + 1] * td[i11 + 3] * w11) / aa;
+              tb = (td[i00 + 2] * td[i00 + 3] * w00 + td[i10 + 2] * td[i10 + 3] * w10 + td[i01 + 2] * td[i01 + 3] * w01 + td[i11 + 2] * td[i11 + 3] * w11) / aa;
+            }
+            shade = sBase + sWrap * wrap;
+            r = r * (1 - al) + tr * shade * al; g = g * (1 - al) + tg * shade * al; bl = bl * (1 - al) + tb * shade * al;
+            dmp = tr > 200 && tg < 90 ? 0.55 : 1 - al * 0.8;
+          }
+        }
+        ed = nx > 0 && nz < 0.8 ? nx * Math.pow(1 - (nz > 0 ? nz : 0), 2.2) * kRim : 0;
+        o = idx * 4;
+        sq *= dmp;
+        out[o] = r + (sq * 255 + ed * 255);
+        out[o + 1] = g + (sq * 255 + ed * 255);
+        out[o + 2] = bl + (sq * 235 + ed * 255);
+        if (hot && (Math.abs(r + (sq * 255 + ed * 255) - Math.floor(r + (sq * 255 + ed * 255)) - 0.5) < 1e-8 || Math.abs(g + (sq * 255 + ed * 255) - Math.floor(g + (sq * 255 + ed * 255)) - 0.5) < 1e-8 || Math.abs(bl + (sq * 235 + ed * 255) - Math.floor(bl + (sq * 235 + ed * 255)) - 0.5) < 1e-8)) {
+          sq = (Math.pow(sp, 16) * 0.55 + Math.pow(sp, 110) * 0.55 + Math.pow(sp, 380) * 0.5) * kSpec * dmp;
+          out[o] = r + (sq * 255 + ed * 255); out[o + 1] = g + (sq * 255 + ed * 255); out[o + 2] = bl + (sq * 235 + ed * 255);
+        }
+        out[o + 3] = 255;
+      }
+    }
+  }
+  function drawMesh(rast, m, mat, view, opts) {
+    view = view || {};
+    var s = view.scale === undefined ? 1 : view.scale, ox = view.ox || 0, oy = view.oy || 0, rot = view.rot || null, cen = view.center || [0, 0, 0];
+    var cols = m.nv + 1, n = cols * (m.nu + 1), verts = new Array(n), k, i, j, x, y, z, nx, ny, nz, a, b, c, d;
+    mat = asMaterial(mat);
+    var pose = opts && typeof opts.pose === 'function' ? opts.pose : null, withUV = !!(mat.texture || mat.ridge), uvs = m.uv;
+    for (k = 0; k < n; k++) {
+      x = m.pos[k * 3]; y = m.pos[k * 3 + 1]; z = m.pos[k * 3 + 2];
+      nx = m.nrm[k * 3]; ny = m.nrm[k * 3 + 1]; nz = m.nrm[k * 3 + 2];
+      if (rot) {
+        x -= cen[0]; y -= cen[1]; z -= cen[2];
+        var rx = rot[0] * x + rot[1] * y + rot[2] * z + cen[0], ry = rot[3] * x + rot[4] * y + rot[5] * z + cen[1], rz = rot[6] * x + rot[7] * y + rot[8] * z + cen[2];
+        var qx = rot[0] * nx + rot[1] * ny + rot[2] * nz, qy = rot[3] * nx + rot[4] * ny + rot[5] * nz, qz = rot[6] * nx + rot[7] * ny + rot[8] * nz;
+        x = rx; y = ry; z = rz; nx = qx; ny = qy; nz = qz;
+      }
+      if (pose) {
+        var P = { x: x, y: y, z: z, nx: nx, ny: ny, nz: nz }, Q = pose(P) || P;
+        x = Q.x; y = Q.y; z = Q.z; nx = Q.nx; ny = Q.ny; nz = Q.nz;
+      }
+      if (withUV) verts[k] = [ox + x * s, oy + y * s, z * s, nx, ny, nz, uvs ? uvs[k * 2] : ((k / cols) | 0) / m.nu, uvs ? uvs[k * 2 + 1] : ((k % cols) / m.nv) * PI2];
+      else verts[k] = [ox + x * s, oy + y * s, z * s, nx, ny, nz];
+    }
+    for (i = 0; i < m.nu; i++) {
+      for (j = 0; j < m.nv; j++) {
+        a = verts[i * cols + j]; b = verts[(i + 1) * cols + j]; c = verts[(i + 1) * cols + j + 1]; d = verts[i * cols + j + 1];
+        tri(rast, a, b, c, mat, opts);
+        tri(rast, a, c, d, mat, opts);
+      }
+    }
+  }
+  return {
+    version: '1.6.1',
+    Rast: Rast,
+    tri: tri,
+    drawMesh: drawMesh,
+    DEFAULT_LIGHT: DEFAULT_LIGHT.slice()
+  };
+})();
+if (typeof module !== 'undefined' && module.exports) module.exports = SpriteBaker; else (typeof globalThis !== 'undefined' ? globalThis : this).SpriteBaker = SpriteBaker;
+
+/* sprite-baker-wasm 1.6.1 (API 1), the WebAssembly fill add-on for sprite-baker. Built from wasm/tri.c. MIT License, Copyright (c) 2026 LFC Foundry. musl libc fmod (MIT). https://github.com/lfcfoundry/JS-modules */
+(function (root) {
+  'use strict';
+  var SB = typeof SpriteBaker === 'object' && SpriteBaker ? SpriteBaker : require('./sprite-baker.js');
+  var JOB = 0x10000, LUT = 0x11000, TEX = 0x20000, TRIS = 0x100000, Z = 0x400000, PX = 0x800000, MEM = 0x1000000;
+  var MAX_PIXELS = (PX - Z) / 4, MAX_TEX_BYTES = TRIS - TEX, MAX_NUMBERS = (Z - TRIS) / 8, PI2 = Math.PI * 2, NO_DEPTH = -1e9;
+  var WASM_B64 = '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';
+  var defaultEngine = null;
+  if (!SB.Rast.prototype.release) SB.Rast.prototype.release = function () {};
+  function bytesOf(b64) {
+    var t = atob(b64), u = new Uint8Array(t.length), i;
+    for (i = 0; i < t.length; i++) u[i] = t.charCodeAt(i);
+    return u;
+  }
+  function plainEngine() {
+    return { available: false, engine: 'js', Rast: SB.Rast, drawMesh: SB.drawMesh, setLight: function (r, l) { return r.setLight(l); }, features: { texture: true, ridge: true } };
+  }
+  function make(bytes) {
+    var inst, ex, mem, buf;
+    try {
+      if (typeof WebAssembly !== 'object' || !WebAssembly || typeof WebAssembly.Instance !== 'function') return plainEngine();
+      inst = new WebAssembly.Instance(new WebAssembly.Module(bytes), { env: { pow: Math.pow, cos: Math.cos } });
+      ex = inst.exports; mem = ex.memory; buf = mem.buffer;
+      if (typeof ex.fill_mesh !== 'function' || !buf || buf.byteLength < MEM) return plainEngine();
+    } catch (e) { return plainEngine(); }
+    var feat = typeof ex.features === 'function' ? ex.features() : 3, hasTex = !!(feat & 1), hasRidge = !!(feat & 2);
+    var f64 = new Float64Array(buf, JOB, 20), i32 = new Int32Array(buf, JOB + 160, 8), u32 = new Uint32Array(buf, JOB + 192, 4);
+    var lutV = new Uint8Array(buf, LUT, 768), texV = new Uint8Array(buf, TEX, MAX_TEX_BYTES), vV = new Float64Array(buf, TRIS, MAX_NUMBERS);
+    var stats = { wasm: 0, js: 0 }, owner = null, materialCache = typeof WeakMap === 'function' ? new WeakMap() : null;
+    function Rast(w, h) {
+      if (!(this instanceof Rast)) return new Rast(w, h);
+      w = w | 0; h = h | 0;
+      if (!(w >= 1 && h >= 1 && w * h <= MAX_PIXELS)) return new SB.Rast(w, h);
+      this.w = w; this.h = h; this.z = null; this.px = null;
+      claim(this);
+      this.z.fill(NO_DEPTH); this.px.fill(0);
+      this.setLight(SB.DEFAULT_LIGHT);
+    }
+    Rast.prototype = Object.create(SB.Rast.prototype);
+    Rast.prototype.constructor = Rast;
+    Rast.prototype.release = function () {
+      if (owner === this) owner = null;
+      this.z = null; this.px = null; this.released = true;
+    };
+    Rast.prototype.toImageData = function () {
+      return SB.Rast.prototype.toImageData.call({ w: this.w, h: this.h, px: this.px.slice() });
+    };
+    function claim(r) {
+      if (owner === r) return;
+      var n = r.w * r.h, oldZ = r.z, oldPx = r.px;
+      if (owner) { owner.z = owner.z.slice(); owner.px = owner.px.slice(); }
+      r.z = new Float32Array(buf, Z, n); r.px = new Uint8ClampedArray(buf, PX, n * 4);
+      if (oldZ) { r.z.set(oldZ); r.px.set(oldPx); }
+      owner = r;
+    }
+    function asMaterial(m) {
+      if (m && m.lut) return m;
+      if (Array.isArray(m)) {
+        var hit = materialCache && materialCache.get(m);
+        if (!hit) { hit = SB.material(m); if (materialCache) materialCache.set(m, hit); }
+        return hit;
+      }
+      return m;
+    }
+    function nums(mat) { return typeof mat.specular === 'number' && typeof mat.bounce === 'number' && typeof mat.pool === 'number' && typeof mat.rimLight === 'number' && typeof mat.edge === 'number'; }
+    function fits(rast, m, mat, st) {
+      var T = mat.texture, Rg = mat.ridge;
+      if (rast instanceof Rast && rast.released) throw new Error('this Rast was released; make a new one');
+      if (!(rast instanceof Rast) || !(m.nu >= 1 && m.nv >= 1) || !nums(mat) || !mat.lut || mat.lut.length < 768) return false;
+      if ((m.nu + 1) * (m.nv + 1) * st > MAX_NUMBERS) return false;
+      if (T) {
+        if (!hasTex || !(T.w >= 1 && T.h >= 1 && T.w === Math.floor(T.w) && T.h === Math.floor(T.h)) || !T.data || T.data.length < T.w * T.h * 4 || T.w * T.h * 4 > MAX_TEX_BYTES) return false;
+      }
+      if (Rg && !hasRidge) return false;
+      return true;
+    }
+    function setup(rast, mat, cull) {
+      var T = mat.texture, Rg = mat.ridge, pick = function (v, d) { return v === undefined ? d : v; };
+      f64[0] = rast.L[0]; f64[1] = rast.L[1]; f64[2] = rast.L[2]; f64[3] = rast.H[0]; f64[4] = rast.H[1]; f64[5] = rast.H[2];
+      f64[6] = mat.specular; f64[7] = mat.bounce * 0.16; f64[8] = mat.pool * 0.3; f64[9] = mat.rimLight * 0.4; f64[10] = mat.edge; f64[11] = cull === false ? NaN : cull === undefined ? -0.75 : cull;
+      f64[12] = Rg ? pick(Rg.freq, 5) : 0; f64[13] = Rg ? pick(Rg.dark, -0.86) : 0; f64[14] = Rg ? pick(Rg.darkScale, 0.93) : 1; f64[15] = Rg && Rg.lit !== undefined ? Rg.lit : 0; f64[16] = Rg ? pick(Rg.litAdd, 0.06) : 0;
+      f64[17] = T ? pick(T.shadeBase, 0.66) : 0.66; f64[18] = T ? pick(T.shadeWrap, 0.5) : 0.5; f64[19] = T ? pick(T.vWrap, PI2) : PI2;
+      i32[0] = rast.w; i32[1] = rast.h; i32[2] = Rg ? 1 : 0; i32[3] = Rg && Rg.lit !== undefined ? 1 : 0; i32[4] = T ? 1 : 0; i32[5] = T ? (pick(T.uClamp, true) ? 1 : 0) : 1; i32[6] = T ? T.w : 0; i32[7] = T ? T.h : 0;
+      u32[0] = LUT; u32[1] = TEX; u32[2] = Z; u32[3] = PX;
+      lutV.set(mat.lut.length === 768 ? mat.lut : mat.lut.subarray(0, 768));
+      if (T) texV.set(T.data.length === T.w * T.h * 4 ? T.data : T.data.subarray(0, T.w * T.h * 4));
+    }
+    function drawMesh(rast, m, mat, view, opts) {
+      mat = asMaterial(mat);
+      var withUV = !!(mat && (mat.texture || mat.ridge)), st = withUV ? 8 : 6;
+      if (!mat || typeof mat !== 'object' || !fits(rast, m, mat, st)) {
+        if (rast instanceof Rast) claim(rast);
+        stats.js++;
+        return SB.drawMesh(rast, m, mat, view, opts);
+      }
+      claim(rast);
+      view = view || {};
+      var s = view.scale === undefined ? 1 : view.scale, ox = view.ox || 0, oy = view.oy || 0, rot = view.rot || null, cen = view.center || [0, 0, 0];
+      var cols = m.nv + 1, n = cols * (m.nu + 1), k, x, y, z, nx, ny, nz, p, V = vV, uvs = m.uv, pose = opts && typeof opts.pose === 'function' ? opts.pose : null;
+      for (k = 0; k < n; k++) {
+        x = m.pos[k * 3]; y = m.pos[k * 3 + 1]; z = m.pos[k * 3 + 2]; nx = m.nrm[k * 3]; ny = m.nrm[k * 3 + 1]; nz = m.nrm[k * 3 + 2];
+        if (rot) {
+          x -= cen[0]; y -= cen[1]; z -= cen[2];
+          var rx = rot[0] * x + rot[1] * y + rot[2] * z + cen[0], ry = rot[3] * x + rot[4] * y + rot[5] * z + cen[1], rz = rot[6] * x + rot[7] * y + rot[8] * z + cen[2];
+          var qx = rot[0] * nx + rot[1] * ny + rot[2] * nz, qy = rot[3] * nx + rot[4] * ny + rot[5] * nz, qz = rot[6] * nx + rot[7] * ny + rot[8] * nz;
+          x = rx; y = ry; z = rz; nx = qx; ny = qy; nz = qz;
+        }
+        if (pose) { var P = { x: x, y: y, z: z, nx: nx, ny: ny, nz: nz }, Q = pose(P) || P; x = Q.x; y = Q.y; z = Q.z; nx = Q.nx; ny = Q.ny; nz = Q.nz; }
+        p = k * st; V[p] = ox + x * s; V[p + 1] = oy + y * s; V[p + 2] = z * s; V[p + 3] = nx; V[p + 4] = ny; V[p + 5] = nz;
+        if (withUV) { V[p + 6] = uvs ? uvs[k * 2] : ((k / cols) | 0) / m.nu; V[p + 7] = uvs ? uvs[k * 2 + 1] : ((k % cols) / m.nv) * PI2; }
+      }
+      setup(rast, mat, opts ? opts.cull : undefined);
+      ex.fill_mesh(JOB, TRIS, m.nu, m.nv, st);
+      stats.wasm++;
+    }
+    return { available: true, engine: 'wasm', Rast: Rast, drawMesh: drawMesh, setLight: function (r, l) { return r.setLight(l); }, features: { texture: hasTex, ridge: hasRidge }, stats: stats };
+  }
+  SB.wasm = function (bytes) {
+    if (bytes) return make(bytes);
+    if (!defaultEngine) defaultEngine = WASM_B64 ? make(bytesOf(WASM_B64)) : plainEngine();
+    return defaultEngine;
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = SB;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* PicCache: the title screen's biggest pictures (the scenery behind the title and the banana's first face) are kept in this browser's own storage, one set per build, picture scale and costume colors, so a later visit puts them back
+   instead of drawing them again. Nothing leaves the device. It is used only where reading back was measured to be quicker than drawing on this device (the last visit's read-back time against its drawing time), it asks the page
+   for nothing but a short wait at start (150 ms at most, then everything is drawn the usual way), and every failure just means "draw it". The pixels come back exactly as they were saved. Copyright (c) 2026 LFC Foundry. MIT licensed. */
+var PicCache = (function () {
+  var SIG = 'fc6f0464e7', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
+    stat = null, on = false, boot = true, builtMs = 0, readMs = -1, late = false, started = 0, ran = false, db = null, api, haveIDB = false, doneW = null;
+  try { stat = JSON.parse(localStorage.getItem(SK) || 'null'); } catch (e) { stat = null; }
+  if (!stat || stat.s !== SIG) stat = { s: SIG, b: 0, r: -1, v: 0 };
+  stat.v++;
+  try { haveIDB = typeof indexedDB === 'object' && !!indexedDB && typeof ImageData === 'function'; } catch (e) { }
+  // on: the first visits (nothing to compare yet), then whenever reading back was clearly quicker than drawing; one visit in twelve tries again after a no
+  on = haveIDB && (forced || (!test && (stat.r < 0 || stat.b <= 0 || stat.r < stat.b * 0.8 || stat.v % 12 === 0)));
+  function store() { try { localStorage.setItem(SK, JSON.stringify(stat)); } catch (e) { } }
+  function collect(v) { var h = [], q; (function walk(x) { if (!x || typeof x !== 'object') return; if (x.b instanceof ArrayBuffer) { h.push(fnv(x.b)); return; } for (q in x) walk(x[q]); })(v); return h.join(','); }
+  function fnv(b) { var u = new Uint8Array(b), h = 2166136261 >>> 0, i, n = u.length; for (i = 0; i < n; i += 7) h = Math.imul(h ^ u[i], 16777619) >>> 0; return h.toString(16) + ':' + n; }
+  api = {
+    get on() { return on; }, get boot() { return boot; }, get hits() { return hits; }, flushed: null,
+    start: function (go) {   // run go() once: now when this is off; after the saved pictures arrive, or after 150 ms, when it is on
+      var done = false, arrived = false, fin = function () { if (done) return; done = true; ran = true; late = !arrived; readMs = performance.now() - started; go(); };
+      if (!on) { boot = false; store(); go(); return; }
+      started = performance.now(); setTimeout(fin, forced ? 4000 : 150);
+      var rq; try { rq = indexedDB.open(DBN, 1); } catch (e) { on = false; boot = false; fin(); return; }
+      rq.onupgradeneeded = function () { try { rq.result.createObjectStore('p'); } catch (e) { } };
+      rq.onerror = rq.onblocked = function () { on = false; boot = false; fin(); };
+      rq.onsuccess = function () {
+        db = rq.result; var tx, g;
+        try {
+          tx = db.transaction('p', 'readwrite'); g = tx.objectStore('p').getAll();
+          g.onsuccess = function () {
+            var all = (g.result || []).filter(function (e) { return e && e.sig === SIG; }), st = tx.objectStore('p'), i, bad = g.result || [];
+            for (i = 0; i < bad.length; i++) if (!bad[i] || bad[i].sig !== SIG) { try { st.delete(bad[i] && bad[i].key); } catch (x) { } }
+            all.sort(function (a, b) { return b.at - a.at; });
+            for (i = 0; i < all.length; i++) { if (i >= KEEP) { try { st.delete(all[i].key); } catch (x) { } } else if (!done) mem[all[i].key] = all[i]; }
+            arrived = !done;
+          };
+          tx.oncomplete = tx.onerror = tx.onabort = fin;
+        } catch (e) { fin(); }
+      };
+    },
+    take: function (name, K) {   // the saved picture set for this name at this picture scale, or null
+      var e; if (!on || !boot) return null; e = mem[name + '|' + K]; if (!e) return null; hits[name] = forced ? collect(e.v) : 1; return e.v;
+    },
+    built: function (ms) { builtMs += ms; },
+    save: function (name, K, thunks) { if (on && boot) queue.push([name, K, thunks]); },   // thunks: { layer: function () { return its pixels } }, read only later, one layer at a time, when the page is idle
+    canvas: function (p) {
+      var c = document.createElement('canvas'), g, a, b, i; c.width = p.pw; c.height = p.ph; g = c.getContext('2d', { willReadFrequently: true }); g.putImageData(new ImageData(new Uint8ClampedArray(p.b), p.pw, p.ph), 0, 0);
+      if (forced) { a = g.getImageData(0, 0, p.pw, p.ph).data; b = new Uint8ClampedArray(p.b); for (i = 0; i < a.length; i++) if (a[i] !== b[i]) mism++; checked += a.length; }   // test copy: the picture read back from the canvas must equal the saved bytes
+      return c;
+    },
+    part: function (c) { var d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height); return { pw: c.width, ph: c.height, b: d.data.buffer }; },
+    end: function () {   // the first frame is on the screen: remember the timings, then write what was drawn, a layer at a time
+      var nm = Object.keys(hits).length, items = queue, put = [], ix = 0, keys, ki, cur, doneRes;
+      if (!boot) return; boot = false; queue = [];
+      if (ran && nm) stat.r = late ? 9999 : Math.round(readMs * 10) / 10;
+      else if (ran && on && !nm && stat.r < 0 && late) stat.r = 9999;
+      if (builtMs > 0 && !nm) stat.b = Math.round(builtMs * 10) / 10;
+      store();
+      if (!on || !items.length || !db) return;
+      api.flushed = new Promise(function (res) { doneRes = res; });
+      (function next() {
+        if (!cur) { if (ix >= items.length) { finish(); return; } cur = { it: items[ix++], v: {}, ks: Object.keys(items[ix - 1][2]), i: 0 }; }
+        if (cur.i < cur.ks.length) { try { cur.v[cur.ks[cur.i]] = cur.it[2][cur.ks[cur.i]](); } catch (e) { cur.bad = 1; } cur.i++; setTimeout(next, test ? 0 : 30); return; }
+        if (!cur.bad) put.push([cur.it[0] + '|' + cur.it[1], cur.v, cur.it[0]]); cur = null; next();
+      })();
+      function finish() {
+        try {
+          var tx = db.transaction('p', 'readwrite'), s = tx.objectStore('p'), j;
+          for (j = 0; j < put.length; j++) { rec[put[j][2]] = collect(put[j][1]); s.put({ key: put[j][0], sig: SIG, at: Date.now(), v: put[j][1] }, put[j][0]); }
+          tx.oncomplete = tx.onerror = tx.onabort = function () { doneRes(); };
+          if (!put.length) doneRes();
+        } catch (e) { doneRes(); }
+      }
+    },
+    dump: function () {   // test copy: for each picture set, whether it came from the saved copy or was drawn, and a hash of its pixels
+      var o = {}, k; for (k in rec) o[k] = { from: 'drawn', hash: rec[k] }; for (k in hits) o[k] = { from: 'saved', hash: hits[k] }; o.restoredValuesChecked = checked; o.restoredValuesDiffering = mism; return o;
+    },
+    hashOf: collect
+  };
+  return api;
+})();
+
 /* ===== art.js: all drawing for Fancy, the Banana (Apple Press look: shaded gradients, gloss, tone-on-tone outlines) =====
    Everything detailed is drawn ONCE into small cached pictures; the game loop only stamps them (cheap, also in Firefox).
    Stage art is built the first time a stage is needed and dropped when it is not (ART.keep), so memory stays small. */
@@ -419,7 +869,7 @@ function rgbS(c, a) { return a === undefined ? 'rgb(' + c.join(',') + ')' : 'rgb
 function setColors(m, s) {   // the new colors are drawn into Fancy's pictures; the first face now, the rest in the background
   if (!/^#[0-9a-f]{6}$/i.test(m || '') || !/^#[0-9a-f]{6}$/i.test(s || '') || (m === PAL.m && s === PAL.s)) return false;
   PAL.m = m; PAL.s = s; RAMP[4] = [[0, mixHex(s, 0, .34)[0], mixHex(s, 0, .34)[1], mixHex(s, 0, .34)[2]], [.5, hexRgb(s)[0], hexRgb(s)[1], hexRgb(s)[2]], [1, mixHex(s, 255, .5)[0], mixHex(s, 255, .5)[1], mixHex(s, 255, .5)[2]]]; LUT = null;
-  if (BAN) { var e, i; BAN.hero = []; BAN.spin = []; BAN.knots = []; BAN.spinT = null; heroPic(0); for (e = 1; e < 5; e++) (function (e) { TASKQ.push(function () { heroPic(e); }); })(e); for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(function () { spinFrame(i); }); })(i); }
+  if (BAN) { var e, i; BAN.hero = []; BAN.spin = []; BAN.knots = []; BAN.spinT = null; heroPic(0); for (e = 1; e < 5; e++) (function (e) { TASKQ.push(qHero(e)); })(e); for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(qSpin(i)); })(i); }
   return true;
 }
 /* ----- the face, painted flat in (length, around) space and wrapped onto the body by the renderer ----- */
@@ -460,14 +910,6 @@ function bandsTex(c, hero) {   // the plain body paint shared by every face: ste
   g.restore(); return c;
 }
 function texData(c) { var d = c.getContext('2d', RF).getImageData(0, 0, TU, TV).data; return { d: d }; }
-function texAt(T, u, v, out) {   // bilinear, wraps around the body (v), clamps along it (u)
-  var x = Math.min(TU - 1.001, Math.max(0, u * TU - .5)), y = (((v / (2 * Math.PI)) * TV - .5) % TV + TV) % TV, x0 = x | 0, y0 = y | 0, fx = x - x0, fy = y - y0, y1 = (y0 + 1) % TV, d = T.d, i00 = (y0 * TU + x0) * 4, i10 = i00 + 4, i01 = (y1 * TU + x0) * 4, i11 = i01 + 4;
-  var w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy, a = d[i00 + 3] * w00 + d[i10 + 3] * w10 + d[i01 + 3] * w01 + d[i11 + 3] * w11;
-  out[3] = a / 255; if (a < 1) { out[0] = out[1] = out[2] = 0; return; }
-  out[0] = (d[i00] * d[i00 + 3] * w00 + d[i10] * d[i10 + 3] * w10 + d[i01] * d[i01 + 3] * w01 + d[i11] * d[i11 + 3] * w11) / a;
-  out[1] = (d[i00 + 1] * d[i00 + 3] * w00 + d[i10 + 1] * d[i10 + 3] * w10 + d[i01 + 1] * d[i01 + 3] * w01 + d[i11 + 1] * d[i11 + 3] * w11) / a;
-  out[2] = (d[i00 + 2] * d[i00 + 3] * w00 + d[i10 + 2] * d[i10 + 3] * w10 + d[i01 + 2] * d[i01 + 3] * w01 + d[i11 + 2] * d[i11 + 3] * w11) / a;
-}
 /* ----- a tiny software renderer: smooth-shaded triangles, a depth buffer, toon-soft lighting ----- */
 var RAMP = [   // per material: colour stops from shadow to light
   [[0, 150, 96, 4], [.3, 216, 164, 14], [.58, 250, 223, 50], [.84, 255, 241, 104], [1, 255, 251, 186]],   // 0 banana skin (a cool lemon yellow, so Fancy never matches the amber coins)
@@ -481,44 +923,20 @@ var LUT = null;
 function lut() { if (LUT) return LUT; LUT = []; RAMP.forEach(function (R, m) { var a = new Uint8Array(256 * 3), i, j, t, A, B, f; for (i = 0; i < 256; i++) { t = i / 255; for (j = 0; j < R.length - 1 && t > R[j + 1][0]; j++); A = R[j]; B = R[Math.min(j + 1, R.length - 1)]; f = B[0] === A[0] ? 0 : Math.min(1, Math.max(0, (t - A[0]) / (B[0] - A[0]))); a[i * 3] = A[1] + (B[1] - A[1]) * f; a[i * 3 + 1] = A[2] + (B[2] - A[2]) * f; a[i * 3 + 2] = A[3] + (B[3] - A[3]) * f; } LUT.push(a); }); return LUT; }
 var LX = -.42, LY = -.62, LZ = .66, HLX, HLY, HLZ;
 (function () { var l = Math.sqrt(LX * LX + LY * LY + LZ * LZ), x, y, z; LX /= l; LY /= l; LZ /= l; x = LX; y = LY; z = LZ + 1; l = Math.sqrt(x * x + y * y + z * z); HLX = x / l; HLY = y / l; HLZ = z / l; })();
-function Rast(w, h) { this.w = w; this.h = h; this.z = new Float32Array(w * h).fill(-1e9); this.px = new Uint8ClampedArray(w * h * 4); }
-function tri(R, a, b, c, mat, T) {
-  var w = R.w, h = R.h, x0 = a[0], y0 = a[1], x1 = b[0], y1 = b[1], x2 = c[0], y2 = c[1], area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
-  if (area === 0 || (a[5] + b[5] + c[5]) < -.75) return;   // degenerate, or facing well away (the depth buffer handles the rest)
-  var minx = Math.max(0, Math.floor(Math.min(x0, x1, x2))), maxx = Math.min(w - 1, Math.ceil(Math.max(x0, x1, x2))), miny = Math.max(0, Math.floor(Math.min(y0, y1, y2))), maxy = Math.min(h - 1, Math.ceil(Math.max(y0, y1, y2)));
-  var inv = 1 / area, x, y, px, py, w0, w1, w2, z, idx, nx, ny, nz, l, d, t, sp, i3, o, tc = [0, 0, 0, 0], L = lut()[mat], r, g, bl, wrap, rim, tu, tv, ridge, al, shade, ed, sp0;
-  for (y = miny; y <= maxy; y++) for (x = minx; x <= maxx; x++) {
-    px = x + .5; py = y + .5;
-    w0 = ((x1 - px) * (y2 - py) - (x2 - px) * (y1 - py)) * inv; w1 = ((x2 - px) * (y0 - py) - (x0 - px) * (y2 - py)) * inv; w2 = 1 - w0 - w1;
-    if (w0 < -1e-5 || w1 < -1e-5 || w2 < -1e-5) continue;
-    z = w0 * a[2] + w1 * b[2] + w2 * c[2]; idx = y * w + x; if (z <= R.z[idx]) continue; R.z[idx] = z;
-    nx = w0 * a[3] + w1 * b[3] + w2 * c[3]; ny = w0 * a[4] + w1 * b[4] + w2 * c[4]; nz = w0 * a[5] + w1 * b[5] + w2 * c[5]; l = 1 / Math.sqrt(nx * nx + ny * ny + nz * nz + 1e-9); nx *= l; ny *= l; nz *= l;
-    d = nx * LX + ny * LY + nz * LZ; wrap = d * .5 + .5; t = wrap * wrap * .35 + wrap * .65;                       // soft wrap lighting: the shadow side stays friendly
-    rim = nx * .5 + ny * .72 + nz * .2; rim = rim > 0 ? rim * .16 : 0;                                                  // warm bounce light from below right
-    t = t * .9 + rim; sp0 = nx * .55 + ny * .8; if (sp0 > .25) t -= (sp0 - .25) * .3;   // shade pooled low and to the right (Apple Press: the deep tone of the ramp collects there)
-    sp = nx * HLX + ny * HLY + nz * HLZ; sp = sp > 0 ? Math.pow(sp, 16) * .55 + Math.pow(sp, 110) * .55 + Math.pow(sp, 380) * .5 : 0;                 // one big soft highlight
-    tv = w0 * a[7] + w1 * b[7] + w2 * c[7];
-    if (mat === 0 || mat === 5) { ridge = Math.cos(5 * tv); if (ridge < -.86) t *= mat === 5 ? .78 : .93; else if (mat === 5 && ridge > .9) t += .06; }                                           // faint valleys between the ridges
-    if (nz < .34) t *= mat === 1 ? .5 + .5 * Math.max(0, nz) / .34 : .88 + .12 * Math.max(0, nz) / .34;   // darker toward the rim: round forms, and fists read apart
-    t = t < 0 ? 0 : t > 1 ? 1 : t; i3 = ((t * 255) | 0) * 3; r = L[i3]; g = L[i3 + 1]; bl = L[i3 + 2];
-    if (T) {
-      tu = w0 * a[6] + w1 * b[6] + w2 * c[6]; texAt(T, tu, tv, tc); al = tc[3];
-      if (al > 0) { shade = .66 + .5 * wrap; r = r * (1 - al) + tc[0] * shade * al; g = g * (1 - al) + tc[1] * shade * al; bl = bl * (1 - al) + tc[2] * shade * al; if (tc[0] > 200 && tc[1] < 90) sp *= .55; else sp *= 1 - al * .8; }
-    }
-    ed = nx > 0 && nz < .8 ? nx * Math.pow(1 - (nz > 0 ? nz : 0), 2.2) * .4 : 0;   // a cool white rim light on the right edge: bounced light from the scene (Apple Press)
-    r += sp * 255 + ed * 255; g += sp * 255 + ed * 255; bl += sp * 235 + ed * 255;
-    o = idx * 4; R.px[o] = r; R.px[o + 1] = g; R.px[o + 2] = bl; R.px[o + 3] = 255;
-  }
-}
-function V(p, sx, sy, ox, oy, tu, tv) { return [ox + p.x * sx, oy + p.y * sy, p.z * sx, p.nx, p.ny, p.nz, tu, tv]; }
+var SB = SpriteBaker.wasm(), Rast = SB.Rast;   // the triangle filler and depth buffer are sprite-baker's (JS-modules); the fill runs in WebAssembly when the page allows it, and in plain JavaScript otherwise (the same pictures)
+var RIDGE = { 0: { freq: 5, dark: -.86, darkScale: .93 }, 5: { freq: 5, dark: -.86, darkScale: .78, lit: .9, litAdd: .06 } };   // faint valleys between the banana's ridges (skin) and the coin's
+function surf(mat, T) { return { lut: lut()[mat], specular: 1, bounce: 1, pool: 1, rimLight: 1, edge: mat === 1 ? .5 : .88, texture: T ? { w: TU, h: TV, data: T.d } : undefined, ridge: RIDGE[mat] }; }   // a material: the ramp, the paint picture (if any) and the ridges
 function meshDraw(R, fn, nu, nv, sx, ox, oy, mat, T, phi) {   // fn(u, v) -> point on the skin (before the roll); quads become two triangles. While a picture is being built a slice at a time, each mesh is queued as its own job.
   if (R.jobs) { R.jobs.push(function () { meshNow(R, fn, nu, nv, sx, ox, oy, mat, T, phi); }); return; }
   meshNow(R, fn, nu, nv, sx, ox, oy, mat, T, phi);
 }
-function meshNow(R, fn, nu, nv, sx, ox, oy, mat, T, phi) {
-  var i, j, grid = [], row, p, a, b, c, d;
-  for (i = 0; i <= nu; i++) { row = []; for (j = 0; j <= nv; j++) { p = rotX(fn(i / nu, j / nv), phi); if (POSEF) p = POSEF(p); row.push(V(p, sx, sx, ox, oy, i / nu, j / nv * 2 * Math.PI)); } grid.push(row); }
-  for (i = 0; i < nu; i++) for (j = 0; j < nv; j++) { a = grid[i][j]; b = grid[i + 1][j]; c = grid[i + 1][j + 1]; d = grid[i][j + 1]; tri(R, a, b, c, mat, T); tri(R, a, c, d, mat, T); }
+function meshNow(R, fn, nu, nv, sx, ox, oy, mat, T, phi) {   // sample the skin on a grid (rolled by phi), then sprite-baker fills the quads
+  var cols = nv + 1, n = (nu + 1) * cols, pos = new Float64Array(n * 3), nrm = new Float64Array(n * 3), uv = new Float64Array(n * 2), i, j, k, p;
+  for (i = 0; i <= nu; i++) for (j = 0; j <= nv; j++) {
+    k = i * cols + j; p = rotX(fn(i / nu, j / nv), phi);
+    pos[k * 3] = p.x; pos[k * 3 + 1] = p.y; pos[k * 3 + 2] = p.z; nrm[k * 3] = p.nx; nrm[k * 3 + 1] = p.ny; nrm[k * 3 + 2] = p.nz; uv[k * 2] = i / nu; uv[k * 2 + 1] = j / nv * 2 * Math.PI;
+  }
+  SB.drawMesh(R, { nu: nu, nv: nv, pos: pos, nrm: nrm, uv: uv }, surf(mat, T), { scale: sx, ox: ox, oy: oy }, POSEF ? { pose: POSEF } : null);
 }
 function ballFn(cx, cy, cz, rx, ry, rz) { return function (u, v) { var ph = (u - .5) * Math.PI, th = v * 2 * Math.PI, cp = Math.cos(ph); return { x: cx + rx * cp * Math.cos(th), y: cy + ry * Math.sin(ph), z: cz + rz * cp * Math.sin(th), nx: cp * Math.cos(th) / rx, ny: Math.sin(ph) / ry, nz: cp * Math.sin(th) / rz }; }; }
 function rodFn(x0, y0, z0, x1, y1, z1, r0, r1) {   // a short tube between two points (stem, glove cuff)
@@ -547,15 +965,18 @@ function outlinePic(B, rpx, col) {   // thick dark outline all round: the pictur
   og.drawImage(B, 0, 0); return o;
 }
 var OUTK = '#3a1f10';
-function posePic(o, w, h, ox, oy) {   // render one pose to a finished, outlined picture w x h (units), origin at (ox, oy) units
-  var m = mk(w, h), sx = m.c.width / w, sy = m.c.height / h, ss = sx * SS, R = new Rast(Math.ceil(w * ss), Math.ceil(h * ss)), S = document.createElement('canvas'), sg, B, Bg;
-  o.s = ss; o.ox = ox * ss; o.oy = oy * ss; POSEF = o.pose || null; bodyScene(R, o); POSEF = null;
-  S.width = R.w; S.height = R.h; sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0);
+function* posePicGen(o, w, h, ox, oy) {   // render one pose to a finished, outlined picture w x h (units), origin at (ox, oy) units; one mesh per slice (the queue runs a slice a frame), returns the picture
+  var m = mk(w, h), sx = m.c.width / w, sy = m.c.height / h, ss = sx * SS, R = new Rast(Math.ceil(w * ss), Math.ceil(h * ss)), S = document.createElement('canvas'), sg, B, Bg, j;
+  o.s = ss; o.ox = ox * ss; o.oy = oy * ss; R.jobs = []; POSEF = o.pose || null; bodyScene(R, o); POSEF = null; yield;
+  for (j = 0; j < R.jobs.length; j++) { POSEF = o.pose || null; R.jobs[j](); POSEF = null; yield; }
+  R.jobs = null;
+  S.width = R.w; S.height = R.h; sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0); R.release();
   B = document.createElement('canvas'); B.width = m.c.width; B.height = m.c.height; Bg = B.getContext('2d', RF); Bg.imageSmoothingQuality = 'high'; Bg.drawImage(S, 0, 0, B.width, B.height);
   m.g.setTransform(1, 0, 0, 1, 0, 0); m.g.drawImage(outlinePic(B, (o.ol || 2.1) * sx * (o.sc || 1), OUTK), 0, 0); m.g.setTransform(sx, 0, 0, sy, 0, 0);
   toyFinish(m, o, ox, oy);
   return m;
 }
+function posePic(o, w, h, ox, oy) { var g = posePicGen(o, w, h, ox, oy), r; while (!(r = g.next()).done); return r.value; }   // all at once (the same steps, run back to back)
 function spot(u, th, phi, sc) { var p = rotX(bsurf(u, th, sc), phi); return [p.x, p.y, p.z]; }
 var BTEX = null;
 function initBanana() {   // Fancy (4 faces + the iris) and a friend are built now; the 16 roll steps are queued (ART.pump) so there is no hitch
@@ -566,13 +987,26 @@ function initBanana() {   // Fancy (4 faces + the iris) and a friend are built n
   BAN = { friend: null, hero: [], iris: ir, spin: [], knots: [], spinT: null };
   ir.g.translate(10, 10); ir.g.beginPath(); ir.g.arc(0, 0, 5.64, 0, 7); ir.g.fillStyle = '#2a140c'; ir.g.fill(); ir.g.beginPath(); ir.g.arc(2.2, -2.4, 1.92, 0, 7); ir.g.fillStyle = '#fff'; ir.g.fill(); ir.g.beginPath(); ir.g.arc(-1.8, 2, .84, 0, 7); ir.g.fill();
   BAN.spinT = null;
-  heroPic(0); TASKQ.push(function () { friendPic(); });
-  for (e = 1; e < 5; e++) (function (e) { TASKQ.push(function () { heroPic(e); }); })(e);
-  TASKQ.push(friendPic);
-  for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(function () { spinFrame(i); }); })(i);
+  heroPic(0); TASKQ.push(qFriend());
+  for (e = 1; e < 5; e++) (function (e) { TASKQ.push(qHero(e)); })(e);
+  TASKQ.push(qFriend());
+  for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(qSpin(i)); })(i);
 }
-function heroPic(e) { if (!BAN.hero[e]) BAN.hero[e] = posePic({ T: texData(bandsTex(faceTex('hero', e, e === 2 || e === 4), true)), hero: true }, BW, BH, BOX, BOY); return BAN.hero[e]; }
+function heroPic(e) {
+  var H, t, pc = e === 0 && PicCache.on && PicCache.boot, nm = 'hero0|' + PAL.m + PAL.s, got = pc ? PicCache.take(nm, K) : null;   // the first face is kept between visits (PicCache), per costume colors
+  if (!BAN.hero[e]) {
+    if (got) BAN.hero[e] = pcLayer(got.m);
+    else {
+      t = performance.now(); BAN.hero[e] = posePic({ T: texData(bandsTex(faceTex('hero', e, e === 2 || e === 4), true)), hero: true }, BW, BH, BOX, BOY);
+      if (pc) { PicCache.built(performance.now() - t); H = BAN.hero[e]; PicCache.save(nm, K, { m: function () { return pcSave(H); } }); }
+    }
+  }
+  return BAN.hero[e];
+}
 function friendPic() { if (!BAN.friend) BAN.friend = posePic({ T: texData(faceTex('friend', 0, true)), hero: false, sc: .9 }, 112, 76, 58, 36); return BAN.friend; }
+function qHero(e) { var H0 = BAN.hero; return slicer(function* () { var T, m; if (H0[e]) return; T = texData(bandsTex(faceTex('hero', e, e === 2 || e === 4), true)); yield; m = yield* posePicGen({ T: T, hero: true }, BW, BH, BOX, BOY); if (BAN.hero === H0 && !H0[e]) H0[e] = m; }, function () {}); }   // heroPic(e) in slices (for the queue)
+function qFriend() { var B0 = BAN; return slicer(function* () { var T, m; if (B0.friend) return; T = texData(faceTex('friend', 0, true)); yield; m = yield* posePicGen({ T: T, hero: false, sc: .9 }, 112, 76, 58, 36); if (BAN === B0 && !B0.friend) B0.friend = m; }, function () {}); }   // friendPic() in slices
+function qSpin(i) { var S0 = BAN.spin, K0 = BAN.knots; return slicer(function* () { var phi = i / SPINN * PI2, T, m; if (S0[i]) return; if (!BAN.spinT) { BAN.spinT = texData(bandsTex(faceTex('hero', 1, true), true)); yield; } if (BAN.spin !== S0) return; T = BAN.spinT; m = yield* posePicGen({ T: T, hero: true, phi: phi }, BW, BH, BOX, BOY); if (BAN.spin === S0 && !S0[i]) { S0[i] = m; K0[i] = spot(.19, .75, phi).slice(0, 2); } }, function () {}); }   // spinFrame(i) in slices
 function spinFrame(i) { if (!BAN.spinT) BAN.spinT = texData(bandsTex(faceTex('hero', 1, true), true)); if (!BAN.spin[i]) { var phi = i / SPINN * PI2; BAN.spin[i] = posePic({ T: BAN.spinT, hero: true, phi: phi }, BW, BH, BOX, BOY); BAN.knots[i] = spot(.19, .75, phi).slice(0, 2); } return BAN.spin[i]; }
 
 /* a scarf tail streaming backward from the knot: waves all the time, whips when he flaps, lifts when he falls */
@@ -1107,7 +1541,7 @@ function* toy3(g, w, h, build) {   // draw 3D shapes into a picture w x h (units
   var ss = K * 1.25, R = new Rast(Math.ceil(w * ss), Math.ceil(h * ss)), S, j, sg;
   R.jobs = []; build(R, ss); yield;
   for (j = 0; j < R.jobs.length; j++) { R.jobs[j](); yield; }
-  R.jobs = null; S = scratch(R.w, R.h); sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0);   // (no yield between filling the shared scratch and stamping it: another build could overwrite it)
+  R.jobs = null; S = scratch(R.w, R.h); sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0); R.release();   // (no yield between filling the shared scratch and stamping it: another build could overwrite it)
   g.save(); g.imageSmoothingQuality = 'high'; g.drawImage(S, 0, 0, w, h); g.restore();
 }
 function ball3(R, s, x, y, z, rx, ry, rz, mat, nu, nv, T) { meshDraw(R, ballFn(x, y, z, rx, ry, rz), nu || 10, nv || 14, s, 0, 0, mat, T || null, 0); }
@@ -1859,6 +2293,16 @@ function bold(w, h, draw, mode) { var gen = boldG(w, h, draw, mode), r; while (!
 /* A stage's pictures are built as a list of small steps. ART.warm() queues them and ART.pump() runs a few milliseconds' worth per frame (no single big hitch);
    if the stage is needed before the queue finishes, sets() simply finishes the rest at once. */
 var PLAN = {}, QUEUE = [], SLICEW = 60;
+function pcLayer(p) {   // a saved layer (PicCache) back into the kind of picture mk() or chunkStrip() would have made
+  var L, c, g, i;
+  if (p.ch) { L = { ch: [], P: p.P, y: p.y, h: p.h }; for (i = 0; i < p.ch.length; i++) { c = PicCache.canvas(p.ch[i]); c.lw = p.ch[i].lw; L.ch.push(c); } return L; }
+  c = PicCache.canvas(p); g = c.getContext('2d', RF); g.setTransform(c.width / p.w, 0, 0, c.height / p.h, 0, 0); g.lineJoin = 'round'; g.lineCap = 'round';
+  L = { c: c, g: g, w: p.w, h: p.h }; if (p.P !== undefined) { L.y = p.y; L.P = p.P; } return L;
+}
+function pcSave(L) {   // the pixels of a finished layer, ready to keep
+  var o, i; if (L.ch) { o = { ch: [], P: L.P, y: L.y, h: L.h }; for (i = 0; i < L.ch.length; i++) { o.ch.push(PicCache.part(L.ch[i])); o.ch[i].lw = L.ch[i].lw; } return o; }
+  o = PicCache.part(L.c); o.w = L.w; o.h = L.h; if (L.P !== undefined) { o.y = L.y; o.P = L.P; } return o;
+}
 function slicer(make, done) { var gen = null; return function () { var r; if (!gen) gen = make(); r = gen.next(); if (r.done) { done(r.value); return false; } return true; }; }   // a plan step that takes many calls: it returns true until it is finished
 function planFor(th) {
   var p = PLAN[th]; if (p) return p; var D = DEF[th], s = { tiles: [[], []], caps: [[], []] }, st = [], side, i, v, JG = th === JT;
@@ -1875,7 +2319,12 @@ function planFor(th) {
   if (JG) {
     chunkStrip(JGW, 0, 72, D.ground, 0, 0, 0, function (L) { s.ground = L; }).forEach(function (f) { st.push(f); });
   } else st.push(function () { s.ground = mk(GP[th], 72); D.ground(s.ground.g, GP[th]); var g = s.ground.g, q = g.createLinearGradient(0, 0, 0, 72); g.save(); g.globalCompositeOperation = 'source-atop'; q.addColorStop(0, 'rgba(255,255,255,.34)'); q.addColorStop(.08, 'rgba(255,255,255,0)'); q.addColorStop(.55, 'rgba(60,30,90,0)'); q.addColorStop(1, 'rgba(60,30,90,.22)'); g.fillStyle = q; g.fillRect(0, 0, GP[th], 72); g.restore(); var gc = s.ground.c, ex = Math.ceil(K), gw = document.createElement('canvas'), wg; gw.width = gc.width + ex; gw.height = gc.height; wg = gw.getContext('2d', RF); wg.drawImage(gc, 0, 0); wg.drawImage(gc, 0, 0, ex, gc.height, gc.width, 0, ex, gc.height); s.ground.c = gw; });   // the floor: a lit top edge and a deeper tone toward the bottom; one picture-pixel of the next tile is added on the right, so the floor can slide by fractions of a pixel without a hairline between tiles
-  var sc = st.length;   // everything above is scenery (what the title screen shows); the obstacle pieces below are only needed once a run starts
+  var sc = st.length, pcn = 'scen' + th, pcs = PicCache.on && PicCache.boot ? PicCache.take(pcn, K) : null, pci, pcl;   // everything above is scenery (what the title screen shows); the obstacle pieces below are only needed once a run starts
+  if (pcs) st.splice(0, sc, function () { var n; for (n in pcs) s[n] = pcLayer(pcs[n]); }), sc = 1;   // the first screen's scenery, put back from the browser's own storage (PicCache): exactly the pixels drawn on an earlier visit
+  else if (PicCache.on && PicCache.boot) {
+    for (pci = 0; pci < sc; pci++) (function (f) { st[pci] = function () { var t = performance.now(), r = f(); PicCache.built(performance.now() - t); return r; }; })(st[pci]);
+    st.splice(sc, 0, function () { pcl = {}; ['sky', 'far', 'mid', 'top', 'ground'].forEach(function (n) { if (s[n]) pcl[n] = function () { return pcSave(s[n]); }; }); PicCache.save(pcn, K, pcl); }); sc++;
+  }
   (TEXT[th] || []).forEach(function (k) { st.push(function () { tex3(k); }); });
   for (side = 0; side < 2; side++) {
     for (v = 0; v < D.ts[side].nv; v++) (function (side, v) { st.push(slicer(function () { return boldG(OW, D.ts[side].h, function (g) { return D.tile(g, side, v); }, 0, th === 5 ? OLG : null); }, function (o) { if (!D.noCyl) cylShade(o); rimH(o); edgeRows(o); s.tiles[side][v] = o; })); })(side, v);
@@ -1913,7 +2362,7 @@ function warm(th, front) {   // front: this stage is needed next (the retry afte
 
 function pump(ms, min) {   // run queued build steps for about `ms` milliseconds, and at least `min` steps (default 1); returns true while work is left
   var t0 = performance.now(), th, p, c = 0, mn = min || 1, s0, r; TWAIT = ms < 1000; TBUD = TBMAX; TLAST = 0;
-  while (TASKQ.length) {  TASKQ.shift()();  if (++c >= mn && performance.now() - t0 >= ms) return true; }
+  while (TASKQ.length) {  if (TASKQ[0]() !== true) TASKQ.shift();  if (++c >= mn && performance.now() - t0 >= ms) return true; }
   while (MGQ.length) {  MGQ.shift()();  if (++c >= mn && performance.now() - t0 >= ms) return true; }
   while (QUEUE.length) {
     th = QUEUE[0]; p = PLAN[th];
@@ -2630,7 +3079,7 @@ function coin(g, x, y, t) {
 var BALW = false, BALC = ['#ff4d6d', '#ff9a3c', '#ffd93b', '#4fd36a', '#2fc7c0', '#4d9bff', '#9a6cff', '#ff7ad0', '#ffc43a'], BALP = {}, WAFP = null, PARTY = null, PARTYN = null, BALWN = false;   // the last balloon is the gold one
 function meshPic(w, h, ol, build) {   // a toon-lit 3D picture w x h (units): build(R, s) draws the meshes; finished with the dark outline all round, like Fancy
   var m = mk(w, h), sx = m.c.width / w, sy = m.c.height / h, ss = sx * SS, R = new Rast(Math.ceil(w * ss), Math.ceil(h * ss)), S = document.createElement('canvas'), sg, B, Bg;
-  build(R, ss); S.width = R.w; S.height = R.h; sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0);
+  build(R, ss); S.width = R.w; S.height = R.h; sg = S.getContext('2d', RF); sg.putImageData(new ImageData(R.px, R.w, R.h), 0, 0); R.release();
   B = document.createElement('canvas'); B.width = m.c.width; B.height = m.c.height; Bg = B.getContext('2d', RF); Bg.imageSmoothingQuality = 'high'; Bg.drawImage(S, 0, 0, B.width, B.height);
   m.g.setTransform(1, 0, 0, 1, 0, 0); m.g.drawImage(outlinePic(B, ol * sx, OUTK), 0, 0); m.g.setTransform(sx, 0, 0, sy, 0, 0);
   return m;
@@ -2699,11 +3148,528 @@ function balWarm(nt) { var i; if (nt && !BALWN) { BALWN = true; TASKQ.push(funct
 return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
+/*! save-kit 1.2.1 (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.SaveKit = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var BAD_KEYS = { '__proto__': 1, 'constructor': 1, 'prototype': 1 };
+  var DEFAULT_MAX_KEYS = 1000;        // most names kept in one 'counts' field
+  var DEFAULT_MAX_BYTES = 262144;     // biggest unpacked save a code may hold: 256 KiB
+  var TOO_BIG = 'That code is too big to open. Copy only the code and try again.';
+  var DAMAGED = 'That code is damaged.';
+  var INCOMPLETE = 'That code is not complete. Copy the whole code and try again.';
+
+  function bag() { return Object.create(null); }
+  function isNum(v) { return typeof v === 'number' && isFinite(v) && v >= 0; }
+  function has(obj, key) { return Object.prototype.hasOwnProperty.call(obj, key); }
+  function isObj(x) { return !!x && typeof x === 'object' && !Array.isArray(x); }
+
+  function norm(spec) {
+    if (spec && typeof spec === 'object') return spec;
+    var m = /^(\w+)(?::(\d+))?$/.exec(String(spec)) || [];
+    return { type: m[1] || 'raw', max: m[2] ? +m[2] : undefined };
+  }
+
+
+  // Rebuilds one field's value from untrusted data; `d` is the default used when the value is missing or broken.
+  function cleanField(spec, v, d) {
+    spec = norm(spec);
+    switch (spec.type) {
+      case 'num': return isNum(v) ? v : d;
+      case 'int': return isNum(v) ? Math.min(Math.floor(v), spec.max == null ? Number.MAX_SAFE_INTEGER : spec.max) : d;
+      case 'flag': return v === 1 ? 1 : v === 0 ? 0 : (d === 1 ? 1 : 0);
+      case 'str': return typeof v === 'string' && v.length <= (spec.max || 200) ? v : (d == null ? '' : d);
+      case 'counts':
+        var out = bag(), kept = 0, maxKeys = spec.maxKeys > 0 ? spec.maxKeys : DEFAULT_MAX_KEYS;
+        if (!isObj(v)) v = d;   // a missing or broken field starts from its default (1.0.0 always gave an empty map here)
+        if (!isObj(v)) return out;
+        var ks = Object.keys(v), cap = spec.max || 1e6, i, k, n;
+        for (i = 0; i < ks.length; i++) {
+          k = ks[i];
+          if (BAD_KEYS[k] || k.length > 200 || kept >= maxKeys) continue;
+          n = v[k];
+          if (typeof n === 'number' && isFinite(n) && n > 0) { out[k] = Math.min(Math.floor(n), cap); kept++; }
+        }
+        return out;
+      default: return d;
+    }
+  }
+
+  // validate(schema, defaults, untrusted) -> a new, clean state object. Fields not in the schema are dropped.
+  function validate(schema, defaults, input) { return validateWith(fieldsOf(schema), defaults, input); }
+  // The field rules read once: [name, normalized rule] pairs (create() keeps them, so a save or load does not parse the rules again).
+  function fieldsOf(schema) {
+    var ks = Object.keys(schema), f = [], i;
+    for (i = 0; i < ks.length; i++) f.push([ks[i], norm(schema[ks[i]])]);
+    return f;
+  }
+  function validateWith(fields, defaults, input) {
+    var out = {}, i, k;
+    input = isObj(input) ? input : {};
+    for (i = 0; i < fields.length; i++) {
+      k = fields[i][0];
+      out[k] = cleanField(fields[i][1], has(input, k) ? input[k] : undefined, defaults ? defaults[k] : undefined);
+    }
+    return out;
+  }
+
+  // isSound(state, keys): true when every listed numeric field that is present is a sound number.
+  function isSound(state, keys) {
+    for (var i = 0; i < keys.length; i++) { var v = state[keys[i]]; if (v !== undefined && !isNum(v)) return false; }
+    return true;
+  }
+
+  // countsSound(v): true when v is not a map, or every value in the map is a finite number >= 0 (a NaN written to storage comes back as null).
+  function countsSound(v) {
+    if (!isObj(v)) return true;
+    var ks = Object.keys(v);
+    for (var i = 0; i < ks.length; i++) if (!isNum(v[ks[i]])) return false;
+    return true;
+  }
+
+  // ---- codes ----
+  // FNV-1a, 32 bit. style: 'padded36' (default, always 7 base-36 characters, so words pasted after a code are not swallowed), 'plain36' (base 36 with
+  // no leading zeros, 1 to 7 characters) or 'hex8' (8 hex characters). The last two exist to read and write the codes of games that predate save-kit.
+  function checksum(t, style) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return style === 'hex8' ? ('00000000' + h.toString(16)).slice(-8) : style === 'plain36' ? h.toString(36) : ('0000000' + h.toString(36)).slice(-7);
+  }
+  // Base64 without padding, URL-safe. Uses the browser's own Uint8Array.toBase64/fromBase64 when it has them (Chrome 140, Firefox 133,
+  // Safari 18.2), else the loops below.
+  function toB64(bytes) {
+    var bin = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function fromB64(t) {
+    var bin = atob(t.replace(/-/g, '+').replace(/_/g, '/'));
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  var squeezes = null;   // asked once per page: building two streams on every export and import was wasted work
+  function canSqueeze() {
+    if (squeezes === null) { try { new CompressionStream('deflate-raw'); new DecompressionStream('deflate-raw'); squeezes = true; } catch (e) { squeezes = false; } }
+    return squeezes;
+  }
+  function deflate(bytes) {
+    var out = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return new Response(out).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  }
+  // Unpacks deflate-raw bytes, reading the output in pieces; gives up (rejects TOO_BIG) as soon as the output passes `limit`,
+  // so a tiny code that expands about 1000 to 1 is cut off early instead of filling memory.
+  function inflate(bytes, limit) {
+    return new Promise(function (resolve, reject) {
+      var reader, chunks = [], total = 0;
+      try { reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader(); } catch (e) { reject(DAMAGED); return; }
+      function pump() {
+        reader.read().then(function (r) {
+          if (r.done) {
+            var out = new Uint8Array(total), at = 0;
+            chunks.forEach(function (c) { out.set(c, at); at += c.length; });
+            resolve(out); return;
+          }
+          total += r.value.length;
+          if (total > limit) { try { reader.cancel().then(null, function () {}); } catch (e) {} reject(TOO_BIG); return; }
+          chunks.push(r.value);
+          pump();
+        }, function () { reject(DAMAGED); });
+      }
+      pump();
+    });
+  }
+  function escapeRe(t) { return t.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&'); }
+
+  // ---- the store ----
+  // create({ key, schema, defaults, soundKeys, prefix, storage, maxCodeBytes, maxCodeChars, backupEveryMs })
+  //   key: localStorage key. schema/defaults: see validate(). soundKeys: numeric fields that must be sound to write a save
+  //   (default: every 'num'/'int' field; every value inside a 'counts' field is always checked too). prefix: 2 capital letters + digit for codes,
+  //   default 'SK1'. maxCodeBytes: biggest save a code may unpack to (default 262144 = 256 KiB). maxCodeChars: longest pasted text
+  //   importCode() will look at (default about 4/3 of maxCodeBytes plus 1024, so 350549). storage: any object with getItem/setItem.
+  function create(o) {
+    o = o || {};
+    var key = o.key, schema = o.schema || {}, defaults = o.defaults || {}, prefix = o.prefix || 'SK1';
+    var storage = o.storage || null;
+    if (!storage) { try { storage = typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { storage = null; } }   // touching localStorage can throw when storage is blocked
+    var maxBytes = o.maxCodeBytes > 0 ? o.maxCodeBytes : DEFAULT_MAX_BYTES;
+    var maxChars = o.maxCodeChars > 0 ? o.maxCodeChars : Math.ceil(maxBytes * 4 / 3) + 1024;
+    var fields = fieldsOf(schema);
+    var kinds = function (t) { return fields.filter(function (f) { return f[1].type === t; }).map(function (f) { return f[0]; }); };
+    var soundKeys = o.soundKeys || kinds('num').concat(kinds('int'));
+    var countKeys = kinds('counts');
+    var re = new RegExp(escapeRe(prefix) + '([zp])\\.([A-Za-z0-9_-]+)\\.');
+    var style = o.codeCheck;
+    var off = false, backupAt = 0, backupEvery = o.backupEveryMs == null ? 60000 : o.backupEveryMs;
+    var stamp = o.stamp || 'seen', bak = o.backupKey || key + '-backup', damaged = o.damagedKey || '', after = typeof o.afterValidate === 'function' ? o.afterValidate : null;
+    var orphan = o.readBackupWithoutMain !== false;   // false: a missing main slot never brings back a leftover backup
+
+    function upgrade(raw) { return raw; }
+
+    // How many fields hold a broken number (numbers in soundKeys, and values inside counts fields).
+    function badFields(x) {
+      var n = 0, i, v;
+      for (i = 0; i < soundKeys.length; i++) { v = x[soundKeys[i]]; if (v !== undefined && !isNum(v)) n++; }
+      for (i = 0; i < countKeys.length; i++) if (!countsSound(x[countKeys[i]])) n++;
+      return n;
+    }
+    function soundState(x) { return isObj(x) && badFields(x) === 0; }
+    function textOf(slot) { try { return storage.getItem(slot); } catch (e) { return undefined; } }   // null = empty slot, undefined = storage refused
+    function parseSlot(t) {
+      try {
+        var x = JSON.parse(t || 'null');
+        if (isObj(x)) return x;
+      } catch (e) {}
+      return null;
+    }
+    function readSlot(slot) { return parseSlot(textOf(slot)); }
+    // Schema check, then the game's own afterValidate(clean, raw) if there is one: it may change `clean` in place, return a replacement object, or return
+    // false/null to refuse the save. A hook that throws is ignored (the schema-checked state is used). Returns null when refused.
+    function finish(raw) {
+      var c = validateWith(fields, defaults, upgrade(raw)), r;
+      if (!after) return c;
+      try { r = after(c, raw); } catch (e) { return c; }
+      return r === false || r === null ? null : isObj(r) ? r : c;
+    }
+    var api = {
+      validate: function (input) { return validateWith(fields, defaults, input); },
+      // Returns a clean state rebuilt from the better slot (the main slot unless the backup has fewer broken numbers), else null.
+      // With damagedKey, main-slot text that was not used (unreadable, refused by afterValidate, or worse than the backup) is copied there first.
+      load: function () {
+        try {
+          var mt = textOf(key), a = parseSlot(mt), b = null, first, second, out = null, used = null;
+          if (mt === null && !orphan) return null;
+          if (!a || badFields(a) > 0) b = readSlot(bak);   // a sound main slot can never lose to the backup, so only read the backup when it could matter
+          if (a || b) {
+            first = !b ? a : !a ? b : (badFields(b) < badFields(a) ? b : a);
+            out = finish(first); used = first;
+            if (!out) {   // refused by afterValidate: try the other slot
+              second = first === a ? (b || readSlot(bak)) : a;
+              out = second ? finish(second) : null; used = second;
+            }
+          }
+          if (damaged && mt && (!a || used !== a)) { try { storage.setItem(damaged, mt); } catch (e) {} }
+          return out;
+        } catch (e) { return null; }
+      },
+      // Writes the state. Returns false (and writes nothing) if a number is broken, saving is switched off, or storage fails.
+      // Returns true when the main slot was written, even if the backup write failed (the backup is tried again next time).
+      // With the skipUnchangedMs option, a save whose fields are all the same as the last written one (only `seen` differs) is not written
+      // again until that many ms have passed; save(state, true) always writes.
+      save: function (state, force) {
+        try {
+          if (off || !storage || !soundState(state)) return false;
+          var now = Date.now(), probe = null;
+          state[stamp] = now;
+          var txt = JSON.stringify(state);
+          storage.setItem(key, txt);
+          if (Date.now() - backupAt > backupEvery) {
+            try { storage.setItem(bak, txt); backupAt = Date.now(); } catch (e) { /* storage full: the main slot is safe */ }
+          }
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      forceBackupNext: function () { backupAt = 0; },
+      // Switches saving off (true) or on (false). Used while a loaded save waits for a page reload, so the old game can't overwrite it.
+      pause: function (v) { off = v !== false; },
+      // -> Promise<string> like 'SK1z.<data>.<check>' (z = squeezed, p = plain; whichever is shorter). Rejects with a message (string)
+      //    when there is no state, a number is broken, or the save is bigger than maxCodeBytes. Never throws.
+      exportCode: function (state) {
+        try {
+          if (!isObj(state)) return Promise.reject('There is nothing to make a code from yet.');
+          if (!soundState(state)) return Promise.reject('A number in the game is broken, so no code was made. Reload the page and try again.');
+          try { state[stamp] = Date.now(); } catch (e) {}
+          var body = state;
+          var raw = new TextEncoder().encode(JSON.stringify(body));
+          if (raw.length > maxBytes) return Promise.reject('This save is too big to turn into a code.');
+          var plain = toB64(raw);
+          var done = function (flag, d) { return prefix + flag + '.' + d + '.' + checksum(d, style); };
+          if (!canSqueeze()) return Promise.resolve(done('p', plain));
+          return deflate(raw).then(function (b) { var z = toB64(b); return z.length < plain.length ? done('z', z) : done('p', plain); }, function () { return done('p', plain); });
+        } catch (e) { return Promise.reject('This save could not be turned into a code.'); }
+      },
+      // -> Promise<clean state>; rejects with a short human-readable message (string). Never throws.
+      //    Refuses text longer than maxCodeChars, and stops unpacking when the result passes maxCodeBytes.
+      importCode: function (text) {
+        try {
+          var t = String(text == null ? '' : text);
+          if (t.length > maxChars) return Promise.reject(TOO_BIG);
+          var flat = t.replace(/\s+/g, '');
+          var m = re.exec(flat);
+          if (!m) return Promise.reject(flat.indexOf(prefix) >= 0 ? INCOMPLETE : 'That is not a save code for this game.');
+          var want = checksum(m[2], style);
+          if (flat.substr(m.index + m[0].length, want.length) !== want) return Promise.reject(INCOMPLETE);
+          var bytes;
+          try { bytes = fromB64(m[2]); } catch (e) { return Promise.reject(DAMAGED); }
+          var get;
+          if (m[1] === 'z') get = canSqueeze() ? inflate(bytes, maxBytes) : Promise.reject('This browser cannot open that code. Try a newer browser.');
+          else get = bytes.length > maxBytes ? Promise.reject(TOO_BIG) : Promise.resolve(bytes);
+          return get.then(function (b) {
+            var x = JSON.parse(new TextDecoder().decode(b));
+            if (!soundState(x)) throw 0;
+            x = finish(x);
+            if (!x) throw 0;
+            return x;
+          }).catch(function (e) { throw typeof e === 'string' ? e : DAMAGED; });
+        } catch (e) { return Promise.reject(DAMAGED); }
+      },
+      // Calls cb(cleanState, event) when ANOTHER tab of this site changes the save (the browser never tells the tab that wrote it), or
+      // cb(null, event) when it removed the save. Use it to stop an old tab from overwriting newer progress: pause(true) and offer a reload.
+      // Returns a function that stops listening. Does nothing outside a browser.
+      onOtherTab: function (cb) {
+        if (typeof window === 'undefined' || !window.addEventListener || typeof cb !== 'function') return function () {};
+        function on(e) {
+          if (e.key !== null && e.key !== key) return;   // key null: the other tab cleared all storage
+          if (e.storageArea && storage && e.storageArea !== storage) return;
+          var x = null, clean = null;
+          try { x = e.newValue == null ? null : JSON.parse(e.newValue); } catch (err) {}
+          try { if (isObj(x)) clean = finish(x); } catch (err) {}
+          try { cb(clean, e); } catch (err) {}
+        }
+        window.addEventListener('storage', on);
+        return function () { window.removeEventListener('storage', on); };
+      },
+    };
+    return api;
+  }
+
+
+  return {
+    create: create, validate: validate, isSound: isSound,
+    checksum: checksum, toBase64Url: toB64, fromBase64Url: fromB64,
+    bag: bag, has: has
+  };
+});
+
+/* back-close 1.2.0 (API 1), LEAN BUILD without: closeRoute, element, history, supported. Made by modules/back-close/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.BackClose = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  function hasCW(needObserver) { return typeof CloseWatcher === 'function' && (!needObserver || typeof MutationObserver === 'function'); }
+  function watchWhen(isOpen, close, opts) { return make(null, close, opts, typeof isOpen === 'function' ? isOpen : null); }
+  function make(el, close, opts, openFn) {
+   var needMO = false;
+    var known = typeof close === 'function' && (el ? true : !!openFn);
+    var mode = !known ? 'none' : hasCW(needMO) ? 'closewatcher'
+      : 'none';
+    var handle = { supported: mode !== 'none', mode: mode, destroy: function () {}, close: function () { return false; }, sync: function () {} };
+    function shown() {
+      try {
+        if (openFn) return !!openFn();
+       return false;
+      } catch (e) { return false; }
+    }
+    if (mode === 'none') {
+      return handle;
+    }
+    var cw = null, destroyed = false;
+    function run() {
+      try { close(); } catch (e) {  }
+      if (!destroyed && shown()) arm();
+    }
+    function arm() {
+      if (destroyed || cw ||
+        !shown()) return;
+      if (mode === 'closewatcher') {
+        try { cw = new CloseWatcher(); } catch (e) { cw = null; return; }
+        cw.onclose = function () { cw = null; run(); };
+      } else {
+      }
+    }
+    function disarm() {
+      if (cw) { try { cw.destroy(); } catch (e) {  } cw = null; }
+    }
+    function sync() { if (destroyed) return; if (shown()) arm(); else disarm(); }
+    arm();
+    handle.sync = sync;
+    handle.destroy = function () {
+      destroyed = true;
+      disarm();
+    };
+    return handle;
+  }
+  var api = {
+    watchWhen: watchWhen
+  };
+  return api;
+});
+/* wake-keeper 1.1.0 (API 1), LEAN BUILD without: callbacks, idle, inject, status. Made by modules/wake-keeper/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.WakeKeeper = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  function create(opts) {
+    opts = opts || {};
+   var nav = typeof navigator !== 'undefined' ? navigator : null;
+   var doc = typeof document !== 'undefined' ? document : null;
+   var now = function () { return Date.now(); };
+    var backoffMs = opts.refusalBackoffMs >= 0 ? opts.refusalBackoffMs : 20000;
+    var supported = !!(nav && nav.wakeLock && typeof nav.wakeLock.request === 'function');
+    var wanted = false, sentinel = null, pending = false, gen = 0;
+    var blockedUntil = 0, dead = false;
+   var api = { supported: supported, want: want, destroy: destroy };
+    function visible() { return !doc || doc.visibilityState !== 'hidden'; }
+   function note() {}
+    function release() {
+      var s = sentinel; sentinel = null; gen++;
+      if (s) { try { var r = s.release(); if (r && r.catch) r.catch(function () {}); } catch (e) {  } note(); }
+    }
+    function acquire() {
+      if (dead || !supported || sentinel || pending || !wanted ||
+        !visible() || now() < blockedUntil) return;
+      pending = true; var my = ++gen;
+      var p; try { p = nav.wakeLock.request('screen'); } catch (e) { p = Promise.reject(e); }
+      Promise.resolve(p).then(function (s) {
+        pending = false;
+        if (dead || my !== gen || !wanted ||
+          !visible()) {
+          try { var r = s.release(); if (r && r.catch) r.catch(function () {}); } catch (e) {  }
+          acquire();
+          return;
+        }
+        sentinel = s;
+        if (s.addEventListener) s.addEventListener('release', function () { if (sentinel === s) { sentinel = null; note(); } });
+        note();
+      }, function (err) {
+        pending = false;
+        if (dead) return;
+        if (my !== gen) { acquire(); return; }
+        blockedUntil = now() + backoffMs;
+      });
+    }
+    function want(on) {
+      if (dead) return;
+      on = !!on; if (on === wanted) { if (on) acquire(); return; }
+      wanted = on; blockedUntil = 0;
+      if (on) {
+        acquire();
+      }
+      else {
+        release();
+      }
+    }
+    function onVis() { if (dead || !doc) return; if (doc.visibilityState === 'hidden') release(); else { blockedUntil = 0; acquire(); } }
+    if (doc && doc.addEventListener) doc.addEventListener('visibilitychange', onVis);
+    function destroy() {
+      dead = true; wanted = false;
+      release();
+      if (doc && doc.removeEventListener) doc.removeEventListener('visibilitychange', onVis);
+    }
+    return api;
+  }
+  return { create: create, supported: typeof navigator !== 'undefined' && !!(navigator.wakeLock && navigator.wakeLock.request) };
+});
+/* even-dt 1.2.0 (API 1), LEAN BUILD without: options, refreshRule, stats. Made by modules/frame-kit/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.EvenDt = factory();
+})(typeof self !== 'undefined' ? self : typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  function EvenDt(opts) {
+   this.minGap = 2; this.maxGap = 60; this.window = 40; this.warmup = 12; this.refreshEvery = 8; this.maxMultiple = 3; this.tolerance = 0.3; this.payback = 0.04;
+    this._gaps = [];
+    this._sorted = [];
+    this._period = 0;
+    this._drift = 0;
+  }
+  EvenDt.prototype.next = function (gapMs) {
+    var ri = +gapMs;
+    if (!(ri > this.minGap && ri < this.maxGap)) return ri > 0 && isFinite(ri) ? ri : 0;
+    var g = this._gaps;
+    g.push(ri);
+    if (g.length > this.window) g.shift();
+    if (g.length < this.warmup) return ri;
+   if (!this._period || g.length % this.refreshEvery === 0) {
+      var s = this._sorted;
+      s.length = g.length;
+      for (var i = 0; i < g.length; i++) s[i] = g[i];
+      s.sort(function (a, b) { return a - b; });
+      this._period = s[s.length >> 1];
+    }
+    var per = this._period;
+    var n = Math.round(ri / per);
+    var snap = n * per;
+    if (n < 1 || n > this.maxMultiple || Math.abs(ri - snap) > per * this.tolerance) {
+      this._drift = 0;
+      return ri;
+    }
+    this._drift += ri - snap;
+    var pay = this._drift * this.payback;
+    this._drift -= pay;
+    return snap + pay;
+  };
+  return EvenDt;
+});
+/* quality-governor 1.2.0 (API 1), LEAN BUILD without: control, errors, flipGuard, graceStart, options, stallRules, stats. Made by modules/frame-kit/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.QualityGovernor = factory();
+})(typeof self !== 'undefined' ? self : typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  function pick(v, d) { return v === undefined || v === null ? d : v; }
+  var BASE_PERIOD = 16.7;
+  var SLOW_RATIO = 22 / BASE_PERIOD;
+  var FAST_RATIO = 18.5 / BASE_PERIOD;
+  function QualityGovernor(opts) {
+    var o = opts || {};
+   this.levels = 5;
+    this.onChange = typeof o.onChange === 'function' ? o.onChange : null;
+   this.expectedPeriod = BASE_PERIOD; this.slowAbove = 22; this.fastBelow = 18.5; this.smoothing = 0.06; this.slowFrames = 100; this.downDelay = 3000; this.fastMs = 10000; this.upDelay = 10000; this.maxGap = 100;
+   this._level = 0;
+    this._ema = this.expectedPeriod;
+    this._slow = 0;
+    this._fast = 0;
+   this._changedAt = 0;
+    this._lastNow = null;
+  }
+  Object.defineProperty(QualityGovernor.prototype, 'level', { get: function () { return this._level; }, configurable: true });
+  QualityGovernor.prototype.frame = function (gapMs, nowMs) {
+    this._lastNow = nowMs;
+   if (!(gapMs > 0) || gapMs > this.maxGap) { this._slow = 0; return; }
+    this._ema += (gapMs - this._ema) * this.smoothing;
+    if (this._ema > this.slowAbove) {
+      this._slow++;
+      this._fast = 0;
+    } else {
+      this._slow = 0;
+      if (this._ema < this.fastBelow) this._fast += gapMs; else this._fast = 0;
+    }
+    if (this._slow >= this.slowFrames && this._level < this.levels - 1 && nowMs - this._changedAt > this.downDelay) {
+      this._move(this._level + 1, nowMs, 1);
+    } else if (
+     this._level > 0
+    ) {
+     var m = 1;
+      if (this._fast > this.fastMs * m && nowMs - this._changedAt > this.upDelay * m) this._move(this._level - 1, nowMs, -1);
+    }
+  };
+  QualityGovernor.prototype._move = function (to, now, kind) {
+    var from = this._level;
+    this._level = to;
+    this._changedAt = now;
+    this._slow = 0;
+    this._fast = 0;
+    if (to > from) this._ema = this.expectedPeriod;
+    if (to !== from && this.onChange) {
+     this.onChange(to, from);
+    }
+  };
+  return QualityGovernor;
+});
+
 (function () {
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.16.2201';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.22.1855';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 LFC Foundry';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -2783,31 +3749,22 @@ function cleanSave(o) {
 function tryParse(t) { try { return JSON.parse(t); } catch (e) { return null; } }
 
 var loadNote = '';
+/* The shared save-kit (savekit.js, from JS-modules) does the reading, the writing, the spare slot, the kept-aside bad text, the save codes and the other-tab warning. Its slots and codes are exactly the ones this game has always used (bf1, bf1-bak, bf1-damaged, BF1z./BF1p. with an 8-character check), so every old save and code still opens. cleanSave below stays the game's own rules and runs on every save the kit reads. */
+var kit = SaveKit.create({ key: K.main, prefix: 'BF1', codeCheck: 'hex8', backupKey: K.bak, damagedKey: K.damaged, readBackupWithoutMain: false, stamp: 'savedAt', backupEveryMs: CFG.backupEverySecs * 1000, maxCodeBytes: 2e6,
+  afterValidate: function (clean, raw) { return cleanSave(raw); } });   // (no schema: cleanSave checks every field; a refused save sends the kit to the spare slot)
 function loadSave() {
-  var main = sget(K.main);
-  if (main === null) return defaultSave();            // a leftover spare never resurrects a game that has no main save
-  var c = cleanSave(tryParse(main));
-  if (c) return c;
-  sset(K.damaged, main);                               // keep the unreadable text aside
-  var b = cleanSave(tryParse(sget(K.bak)));
-  if (b) { loadNote = 'Your newest save was damaged, so the backup was loaded.'; return b; }
-  loadNote = 'Your save could not be read, so you are starting fresh.';
+  var main = sget(K.main), s = kit.load();   // a leftover spare never resurrects a game that has no main save
+  if (s) { if (main !== null && !cleanSave(tryParse(main))) loadNote = 'Your newest save was damaged, so the backup was loaded.'; return s; }
+  if (main !== null) loadNote = 'Your save could not be read, so you are starting fresh.';
   return defaultSave();
 }
 var save = loadSave();
 var otherTab = false;   // P09: another tab wrote the save, so this tab stops saving (a banner offers Reload)
-var lastBackup = 0, sessionSaved = false, noSave = false;   // noSave is only switched on by checks
+var noSave = false;   // noSave is only switched on by checks
 function persist() {
   if (noSave || otherTab) return false;   // otherTab: another tab changed the save; this one must not write over it
-  save.savedAt = Date.now();
-  var text = JSON.stringify(save);
-  if (!cleanSave(tryParse(text))) { logError('save', 'refused to write an unreadable save'); return false; }
-  var prev = sget(K.main);
-  if (prev !== null && (!sessionSaved || Date.now() - lastBackup > CFG.backupEverySecs * 1000) && cleanSave(tryParse(prev))) {
-    sset(K.bak, prev); lastBackup = Date.now();
-  }
-  sessionSaved = true;
-  return sset(K.main, text);
+  if (!cleanSave(tryParse(JSON.stringify(save)))) { logError('save', 'refused to write an unreadable save'); return false; }
+  return kit.save(save);   // stamps savedAt, keeps the spare slot (at most once a minute)
 }
 
 /* ===== Player options (Settings): Calm mode, Relaxed speed, left-handed, large buttons, news ticker. Saved with the game and the save code. ===== */
@@ -2820,17 +3777,8 @@ function relaxK() { return spdPct() / 100; }
 function bestOf() { var p = spdPct(); return p === 100 ? save.best : p === 80 ? save.bestR : save.bestS[p] || 0; }   // each slower speed keeps its own best score (80 keeps the old Relaxed one)
 function setBestOf(sc) { var p = spdPct(); if (p === 100) save.best = Math.max(save.best, sc); else if (p === 80) save.bestR = Math.max(save.bestR, sc); else save.bestS[p] = Math.max(save.bestS[p] || 0, sc); }
 
-/* ===== Save code: BF1z.<base64url deflate-raw JSON>.<FNV-1a check> (BF1p = uncompressed) ===== */
-function fnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ('00000000' + h.toString(16)).slice(-8); }
-function b64e(bytes) { var s = ''; for (var i = 0; i < bytes.length; i += 8192) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
-function b64d(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s = atob(t), b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
-function pipe(bytes, stream) { var w = stream.writable.getWriter(); w.write(bytes); w.close(); return new Response(stream.readable).arrayBuffer().then(function (ab) { return new Uint8Array(ab); }); }
-function makeCode() {
-  var bytes = new TextEncoder().encode(JSON.stringify(save));
-  function plain() { var b = b64e(bytes); return 'BF1p.' + b + '.' + fnv(b); }
-  if (typeof CompressionStream !== 'function') return Promise.resolve(plain());
-  return pipe(bytes, new CompressionStream('deflate-raw')).then(function (z) { var b = b64e(z); return 'BF1z.' + b + '.' + fnv(b); }, function () { return plain(); });
-}
+/* ===== Save code: BF1z.<base64url deflate-raw JSON>.<FNV-1a check, 8 hex characters> (BF1p = uncompressed), made and read by save-kit ===== */
+function makeCode() { return kit.exportCode(save); }
 var BAD = 'That is not a Fancy, the Banana save. Copy the whole save code and try again.';
 function readText(text) {
   text = String(text || '').trim();
@@ -2839,20 +3787,9 @@ function readText(text) {
     var c = cleanSave(tryParse(text));
     return c ? Promise.resolve(c) : Promise.reject(new Error(BAD));
   }
-  var m = /^(BF1[zp])\.([A-Za-z0-9_-]+)\.([0-9a-f]{8})$/.exec(text.replace(/\s+/g, ''));
-  if (!m) return Promise.reject(new Error(BAD));
-  if (fnv(m[2]) !== m[3]) return Promise.reject(new Error('That code looks incomplete or has a typo. Copy the whole code and try again.'));
-  var bytes;
-  try { bytes = b64d(m[2]); } catch (e) { return Promise.reject(new Error(BAD)); }
-  var done = function (b) {
-    if (b.length > 2e6) throw new Error(BAD);
-    var o = tryParse(new TextDecoder().decode(b)), c = cleanSave(o);
-    if (!c) throw new Error(BAD);
-    return c;
-  };
-  if (m[1] === 'BF1p') { try { return Promise.resolve(done(bytes)); } catch (e) { return Promise.reject(e); } }
-  if (typeof DecompressionStream !== 'function') return Promise.reject(new Error('This browser cannot open compressed codes. Use a save file instead.'));
-  return pipe(bytes, new DecompressionStream('deflate-raw')).then(done, function () { throw new Error(BAD); });
+  return kit.importCode(text).then(null, function (m) {   // the kit's reasons, in this game's own words (unchanged since the first release)
+    throw new Error(/not complete/.test(m) ? 'That code looks incomplete or has a typo. Copy the whole code and try again.' : /cannot open/.test(m) ? 'This browser cannot open compressed codes. Use a save file instead.' : BAD);
+  });
 }
 
 /* ===== Page parts ===== */
@@ -2869,12 +3806,8 @@ function closePanels() { for (var i = 1; i < PL.length; i++) PL[i].hidden = true
 var twinEl = $('twin'), INERT = [cv, bar, bar2, $('bCont'), twinEl];
 function syncInert() { var on = panelOpen(), i; for (i = 0; i < INERT.length; i++) if (INERT[i] && INERT[i].inert !== on) INERT[i].inert = on; bcSync(); }
 /* X16: the phone's back swipe (and the back button) closes the open window, like Esc does, instead of leaving the page. CloseWatcher: Chrome 126+, Firefox 149+; elsewhere nothing happens and the Close buttons still work. */
-var bcw = null;
-function bcSync() {
-  if (typeof CloseWatcher !== 'function') return;
-  if (closable()) { if (!bcw) { try { bcw = new CloseWatcher(); } catch (e) { bcw = null; return; } bcw.onclose = function () { bcw = null; try { closePanels(); } catch (e) { } if (closable()) bcSync(); }; } }
-  else if (bcw) { try { bcw.destroy(); } catch (e) { } bcw = null; }
-}
+var bcw = BackClose.watchWhen(closable, function () { closePanels(); });   // BackClose: the lean build of back-close from JS-modules (smallparts.js); it makes the CloseWatcher while a window is open and mends it after a close
+function bcSync() { if (bcw) bcw.sync(); }
 /* X84: the buttons that exist only as canvas drawings (pause, the card buttons) each get an invisible real button over them, so a keyboard, a screen reader, Voice Access or Switch Access can reach them. A finger still lands on the canvas underneath (the twin ignores the pointer); an assistive click replays the tap through the game's own hit tests. */
 var TWL = [], twSig = '';
 function twinAdd(x, y, w, h, label, off) { TWL.push(x, y, w, h, label, off ? 1 : 0); }
@@ -2982,10 +3915,7 @@ function otherTabWrote() {
   otherTab = true; $('tabWarn').hidden = false;
   if (inRun()) onHidden();
 }
-addEventListener('storage', function (e) {
-  try { if (e.storageArea && e.storageArea !== localStorage) return; } catch (x) { return; }
-  if (e.key === null || e.key === K.main) otherTabWrote();   // null: the other tab cleared everything
-});
+kit.onOtherTab(otherTabWrote);   // another tab changed (or cleared) the save
 $('bReload').addEventListener('click', function () { location.reload(); });
 function blockedByTab() { if (!otherTab) return false; say('Saving is paused because the game changed in another tab. Reload this page first.'); return true; }
 function copyText(t, done) {   // to the clipboard; if the browser says no, a short-lived text box does it
@@ -4166,19 +5096,13 @@ function stageUp() {
 function onHidden() {
   keys = {}; kHeld.key = false; kHeld.ptr = false; resT = -1; if (state === 'mini') mgPause(true); if (state === 'sky') skyPause(true); if (state === 'volc') volcPause(true);
   if (state === 'play') { state = 'paused'; runPauses++; noteBest(); }
+  wlSync();   // a paused game no longer wants the lock
   persist();
 }
 /* Keep the screen awake while a run is going (the browser lets go by itself when the tab is hidden, so ask again when it is back) */
-var wlock = null, wlBusy = false, wlFail = 0;
+var wk = WakeKeeper.create({ refusalBackoffMs: 8000 });   // WakeKeeper: the lean build of wake-keeper from JS-modules (smallparts.js); it asks again on its own when the tab comes back, and waits 8 s after a refusal
 function wlWant() { return state === 'launch' || state === 'play' || state === 'mini' || state === 'sky' || state === 'volc'; }
-function wlSync() {
-  if (!navigator.wakeLock || document.hidden) return;
-  if (wlWant()) {
-    if (wlock || wlBusy || performance.now() < wlFail) return;
-    wlBusy = true;
-    try { navigator.wakeLock.request('screen').then(function (l) { wlBusy = false; wlock = l; l.addEventListener('release', function () { if (wlock === l) wlock = null; }); }, function () { wlBusy = false; wlFail = performance.now() + 8000; }); } catch (e) { wlBusy = false; wlFail = performance.now() + 60000; }
-  } else if (wlock) { var l2 = wlock; wlock = null; try { l2.release().catch(function () { }); } catch (e) { } }
-}
+function wlSync() { wk.want(wlWant()); }
 /* Safari clears a site's saved data after a week without a visit (a Home Screen app is exempt): say so once, kindly */
 function saveAtRisk() {
   var ua = navigator.userAgent || '', ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), webkit = /AppleWebKit/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|Android|OPR/.test(ua);
@@ -6301,35 +7225,26 @@ function padStep() {
 
 /* ===== Start ===== */
 var awayMs = save.stats.runs > 0 && save.savedAt > 0 ? Date.now() - save.savedAt : 0;
-applyColors(); syncOpts(); resetWorld(); resize(); setBar(true); if (awayMs > 3 * 864e5) setTimeout(function () { toast('Welcome back! Tap, click or press Space to flap. P pauses. Settings is the gear.', 6000); }, 2500); ART.warm(shownTheme());   // the first stage's obstacle pieces are built in the background while the title shows
+PicCache.start(function () {   // the title's big pictures may be put back from the browser's own storage first (at most a 150 ms wait; off where that is not quicker); then the game starts as it always did
+applyColors(); syncOpts(); resetWorld(); resize(); setBar(true); if (awayMs > 3 * 864e5) setTimeout(function () { toast('Welcome back! Tap, click or press Space to flap. P pauses. Settings is the gear.', 6000); }, 2500); ART.warm(shownTheme());
+requestAnimationFrame(frame);
+});   // the first stage's obstacle pieces are built in the background while the title shows
 if (loadNote) toast(loadNote);
 if (!storageOK) toast('This browser is not keeping progress. Use Save to copy your save code.');
 
 /* The browser's frame times wobble by a millisecond or two even when every picture is on time, and the game moves by that wobble, so the scenery shivers a little. This finds the screen's real beat (the middle of the recent frame gaps) and, when a gap is a whole number of beats give or take a little, moves by exactly that; real stalls are passed through as they are, and any left-over difference is paid back slowly so the clock never drifts. */
-var edGaps = [], edPer = 0, edDrift = 0;
-function evenDt(ri) {
-  if (!(ri > 2 && ri < 60)) return ri > 0 ? ri : 0;
-  edGaps.push(ri); if (edGaps.length > 40) edGaps.shift();
-  if (edGaps.length < 12) return ri;
-  if (edGaps.length % 8 === 0 || !edPer) { var q = edGaps.slice().sort(function (a, b) { return a - b; }); edPer = q[q.length >> 1]; }
-  var n = Math.round(ri / edPer), snap = n * edPer;
-  if (n < 1 || n > 3 || Math.abs(ri - snap) > edPer * .3) { edDrift = 0; return ri; }
-  edDrift += ri - snap; var pay = edDrift * .04; edDrift -= pay;
-  return snap + pay;
-}
+var ed = new EvenDt();   // EvenDt: the lean build of even-dt from JS-modules (smallparts.js)
+function evenDt(ri) { return ed.next(ri); }
 var pumpSkip = 0, last = 0, acc = 0, autoRun = true, REC = null, stillDrawn = false, renders = 0;   // renders: how many pictures were drawn (checks use it)
-var qLvl = 0, qEma = 16.7, qSlow = 0, qFast = 0, qAt = 0, qHint = false, dprMax = 2, govOn = true, lastDraw = 0;   // quality level 0 (full) to 4 (lightest): the governor steps it from how long frames really take
+var qLvl = 0, qHint = false, dprMax = 2, govOn = true, lastDraw = 0;   // quality level 0 (full) to 4 (lightest): the governor steps it from how long frames really take
 function qApply() {
   fxMax = qLvl >= 1 ? 36 : 70; ART.lite = qLvl >= 2; var d = qLvl >= 4 ? 1 : qLvl >= 3 ? 1.5 : 2;
   if (d !== dprMax) { dprMax = d; try { resize(); render(); } catch (e) { logError('render', e); } }
 }
+var gov = new QualityGovernor({ onChange: function (to, from) { qLvl = to; qApply(); if (to > from && qLvl >= 2 && !qHint && !opt('saver')) { qHint = true; toast('This screen is working hard. Settings has a Battery saver that makes it lighter.', 5000); } } });   // QualityGovernor: the lean build of quality-governor from JS-modules (smallparts.js)
 function govStep(ri, t) {
   if (!govOn) return;
-  if (document.hidden || (state !== 'play' && state !== 'mini') || ri > 100 || ri <= 0) { qSlow = 0; return; }
-  qEma += (ri - qEma) * 0.06;
-  if (qEma > 22) { qSlow++; qFast = 0; } else { qSlow = 0; if (qEma < 18.5) qFast += ri; else qFast = 0; }
-  if (qSlow >= 100 && qLvl < 4 && t - qAt > 3000) { qLvl++; qAt = t; qSlow = 0; qEma = 16.7; qApply(); if (qLvl >= 2 && !qHint && !opt('saver')) { qHint = true; toast('This screen is working hard. Settings has a Battery saver that makes it lighter.', 5000); } }
-  else if (qFast > 10000 && qLvl > 0 && t - qAt > 10000) { qLvl--; qAt = t; qFast = 0; qApply(); }
+  gov.frame(document.hidden || (state !== 'play' && state !== 'mini') ? 0 : ri, t);   // a gap of 0 only ends the slow streak (paused, hidden tab or another screen)
 }
 var artDown = 0;
 function softFail(e) {   // a canvas could not be made (memory ran out): build the art a notch less sharp instead of leaving a black screen
@@ -6345,9 +7260,8 @@ function frame(t) {
   requestAnimationFrame(frame);
   if (!autoRun || dlHold) { last = t; return; }
   var fs = performance.now(), ri = t - last, dt = Math.min(0.05, evenDt(ri) / 1000 || 0), p0 = REC ? fs : 0; last = t; acc += dt; wlSync(); govStep(ri, t); if (padOn || padTest) padStep();
-  var sn = 0; try { if (STEPMODE) { sn = Math.ceil(acc / 0.0167 - 1e-6); if (sn > 0) { var sd = acc / sn; for (var si = 0; si < sn; si++) update(sd); acc = 0; } } else while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; sn++; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
+  var sn = 0; try { if (STEPMODE) { sn = Math.ceil(acc / 0.0167 - 1e-6); if (sn > 0) { var sd = acc / sn; for (var si = 0; si < sn; si++) update(sd); acc = 0; } } else while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; sn++; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (renders > 0 && PicCache.boot) PicCache.end(); if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
 }
-requestAnimationFrame(frame);
 
 
 })();
