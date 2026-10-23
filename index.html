@@ -323,13 +323,13 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
 </section>
 </div>
 <script>
-/*! field-report 1.0.1 (API 1), the hidden speed report and error log (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
+/*! field-report 1.0.2 (API 1), the hidden speed report and error log (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.FieldReport = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var VERSION = '1.0.0';
+  var VERSION = '1.0.2';
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function stamp(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); }
   function r1(x) { return Math.round(x * 10) / 10; }
@@ -567,7 +567,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
   return { version: VERSION, start: start, frameStats: frameStats, speedVerdict: speedVerdict, errorsMarkdown: errorsMarkdown };
 });
 
-var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2131' });
+var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2219' });
 
 /* sprite-baker 1.7.0 (API 1), LEAN BUILD without: baking, mesh, ramps, rotation, shapes, sheets. Made by modules/sprite-baker/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
 var SpriteBaker = (function () {
@@ -955,7 +955,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SpriteBake
    instead of drawing them again. Nothing leaves the device. It is used only where reading back was measured to be quicker than drawing on this device (the last visit's read-back time against its drawing time), it asks the page
    for nothing but a short wait at start (150 ms at most, then everything is drawn the usual way), and every failure just means "draw it". The pixels come back exactly as they were saved. Copyright (c) 2026 LFC Foundry. MIT licensed. */
 var PicCache = (function () {
-  var SIG = '266db611dc', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
+  var SIG = '3cde4dde9d', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
     stat = null, on = false, boot = true, builtMs = 0, readMs = -1, late = false, started = 0, ran = false, db = null, api, haveIDB = false, doneW = null;
   try { stat = JSON.parse(localStorage.getItem(SK) || 'null'); } catch (e) { stat = null; }
   if (!stat || stat.s !== SIG) stat = { s: SIG, b: 0, r: -1, v: 0 };
@@ -1134,7 +1134,7 @@ function rgbS(c, a) { return a === undefined ? 'rgb(' + c.join(',') + ')' : 'rgb
 function setColors(m, s) {   // the new colors are drawn into Fancy's pictures; the first face now, the rest in the background
   if (!/^#[0-9a-f]{6}$/i.test(m || '') || !/^#[0-9a-f]{6}$/i.test(s || '') || (m === PAL.m && s === PAL.s)) return false;
   PAL.m = m; PAL.s = s; RAMP[4] = [[0, mixHex(s, 0, .34)[0], mixHex(s, 0, .34)[1], mixHex(s, 0, .34)[2]], [.5, hexRgb(s)[0], hexRgb(s)[1], hexRgb(s)[2]], [1, mixHex(s, 255, .5)[0], mixHex(s, 255, .5)[1], mixHex(s, 255, .5)[2]]]; LUT = null;
-  if (BAN) { var e, i; BAN.hero = []; BAN.spin = []; BAN.knots = []; BAN.spinT = null; heroPic(0); for (e = 1; e < 5; e++) (function (e) { TASKQ.push(qHero(e)); })(e); for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(qSpin(i)); })(i); }
+  if (BAN) { var e, i; BAN.hero = []; BAN.spin = []; BAN.knots = []; BAN.spinT = null; HG = null; heroPic(0); for (e = 1; e < 5; e++) (function (e) { TASKQ.push(qHero(e)); })(e); for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(qSpin(i)); })(i); }
   return true;
 }
 /* ----- the face, painted flat in (length, around) space and wrapped onto the body by the renderer ----- */
@@ -1252,13 +1252,32 @@ function initBanana() {   // Fancy (4 faces + the iris) and a friend are built n
   BAN = { friend: null, hero: [], iris: ir, spin: [], knots: [], spinT: null };
   ir.g.translate(10, 10); ir.g.beginPath(); ir.g.arc(0, 0, 5.64, 0, 7); ir.g.fillStyle = '#2a140c'; ir.g.fill(); ir.g.beginPath(); ir.g.arc(2.2, -2.4, 1.92, 0, 7); ir.g.fillStyle = '#fff'; ir.g.fill(); ir.g.beginPath(); ir.g.arc(-1.8, 2, .84, 0, 7); ir.g.fill();
   BAN.spinT = null;
-  heroPic(0); TASKQ.push(qFriend());
+  heroPrep(); TASKQ.push(qFriend());
   for (e = 1; e < 5; e++) (function (e) { TASKQ.push(qHero(e)); })(e);
   TASKQ.push(qFriend());
   for (i = 0; i < SPINN; i++) (function (i) { TASKQ.push(qSpin(i)); })(i);
 }
+var HG = null;
+function heroName() { return 'hero0|' + PAL.m + PAL.s; }
+function heroPrep() {   // the first face: from the saved copy at once, otherwise drawn in slices (heroStep) while the title is built, or all at once if it is asked for first
+  var H0 = BAN.hero;
+  if (PicCache.on && PicCache.boot && PicCache.take(heroName(), K)) { HG = null; heroPic(0); return; }
+  HG = { H: H0, t: performance.now(), g: posePicGen({ T: texData(bandsTex(faceTex('hero', 0, false), true)), hero: true }, BW, BH, BOX, BOY) };
+}
+function heroRun(ms) {   // true once the first face is built
+  var h = HG, t0 = performance.now(), r = null, pc, H;
+  if (!h) return true;
+  if (h.H !== BAN.hero) { HG = null; return true; }
+  while (!(r = h.g.next()).done) { if (performance.now() - t0 >= ms) return false; }
+  HG = null; H = BAN.hero; if (!H[0]) H[0] = r.value;
+  pc = PicCache.on && PicCache.boot;
+  if (pc) { PicCache.built(performance.now() - h.t); PicCache.save(heroName(), K, { m: function () { return pcSave(H[0]); } }); }
+  return true;
+}
+function heroStep(ms) { return !HG || heroRun(ms); }
 function heroPic(e) {
   var H, t, pc = e === 0 && PicCache.on && PicCache.boot, nm = 'hero0|' + PAL.m + PAL.s, got = pc ? PicCache.take(nm, K) : null;   // the first face is kept between visits (PicCache), per costume colors
+  if (!BAN.hero[e] && e === 0 && HG) heroRun(1e9);
   if (!BAN.hero[e]) {
     if (got) BAN.hero[e] = pcLayer(got.m);
     else {
@@ -3416,7 +3435,7 @@ function balBack(g, off, nt) { var P = party(nt); put(g, P.sky.c, 0, 0); layer(g
 function balGround(g, off, nt) { var F = party(nt).floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
 function balWarm(nt) { var i; if (nt && !BALWN) { BALWN = true; TASKQ.push(function () { party(true); }); } if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { layersOf: layersOf, sceneReady: sceneReady, sceneStep: sceneStep, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, sceneReady: sceneReady, sceneStep: sceneStep, heroStep: heroStep, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 /*! save-kit 1.2.1 (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
@@ -3950,7 +3969,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, sceneStep: sceneStep, get t
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.22.2131';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.22.2219';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 LFC Foundry';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -7561,7 +7580,7 @@ function firstScreenGo(go) {   // build the title's pictures in pieces of about 
 var FSW = null, FSI = 0;
 function firstScreenStep(t) {   // a first visit: the title's pictures are made in pieces of about 8 ms per screen refresh (the scenery, then the news strip, the title word and the leaderboard column), the later ones drawn into a scratch canvas so nothing shows early; true once all are ready and the title can be drawn in one cheap go
   var o = ctx, steps, t0 = performance.now();
-  if (!ART.sceneStep(shownTheme(), 8)) return false;
+  if (!ART.sceneStep(shownTheme(), 8) || !ART.heroStep(Math.max(1, 8 - (performance.now() - t0)))) return false;
   steps = [function () { if (lbWant() !== LBT) lbApply(); }, function () { if (!opt('noticker')) drawTicker(); }, drawTitleWord];
   if (!FSW) { FSW = document.createElement('canvas'); FSW.width = FSW.height = 8; FSW = FSW.getContext('2d'); }
   while (FSI < steps.length && performance.now() - t0 < 8) {
