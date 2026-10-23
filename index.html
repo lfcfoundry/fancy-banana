@@ -567,7 +567,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
   return { version: VERSION, start: start, frameStats: frameStats, speedVerdict: speedVerdict, errorsMarkdown: errorsMarkdown };
 });
 
-var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2027' });
+var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2131' });
 
 /* sprite-baker 1.7.0 (API 1), LEAN BUILD without: baking, mesh, ramps, rotation, shapes, sheets. Made by modules/sprite-baker/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
 var SpriteBaker = (function () {
@@ -955,7 +955,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SpriteBake
    instead of drawing them again. Nothing leaves the device. It is used only where reading back was measured to be quicker than drawing on this device (the last visit's read-back time against its drawing time), it asks the page
    for nothing but a short wait at start (150 ms at most, then everything is drawn the usual way), and every failure just means "draw it". The pixels come back exactly as they were saved. Copyright (c) 2026 LFC Foundry. MIT licensed. */
 var PicCache = (function () {
-  var SIG = 'ca68dbcb00', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
+  var SIG = '266db611dc', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
     stat = null, on = false, boot = true, builtMs = 0, readMs = -1, late = false, started = 0, ran = false, db = null, api, haveIDB = false, doneW = null;
   try { stat = JSON.parse(localStorage.getItem(SK) || 'null'); } catch (e) { stat = null; }
   if (!stat || stat.s !== SIG) stat = { s: SIG, b: 0, r: -1, v: 0 };
@@ -3950,7 +3950,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, sceneStep: sceneStep, get t
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.22.2027';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.22.2131';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 LFC Foundry';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -7397,7 +7397,7 @@ function onCtxBack() { ctxLost = false; TXC = {}; TXI = Object.create(null); TXN
 cv.addEventListener('contextlost', onCtxLost); cv.addEventListener('contextrestored', onCtxBack);
 /* P60: use the canvas box in real device pixels (within 2 px of our own, governor not lowering sharpness) */
 var dpcb = null;   
-if (window.ResizeObserver) { try { new ResizeObserver(function (L) { var b = L[0] && L[0].devicePixelContentBoxSize && L[0].devicePixelContentBoxSize[0]; if (!b) return; var n = { w: Math.round(b.inlineSize), h: Math.round(b.blockSize) }; if (dpcb && dpcb.w === n.w && dpcb.h === n.h) return; dpcb = n; if (n.w !== cv.width || n.h !== cv.height) { clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { render(); } catch (e) { logError('render', e); } }, 60); } }).observe(cv, { box: 'device-pixel-content-box' }); } catch (e) { dpcb = null; } }
+if (window.ResizeObserver) { try { new ResizeObserver(function (L) { var b = L[0] && L[0].devicePixelContentBoxSize && L[0].devicePixelContentBoxSize[0]; if (!b) return; var n = { w: Math.round(b.inlineSize), h: Math.round(b.blockSize) }; if (dpcb && dpcb.w === n.w && dpcb.h === n.h) return; dpcb = n; if (n.w !== cv.width || n.h !== cv.height) { clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { if (renders > 0) render(); } catch (e) { logError('render', e); } }, 60);   /* before the first picture is on screen the picture loop draws it (a draw here would do the whole first-screen work in one go) */ } }).observe(cv, { box: 'device-pixel-content-box' }); } catch (e) { dpcb = null; } }
 var rzT = 0, rzRaf = 0;   // phones fire many resize events while the address bar slides: fit the box now (cheap), rebuild the picture once things are quiet
 function fitStage() { bkReset(); var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0)), s = Math.min(aw / W, ah / H); stageEl.style.width = Math.floor(W * s) + 'px'; stageEl.style.height = Math.floor(H * s) + 'px'; stageEl.style.setProperty('--u', s + 'px'); }
 addEventListener('resize', function () {
