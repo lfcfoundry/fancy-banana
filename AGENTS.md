@@ -20,7 +20,7 @@ The public repository (`fancy-banana`) holds only the built game (`index.html`),
 | Release history, one row per build (the full, technical one) | `CHANGELOG.md` in the working folder, and the copy kept in the private knowledge base at `changelogs-full/fancy-banana/CHANGELOG-full.md`. Write the full entry there for every release. The repository's `changelog.md` is the short, player-facing one |
 | Latest hand-off for a new session | the newest `HANDOFF-fancy-the-banana-*.md` |
 | What the game taught us | the lessons and foundation documents, filed in the private knowledge base under research/2026-10-16-fancy-banana-archive (with the research, audits, QA efficiency notes and all earlier handoffs) |
-| Checks | `qa/` (`qa.py` quick tier, `smoke.py`, `ffsmoke.mjs`, `fuzz.js`, `packed.py`) |
+| Checks | `qa/` (`qa.py` quick tier, `smoke.py`, `ffsmoke.mjs`, `fuzzkit-adapter.js` with `fuzzkit.sh`, `packed.py`) |
 
 Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/`. The build removes it from the player copy, so never rely on `window.__bf` in shipped code.
 
@@ -54,7 +54,7 @@ The owner pays for every run and waits on it. Use the smallest check that covers
 1. `python3 qa/qa.py`: builds, then runs only the quick probes that match the files you changed (about 3 seconds).
 2. `python3 qa/docs_drift.py`: under a second, no browser.
 3. Small standing checks, each a few seconds, also run first by `full`: `python3 qa/canvas_budget.py` (drawing calls per frame stay within 5% of `qa/canvas-budget.json`, and `save()`/`restore()` stay balanced), `python3 qa/fixtures_check.py` (frozen old saves and save codes in `qa/fixtures` still load; never edit a fixture to make it pass) and `python3 qa/startup.py` (startup timeline, for looking, not a gate).
-4. When a fuzz run finds something: `python3 qa/fuzzreduce.py <seed>` cuts it to the few operations that matter. When you add a probe: `python3 qa/mutants.py` proves it fails when the code it guards is broken (add a mutant for it). A suite that failed and then passed on the same files is written to `qa/flakes.md` by itself.
+4. When a fuzz run finds something: add `--shrink` to the runner line in `qa/fuzzkit.sh` (the shared fuzz-kit in the JS-modules repository) to cut it to the few operations that matter. When you add a probe: `python3 qa/mutants.py` proves it fails when the code it guards is broken (add a mutant for it). A suite that failed and then passed on the same files is written to `qa/flakes.md` by itself.
 5. `python3 qa/qa.py full`: the whole Chromium suite (`smoke.py`, 91 checks) and then Firefox (`ffsmoke.mjs`, run with `FIREFOX=<path to Firefox 158>`). It says so and stops if nothing changed since the last green run. Run it once, when the design is final.
 
 Never run the two browsers at the same time on this machine: Firefox's timing checks fail every time. `build.py` stamps the page with the current time; pin it with `STAMP=2026.10.14.0004 python3 build.py` for a repeatable build. Report the real time and the CPU time of every run.
