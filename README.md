@@ -54,6 +54,7 @@ Every release is checked in real browsers, one at a time. The table lists the br
 | 2026.10.22.2026 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.2131 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.2219 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
+| 2026.10.22.2251 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.1903 | Ungoogled Chromium 155.0.8059.39: 91 of 91 checks | Firefox 158.0: 26 of 26 checks | Plus WebKitGTK 2.52.6: 3 of 3 and GNOME Web 46.5: 3 of 3, and the saved-pictures check 4 of 4. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.1905 | Ungoogled Chromium 155.0.8059.39: 91 of 91 checks | Firefox 158.0: 26 of 26 checks | Plus WebKitGTK 2.52.6: 3 of 3 and GNOME Web 46.5: 3 of 3, and the saved-pictures check 4 of 4. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 
@@ -65,7 +66,7 @@ The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780
 - It uses plain HTML canvas and JavaScript with no libraries. There are no image files in the game: all of its art is drawn by code when it starts and built in small background steps so play stays smooth.
 - Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test), ungoogled Chromium and WebKitGTK; see [Tested with](#tested-with).
 - Version numbers look like `2026.10.10.2346`: year, month, day and the time (US Eastern). The current one is shown under the title on the title screen.
-- This repository holds the built game (`index.html`), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
+- This repository holds the built game (`index.html`), its readable [source and rebuild steps](src/README.md), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
 
 ## Credits and attributions
 
