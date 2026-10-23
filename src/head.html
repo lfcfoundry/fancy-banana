@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<!--
+    ===================================================================================
+    🛠️ APPLICATION : Fancy, the Banana
+    🏭 FORGED BY : LFC Foundry (https://github.com/lfcfoundry)
+    📜 LICENSE : MIT License
+    ===================================================================================
+    Copyright (c) 2026 LFC Foundry
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    BRANDING NOTICE: While the code is open under MIT, the name "LFC Foundry" and 
+    associated project identities are reserved. If you fork, significantly modify, 
+    or commercially redistribute this software, you must change the external public 
+    product name and branding.
+    ===================================================================================
+    -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval'; worker-src blob:; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="color-scheme" content="light">
+<title>Fancy, the Banana</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f4aa8'/%3E%3Cpath d='M11 6.2 12.4 2.6 16 4.2' fill='%237a5320' stroke='%233a1f10' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M11.5 5.4C21 3.6 28.5 11 27 20.2 25.8 27.6 16 30.4 9.2 25.6 3.6 21.6 4.4 8.6 11.5 5.4Z' fill='%23ffd93b' stroke='%233a1f10' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M9.2 12.4Q11 9 15 8.2' fill='none' stroke='%23fff4b0' stroke-width='1.5' stroke-linecap='round'/%3E%3Cellipse cx='12.2' cy='15.6' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Cellipse cx='20.6' cy='14.9' rx='3.9' ry='4.9' fill='%23fffdf6' stroke='%233a1f10' stroke-width='1.2'/%3E%3Ccircle cx='12.9' cy='16.4' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='21.3' cy='15.7' r='2.1' fill='%232a140c'/%3E%3Ccircle cx='13.6' cy='15.5' r='.8' fill='%23fff'/%3E%3Ccircle cx='22' cy='14.8' r='.8' fill='%23fff'/%3E%3Cpath d='M13 22.8Q17 25.6 21 22.4' fill='none' stroke='%233a1f10' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--lb,#2b2140);overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
+body{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);display:flex;align-items:center;justify-content:center;font-family:"Arial Rounded MT Bold","Trebuchet MS",system-ui,"Segoe UI",Roboto,sans-serif;color:#3a2a4d}
+@supports (height:100dvh){html,body{height:100dvh}}
+[hidden]{display:none!important}
+#stage{contain:layout paint;position:relative;--u:1px;font-size:calc(16*var(--u));overflow:hidden;border-radius:calc(14*var(--u));background:#ffe3b8}
+#c{display:block;position:relative;width:100%;height:100%;touch-action:none}
+#bk{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;pointer-events:none}
+#bk canvas{position:absolute;left:0;display:block;pointer-events:none;will-change:transform}
+#bar{position:absolute;top:calc(10*var(--u));right:calc(10*var(--u));max-width:calc(100% - 20*var(--u));display:flex;flex-direction:column;align-items:flex-end;gap:calc(8*var(--u))}
+.brow{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:calc(8*var(--u))}
+.brow:empty,.brow:not(:has(button:not([hidden]))){display:none}
+body.lefty #bar{right:auto;left:calc(10*var(--u));align-items:flex-start}
+#bar.tk{top:calc(58*var(--u))}
+body.lefty .brow{justify-content:flex-start}
+body.big button{min-height:calc(64*var(--u));min-width:calc(64*var(--u));font-size:calc(19*var(--u))}
+body.big button.sm{font-size:calc(17*var(--u))}
+body.big .opt{min-height:calc(88*var(--u))}
+button{font:inherit;font-weight:800;min-height:calc(52*var(--u));min-width:calc(52*var(--u));padding:0 calc(16*var(--u));border-radius:calc(14*var(--u));border:calc(3*var(--u)) solid #3a2a4d;background:linear-gradient(180deg,#ffec86,#ffd93b 55%,#f6c617);color:#3a2a4d;cursor:pointer;touch-action:manipulation;box-shadow:0 calc(3*var(--u)) 0 #b98a06,0 calc(6*var(--u)) calc(9*var(--u)) rgba(30,20,50,.22),inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.65)}
+button:active{transform:translateY(calc(2*var(--u)));box-shadow:0 calc(1*var(--u)) 0 #b98a06,0 calc(3*var(--u)) calc(5*var(--u)) rgba(30,20,50,.2),inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.65)}
+button.alt{background:linear-gradient(180deg,#fff,#f1edf9);box-shadow:0 calc(3*var(--u)) 0 #b6aecb,0 calc(6*var(--u)) calc(9*var(--u)) rgba(30,20,50,.2),inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.9)}
+button.alt:active{box-shadow:0 calc(1*var(--u)) 0 #b6aecb,0 calc(3*var(--u)) calc(5*var(--u)) rgba(30,20,50,.18),inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.9)}
+button.sm{padding:0 calc(10*var(--u));font-size:calc(14.5*var(--u))}
+button.pf,button:focus-visible,textarea:focus-visible{outline:calc(3*var(--u)) solid #7a4dff;outline-offset:calc(2*var(--u))}
+#padHint{position:absolute;left:50%;bottom:calc(3*var(--u));transform:translateX(-50%);z-index:30;pointer-events:none;white-space:pre;background:rgba(58,42,77,.9);color:#fff;font-weight:700;font-size:calc(12*var(--u));padding:calc(3*var(--u)) calc(10*var(--u));border-radius:calc(10*var(--u))}
+#padHint.top{bottom:auto;top:calc(3*var(--u))}
+#bCont{position:absolute;left:50%;top:calc(318*var(--u));transform:translateX(-50%);white-space:nowrap;box-shadow:0 calc(3*var(--u)) 0 rgba(58,42,77,.35)}
+#bCont:active{transform:translateX(-50%) translateY(calc(2*var(--u)))}
+#bar2{pointer-events:none;position:absolute;left:0;right:0;bottom:calc(14*var(--u));display:flex;justify-content:center;gap:calc(10*var(--u))}
+#bar2 button{pointer-events:auto}
+
+/* X84: an invisible real button over each canvas-drawn button (pause, card buttons): a keyboard, a screen reader, Voice Access or Switch Access can reach them. A finger still lands on the canvas underneath. */
+#twin{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#twin button.tw{position:absolute;pointer-events:none;min-width:0;min-height:0;padding:0;border:0;background:none;box-shadow:none;opacity:0}
+#twin button.tw:focus-visible{opacity:1;outline:calc(4*var(--u)) solid #7a4dff;outline-offset:calc(1*var(--u));border-radius:calc(14*var(--u))}
+/* X08: a ring around the pressed button from the first frame, wider than a fingertip (the button's own dip is 2 px, which a finger covers). :active is enough here: buttons are touch-action: manipulation, so the press is never lost */
+button:not(:disabled):active{outline:calc(5*var(--u)) solid #ffd93b;outline-offset:calc(1*var(--u))}
+/* Sideways on a phone the picture is small: the buttons go beside it, the windows are bigger than it, and the letterbox is the stage's own colors (body.wide is set by resize()) */
+body.wide #stage{contain:none;overflow:visible;border-radius:0}
+body.wide #c,body.wide #bk{border-radius:calc(14*var(--u))}
+body.wide .panel,body.wide #tabWarn{--u:var(--ui);left:50%;right:auto;width:min(calc(340*var(--ui)),calc(100vw - 24px));transform:translateX(-50%)}
+body.wide #pSet{--u:var(--su);width:min(calc(340*var(--su)),calc(100vw - 24px))}
+body.wide #toast{--u:var(--ui);left:50%;right:auto;width:max-content;max-width:calc(340*var(--ui));transform:translateX(-50%)}
+body.wide #bar,body.wide #bar2{position:fixed;--u:var(--ui);left:calc(50% + var(--sw)/2 + 10*var(--ui));right:auto;max-width:calc(var(--room) - 20*var(--ui));align-items:flex-start}
+body.wide .brow{justify-content:flex-start}
+body.wide #bar{top:calc(10*var(--ui))}
+body.wide #bar2{bottom:calc(14*var(--ui));flex-wrap:wrap;justify-content:flex-start}
+body.wide.lefty #bar,body.wide.lefty #bar2{left:auto;right:calc(50% + var(--sw)/2 + 10*var(--ui));align-items:flex-end}
+body.wide.lefty #bar2,body.wide.lefty .brow{justify-content:flex-end}
+body.wide #bCont,body.wide #bCont:active{transform:translateX(-50%) scale(var(--kk));transform-origin:50% 0}
+.opt{display:flex;align-items:center;gap:calc(10*var(--u));width:100%;min-height:calc(78*var(--u));text-align:left;margin:calc(6*var(--u)) 0;background:#fff}
+.opt.on{background:#ffd93b}
+.opt:disabled{opacity:.6;cursor:default}
+.opt canvas{flex:none;width:calc(88*var(--u));height:calc(60*var(--u));background:#ffe9b8;border-radius:calc(10*var(--u))}
+.opt small{display:block;font-weight:600}
+#pSet{padding:calc(10*var(--u)) calc(12*var(--u))}
+#pWin{inset:auto calc(12*var(--u)) calc(12*var(--u)) calc(12*var(--u));padding:calc(10*var(--u)) calc(12*var(--u))}
+#pWin{background:linear-gradient(180deg,#fff7d2,#fff9e8 38%);padding:calc(12*var(--u)) calc(12*var(--u)) calc(10*var(--u))}
+#pWin h2{margin:0;text-align:center;font-size:calc(26*var(--u));color:#e8890c;text-shadow:0 calc(2*var(--u)) 0 #fff,0 calc(3*var(--u)) 0 rgba(58,42,77,.25)}
+#pWin #winNote{text-align:center;font-size:calc(13.5*var(--u));margin:calc(2*var(--u)) 0 calc(6*var(--u))}
+.opt.wo{display:block;min-height:calc(58*var(--u));margin:calc(6*var(--u)) 0;padding:calc(6*var(--u)) calc(10*var(--u)) calc(6*var(--u)) calc(14*var(--u));border-left:calc(12*var(--u)) solid var(--c);line-height:1.2;font-size:calc(14.5*var(--u))}
+.opt.wo b{display:block;font-size:calc(16.5*var(--u))}
+.opt.wo small{font-size:calc(12*var(--u));margin-top:calc(2*var(--u))}
+.opt.wo.g{--c:#46c261;background:linear-gradient(180deg,#f3ffe9,#d8f7c8)}
+.opt.wo.b{--c:#4a9bd8}
+.opt.wo.p{--c:#8a6cd8}
+.opt.wo.r{--c:#ff7a5a;min-height:calc(46*var(--u))}
+.opt.wo.r.armed{background:#ffe3d6}
+#pWin #winMsg{min-height:calc(16*var(--u));font-size:calc(12*var(--u));text-align:center}
+#pUp,#pEmp{display:flex;flex-direction:column;overflow:hidden;padding:calc(12*var(--u)) calc(10*var(--u)) calc(8*var(--u));background:linear-gradient(180deg,#fff3c4,#fff9e8 30%)}
+#pUp h2,#pEmp h2{margin:0;font-size:calc(24*var(--u));padding-right:calc(48*var(--u))}
+#pUp .bal,#pEmp .bal{margin:calc(2*var(--u)) 0 calc(4*var(--u));font-size:calc(14*var(--u));display:flex;align-items:center;gap:calc(6*var(--u))}
+#upBal,#epBal{display:inline-block;background:#3a2a4d;color:#ffd93b;border-radius:calc(12*var(--u));padding:calc(2*var(--u)) calc(10*var(--u));font-weight:800}
+#upMsg,#epMsg{min-height:calc(17*var(--u));margin:0;font-size:calc(12.5*var(--u));font-weight:700;color:#2f8f4a}
+#upList,#epList{flex:1 1 auto;overflow:auto;touch-action:pan-y;display:grid;grid-template-columns:1fr 1fr;gap:calc(7*var(--u));align-content:start;padding:calc(2*var(--u)) calc(2*var(--u)) calc(6*var(--u))}
+#upList h3,#epList h3{grid-column:1/-1;margin:calc(4*var(--u)) 0 0;font-size:calc(13*var(--u));color:#6b5a85}
+#upList p,#epList p{grid-column:1/-1}
+.ut{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:calc(2*var(--u));min-height:calc(104*var(--u));padding:calc(7*var(--u)) calc(8*var(--u));min-width:0;line-height:1.15;background:#fff;box-shadow:0 calc(3*var(--u)) 0 #b6aecb,inset 0 calc(2*var(--u)) 0 rgba(255,255,255,.9)}
+.ut b{font-size:calc(14*var(--u))}
+.ut small{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-weight:600;font-size:calc(11*var(--u));color:#4a3a63}
+.ut em{margin-top:auto;font-style:normal;align-self:flex-start;background:#46c261;color:#fff;border-radius:calc(10*var(--u));padding:calc(1*var(--u)) calc(8*var(--u));font-size:calc(12.5*var(--u));text-shadow:0 calc(1*var(--u)) 0 rgba(0,0,0,.25)}
+.ut.done{cursor:default;background:#fff8d6}
+.ut.off{min-height:calc(66*var(--u));background:#f1edf9;box-shadow:none;opacity:.85;cursor:default}
+.ut.off em{background:#b6aecb}
+.pips{display:flex;gap:calc(3*var(--u))}
+.pips s{width:calc(9*var(--u));height:calc(9*var(--u));border-radius:50%;border:calc(1.6*var(--u)) solid #3a2a4d;background:#fff}
+.pips s.on{background:#ffd93b}
+.pclw{position:sticky;top:0;height:0;z-index:4;text-align:right;overflow:visible}
+.pcl{position:relative;top:calc(-4*var(--u));right:calc(-4*var(--u));width:calc(36*var(--u));height:calc(36*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(22*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
+body.big .pcl{width:calc(48*var(--u));height:calc(48*var(--u))}
+#uClose,#eClose{position:absolute;top:calc(8*var(--u));right:calc(8*var(--u));z-index:3;width:calc(40*var(--u));height:calc(40*var(--u));min-width:0;min-height:0;padding:0;border-radius:50%;font-size:calc(24*var(--u));line-height:1;background:linear-gradient(180deg,#ff9a8a,#ff6b5a);color:#fff}
+body.big #uClose,body.big #eClose{width:calc(52*var(--u));height:calc(52*var(--u));min-width:0;min-height:0}
+body.big .ut{min-height:calc(120*var(--u))}
+#pSet h2{margin:0 0 calc(4*var(--u));font-size:calc(22*var(--u))}
+.opt.cmp{min-height:calc(50*var(--u));margin:calc(4*var(--u)) 0;padding:calc(4*var(--u)) calc(10*var(--u));font-size:calc(15*var(--u));line-height:1.15}
+.opt.cmp small{font-size:calc(11.5*var(--u));line-height:1.2;margin-top:calc(1*var(--u))}
+.opt.cmp b{flex:none;margin-left:auto;min-width:calc(30*var(--u));text-align:right;font-size:calc(14*var(--u))}
+body.big .opt.cmp{min-height:calc(58*var(--u))}
+body.bt .panel{font-size:calc(18*var(--u))}
+body.bt .panel h2{font-size:calc(27*var(--u))}
+body.bt .opt.cmp{font-size:calc(17*var(--u))}
+body.bt .opt.cmp small{font-size:calc(13.5*var(--u))}
+body.bt #pSet .opt.cmp{min-height:calc(56*var(--u))}
+#pSet .row{margin:calc(6*var(--u)) 0 0}
+#toast{position:absolute;left:calc(16*var(--u));right:calc(16*var(--u));bottom:calc(86*var(--u));text-align:center;background:#3a2a4d;color:#fff;border-radius:calc(12*var(--u));padding:calc(10*var(--u)) calc(12*var(--u));font-size:calc(15*var(--u));opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.on{opacity:.96}
+.panel{position:absolute;inset:calc(12*var(--u));background:#fff9e8;border:calc(3*var(--u)) solid #3a2a4d;border-radius:calc(18*var(--u));padding:calc(14*var(--u));overflow:auto;touch-action:pan-y;-webkit-user-select:text;user-select:text;font-size:calc(15*var(--u));line-height:1.35}
+.panel h2{margin:0 0 calc(8*var(--u));font-size:calc(24*var(--u))}
+.panel h3{margin:calc(12*var(--u)) 0 calc(4*var(--u));font-size:calc(16*var(--u))}
+.panel p{margin:calc(4*var(--u)) 0}
+.panel .row{display:flex;flex-wrap:wrap;gap:calc(8*var(--u));margin:calc(8*var(--u)) 0}
+#pHelp .hrow{display:flex;align-items:center;gap:calc(10*var(--u));margin:calc(6*var(--u)) 0}
+#pHelp .hrow p{margin:0}
+.hic{flex:none;width:calc(56*var(--u));height:calc(44*var(--u));background:#ffe9b8;border-radius:calc(10*var(--u))}
+.swr{display:flex;flex-wrap:wrap;gap:calc(6*var(--u))}
+.pcp{display:block;margin:4px auto;width:150px;height:46px}
+.sw{min-width:calc(52*var(--u));min-height:calc(56*var(--u));padding:calc(4*var(--u)) calc(8*var(--u));font-size:calc(12.5*var(--u));background:#fff}
+.sw i{display:block;width:calc(24*var(--u));height:calc(24*var(--u));margin:0 auto calc(2*var(--u));border-radius:50%;border:calc(2.5*var(--u)) solid #3a2a4d}
+.sw.on{background:#ffd93b}
+.sw:disabled{opacity:.55;cursor:default}
+#museFr{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(6*var(--u));text-align:center}
+#museFr .fr canvas{width:calc(64*var(--u));height:calc(48*var(--u))}
+#museFr .fr span{display:block;font-weight:700}
+.mrow{margin:calc(4*var(--u)) 0}
+.mrow small{display:block;opacity:.75}
+#recs{display:grid;grid-template-columns:1fr auto;gap:calc(2*var(--u)) calc(12*var(--u));margin:0}
+#recs dt{font-weight:700}
+#recs dd{margin:0;text-align:right}
+textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monospace,Consolas,monospace;border:calc(2*var(--u)) solid #3a2a4d;border-radius:calc(10*var(--u));padding:calc(8*var(--u));background:#fff;color:#3a2a4d;resize:none}
+#saveMsg{min-height:calc(40*var(--u));font-weight:700}
+.warn{color:#a3260f;font-weight:700}
+@media (forced-colors:active){button{border-width:calc(4*var(--u))}button.alt{border-width:calc(2*var(--u))}.opt.on{outline:calc(4*var(--u)) solid Highlight;outline-offset:calc(-6*var(--u))}.opt:disabled{border-style:dashed}.opt.wo{border-left-color:CanvasText}}
+@media (prefers-contrast:more){button{border-width:calc(4*var(--u))}}
+#tabWarn{position:absolute;left:calc(12*var(--u));right:calc(12*var(--u));top:calc(12*var(--u));z-index:20;display:flex;gap:calc(10*var(--u));align-items:center;justify-content:space-between;background:#3a2a4d;color:#fff;border:calc(3*var(--u)) solid #ffd93b;border-radius:calc(14*var(--u));padding:calc(8*var(--u)) calc(12*var(--u));font-size:calc(14*var(--u));line-height:1.3}
+#tabWarn button{flex:none}
+.panel .sub{font-size:calc(13*var(--u));opacity:.85}
+.panel :is(h2,h3,.sub,small,.opt b,#winNote,#winMsg),#toast{text-wrap:balance}
+.panel :is(p,.opt,dd,dt,li,label){text-wrap:pretty}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="bk" hidden></div>
+<canvas id="c" role="img" aria-label="Fancy, the Banana. Tap, click or press the space bar to flap the banana through the gaps."></canvas>
+<div id="twin" aria-label="Game buttons"></div>
+<div id="bar">
+<div class="brow"><button id="bSet" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#3a2a4d" fill-rule="evenodd" d="M10.4 2h3.2l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.6 2.8-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.6 2.8-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-3.2l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.6-2.8 2-1.7a6 6 0 010-1.9l-2-1.7 1.6-2.8 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a2.4 2.4 0 100 4.8 2.4 2.4 0 000-4.8z" transform="translate(0 1.4)"/></svg></button><button id="bHelp" aria-label="Help" title="Help">?</button><button id="bSave" aria-label="Save and records" title="Save code and file">Save</button></div>
+<div class="brow"><button id="bPractice" class="alt sm" hidden>Practice</button><button id="bChal" class="alt sm" hidden>Challenges</button><button id="bWear" class="alt sm">Costume</button><button id="bEmp" class="alt sm" hidden>Emporium</button><button id="bSky" class="alt sm" hidden>Clouds</button><button id="bVolc" class="alt sm" hidden>Volcano</button><button id="bUp" class="alt sm">Upgrades</button></div>
+</div>
+<div id="bar2" hidden></div>
+<button id="bCont" hidden>Continue</button>
+<div id="padHint" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="tabWarn" role="alert" hidden><span>Fancy was changed in another tab, so saving is paused here to protect that game.</span><button id="bReload" class="sm">Reload</button></div>
+<section id="pHelp" class="panel" hidden aria-label="Help">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>How to play</h2>
+<div class="hrow"><canvas class="hic" data-k="banana" width="112" height="88" aria-hidden="true"></canvas><p>Tap, click or press Space to flap through the gaps. Each gate scores 1.</p></div>
+<div class="hrow"><canvas class="hic" data-k="gate" width="112" height="88" aria-hidden="true"></canvas><p>Touch an obstacle or the ground and the run ends.</p></div>
+<div class="hrow"><canvas class="hic" data-k="friends" width="112" height="88" aria-hidden="true"></canvas><p>At first, every 10 gates is a new stage, and each stage sets 5 banana friends free!</p></div>
+<div class="hrow"><canvas class="hic" data-k="coin" width="112" height="88" aria-hidden="true"></canvas><p>Golden coins are banana credits for the Upgrades shop.</p></div>
+<div class="hrow"><canvas class="hic" data-k="star" width="112" height="88" aria-hidden="true"></canvas><p>Fly through the middle of a gap for a PERFECT. Skim an edge for a Close call.</p></div>
+<h3>Chimp's Navy, the water bonus after stage 4</h3>
+<div class="hrow"><canvas class="hic" data-k="sub" width="112" height="88" aria-hidden="true"></canvas><p>Seen from above. Drag, move the mouse or use the arrow keys to steer.</p></div>
+<div class="hrow"><canvas class="hic" data-k="barrels" width="112" height="88" aria-hidden="true"></canvas><p>Tap or press Space to LEAP over subs and barrels. No steering in the air!</p></div>
+<div class="hrow"><canvas class="hic" data-k="gull" width="112" height="88" aria-hidden="true"></canvas><p>Steer around seagulls: no leaping them.</p></div>
+<div class="hrow"><canvas class="hic" data-k="whirl" width="112" height="88" aria-hidden="true"></canvas><p>Whirlpools slow you down.</p></div>
+<div class="hrow"><canvas class="hic" data-k="heart" width="112" height="88" aria-hidden="true"></canvas><p>You have 3 hearts. If the Navy gets you, you try just that part again.</p></div>
+<div class="hrow"><canvas class="hic" data-k="bubble" width="112" height="88" aria-hidden="true"></canvas><p>Pop bubbles to free friends. A heart buoy half way wins back a heart.</p></div>
+<h3>Good to know</h3>
+<div class="hrow"><canvas class="hic" data-k="pause" width="112" height="88" aria-hidden="true"></canvas><p>The pause button or the P key holds the game still.</p></div>
+<div class="hrow"><canvas class="hic" data-k="pad" width="112" height="88" aria-hidden="true"></canvas><p>Controller: any button flaps, Start pauses, the d-pad moves through menus (A picks, B goes back).</p></div>
+<div class="hrow"><canvas class="hic" data-k="chimp" width="112" height="88" aria-hidden="true"></canvas><p>The last stage is Prince Chimp's jungle kingdom. Beat it to keep your upgrades or start fresh.</p></div>
+<h3>Secrets</h3>
+<div id="secList"></div>
+<h3>Your progress</h3>
+<p>Progress is saved in this browser. To move to another device, copy your save code from Save.</p>
+<p id="fileNote" hidden>This copy was opened from a file, so the browser keeps its progress for this exact file location only.</p>
+<h3>Records</h3>
+<dl id="recs"></dl>
+<p id="errNote" class="warn" hidden></p>
+<p id="verNote"></p>
+<div class="row"><button id="sHelp" class="alt">Ways to make it easier</button><button id="hClose">Close</button></div>
+</section>
+<section id="pPrac" class="panel" hidden aria-label="Practice">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Practice</h2>
+<p>Play any level you have cleared. Nothing is earned, so it is safe to try things.</p>
+<div id="pracList"></div>
+<div class="row"><button id="pracClose">Close</button></div>
+</section>
+<section id="pSet" class="panel" hidden aria-label="Settings">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Settings</h2>
+<button class="opt cmp" id="sCalm" aria-pressed="false"><span>Calm mode<small>No flashes, shake or zoom; less confetti.</small></span><b id="sCalmN"></b></button>
+<button class="opt cmp" id="sSpeed"><span>Game speed<small id="sSpeedNote">Slower speeds keep their own best score.</small></span><b id="sSpeedN"></b></button>
+<button class="opt cmp" id="sLeft" aria-pressed="false"><span>Left-handed layout<small>Buttons move to the left side.</small></span><b id="sLeftN"></b></button>
+<button class="opt cmp" id="sBig" aria-pressed="false"><span>Large buttons<small>Bigger buttons and pause button.</small></span><b id="sBigN"></b></button>
+<button class="opt cmp" id="sText" aria-pressed="false"><span>Larger text<small>Bigger words in menus and panels.</small></span><b id="sTextN"></b></button>
+<button class="opt cmp" id="sTick" aria-pressed="false"><span>News ticker<small>Scrolling news on the title screen.</small></span><b id="sTickN"></b></button>
+<button class="opt cmp" id="sSave" aria-pressed="false"><span>Battery saver<small>About 30 pictures a second; same game.</small></span><b id="sSaveN"></b></button>
+<div class="row"><button id="bFull" class="alt" hidden>Full screen</button><button id="setClose">Close</button></div>
+</section>
+<section id="pAssist" class="panel" hidden aria-label="Help options">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Want a little help?</h2>
+<p id="aText">Anyone can use a little help, and your scores stay yours.</p>
+<button class="opt cmp" id="aSlow"><span>Slow the game down<small id="aSlowNote">Slower speeds keep their own best score.</small></span><b id="aSlowN"></b></button>
+<button class="opt cmp" id="aUps"><span>Look at Upgrades<small>Free bounce, Gentle fall and Roomy gaps make a run easier. Banana credits pay for them.</small></span><b></b></button>
+<div class="row"><button id="aNo">No thanks</button></div>
+</section>
+<section id="pWear" class="panel" hidden aria-label="Costume">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Costume</h2>
+<p>Pick how Fancy looks.</p>
+<button class="opt" id="wPlain"><canvas id="cvPlain" width="176" height="120"></canvas><span>Plain Fancy<small>Cape only</small></span></button>
+<button class="opt" id="wBow"><canvas id="cvBow" width="176" height="120"></canvas><span>Bow tie<small id="bowNote"></small></span></button>
+<button class="opt" id="wRain"><span>Rainbow trail<small id="rainNote"></small></span></button>
+<button class="opt" id="wBunch"><canvas id="cvBunch" width="176" height="120"></canvas><span>Banana Bunch<small id="bunchNote"></small></span></button>
+<button class="opt" id="wCrown"><span>Banana Crown<small id="crownNote"></small></span></button>
+<button class="opt" id="wFlags"><span>Pennant flags<small id="flagNote"></small></span></button>
+<h3>Scarf color</h3><div class="swr" id="scRow"></div>
+<h3>Mask color</h3><div class="swr" id="mkRow"></div>
+<div class="row"><button id="wClose">Close</button></div>
+</section>
+<section id="pChal" class="panel" hidden aria-label="Challenges">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Challenges</h2>
+<p>Pick one for your next run. Reach the end of the game in it to earn its badge and a new scarf and mask color. Normal runs never change.</p>
+<div id="chList"></div>
+<button class="opt cmp" id="pcFight" aria-pressed="false"><span>Prince Chimp fight<small id="pcNote"></small></span><b id="pcN"></b></button>
+<canvas id="pcPieces" class="pcp" width="300" height="92" aria-hidden="true"></canvas>
+<p id="chNote"></p>
+<div class="row"><button id="chClose">Close</button></div>
+</section>
+<section id="pMuse" class="panel" hidden aria-label="Banana Museum">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Banana Museum</h2>
+<p>You found the secret door! Here is everything Fancy has discovered.</p>
+<h3>The lost friends</h3>
+<div id="museFr"></div>
+<p id="museNote"></p>
+<h3>Secrets</h3>
+<div id="museSec"></div>
+<div class="row"><button id="mClose">Close</button></div>
+</section>
+<section id="pWin" class="panel" hidden aria-label="You won">
+<h2>What now, hero?</h2>
+<p id="winNote"></p>
+<button id="wKeep" class="opt wo g"><span><b></b><small></small></span></button>
+<button id="wTitle" class="opt wo b"><span><b>Rest at the title screen</b><small>Keep everything and save. Come back whenever you like!</small></span></button>
+<button id="wCopy" class="opt wo p"><span><b>Show off my result</b><small>Copy it, then paste it to a friend.</small></span></button>
+<button id="wFresh" class="opt wo r"><span><b></b><small></small></span></button>
+<p id="winMsg" role="status" aria-live="polite"></p>
+</section>
+<section id="pUp" class="panel" hidden aria-label="Upgrades">
+<button id="uClose" aria-label="Close">&times;</button>
+<h2>Upgrades</h2>
+<p class="bal">Your banana credits: <span id="upBal"></span></p>
+<p id="upMsg" role="status" aria-live="polite"></p>
+<div id="upList"></div>
+</section>
+<section id="pEmp" class="panel" hidden aria-label="Emporium">
+<button id="eClose" aria-label="Close">&times;</button>
+<h2>Emporium</h2>
+<p class="bal">Your banana credits: <span id="epBal"></span></p>
+<p id="epMsg" role="status" aria-live="polite"></p>
+<div id="epList"></div>
+</section>
+<section id="pSave" class="panel" hidden aria-label="Save and load">
+<div class="pclw"><button class="pcl" aria-label="Close" tabindex="-1">&times;</button></div>
+<h2>Save</h2>
+<p id="storeWarn" class="warn" hidden>This browser is not keeping progress (a private window, perhaps). Copy your save code to keep it.</p>
+<p id="expNote" class="sub"></p>
+<p>Your save code:</p>
+<textarea id="code" spellcheck="false" autocomplete="off" aria-label="Save code"></textarea>
+<div class="row">
+<button id="bCopy">Copy save code</button>
+<button id="bDown" class="alt">Download save file</button>
+</div>
+<div class="row">
+<button id="bLoadCode" class="alt">Load save code</button>
+<button id="bLoadFile" class="alt">Load save file</button>
+</div>
+<div class="row"><button id="bOld" class="alt" hidden>Put my old game back</button></div>
+<p id="saveMsg" role="status" aria-live="polite"></p>
+<div class="row"><button id="bConfirm" hidden>Replace my progress with this</button><button id="sClose">Close</button></div>
+<input id="file" type="file" accept=".json,.txt,text/plain,application/json" hidden>
+</section>
+</div>
