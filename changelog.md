@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.10.22.2027 (beta)
+
+- The first time the game opens on a device, the title is built in small pieces so the page never freezes for one long moment; the title can appear a little later.
+
 ## 2026.10.22.2026 (beta)
 
 - On a struggling device the game now lightens its effects only when the frame rate really drops, and it does not flip back and forth.
