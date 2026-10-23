@@ -567,7 +567,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
   return { version: VERSION, start: start, frameStats: frameStats, speedVerdict: speedVerdict, errorsMarkdown: errorsMarkdown };
 });
 
-var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2026' });
+var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2131' });
 
 /* sprite-baker 1.7.0 (API 1), LEAN BUILD without: baking, mesh, ramps, rotation, shapes, sheets. Made by modules/sprite-baker/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
 var SpriteBaker = (function () {
@@ -955,7 +955,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SpriteBake
    instead of drawing them again. Nothing leaves the device. It is used only where reading back was measured to be quicker than drawing on this device (the last visit's read-back time against its drawing time), it asks the page
    for nothing but a short wait at start (150 ms at most, then everything is drawn the usual way), and every failure just means "draw it". The pixels come back exactly as they were saved. Copyright (c) 2026 LFC Foundry. MIT licensed. */
 var PicCache = (function () {
-  var SIG = 'defc2761da', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
+  var SIG = '266db611dc', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
     stat = null, on = false, boot = true, builtMs = 0, readMs = -1, late = false, started = 0, ran = false, db = null, api, haveIDB = false, doneW = null;
   try { stat = JSON.parse(localStorage.getItem(SK) || 'null'); } catch (e) { stat = null; }
   if (!stat || stat.s !== SIG) stat = { s: SIG, b: 0, r: -1, v: 0 };
@@ -1000,7 +1000,10 @@ var PicCache = (function () {
       if (forced) { a = g.getImageData(0, 0, p.pw, p.ph).data; b = new Uint8ClampedArray(p.b); for (i = 0; i < a.length; i++) if (a[i] !== b[i]) mism++; checked += a.length; }   // test copy: the picture read back from the canvas must equal the saved bytes
       return c;
     },
-    part: function (c) { var d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height); return { pw: c.width, ph: c.height, b: d.data.buffer }; },
+    part: function (c) {   // a picture's pixels, read back a band of rows at a time (the returned _f reads the next band and says whether more are left), so no single read holds the page
+      var g = c.getContext('2d', { willReadFrequently: true }), w = c.width, h = c.height, b = new ArrayBuffer(w * h * 4), u = new Uint8ClampedArray(b), y = 0, rows = Math.max(1, Math.floor(120000 / Math.max(1, w)));
+      return { pw: w, ph: h, b: b, _f: function () { var n = Math.min(rows, h - y); u.set(g.getImageData(0, y, w, n).data, y * w * 4); y += n; return y < h; } };
+    },
     end: function () {   // the first frame is on the screen: remember the timings, then write what was drawn, a layer at a time
       var nm = Object.keys(hits).length, items = queue, put = [], ix = 0, keys, ki, cur, doneRes;
       if (!boot) return; boot = false; queue = [];
@@ -1012,7 +1015,8 @@ var PicCache = (function () {
       api.flushed = new Promise(function (res) { doneRes = res; });
       (function next() {
         if (!cur) { if (ix >= items.length) { finish(); return; } cur = { it: items[ix++], v: {}, ks: Object.keys(items[ix - 1][2]), i: 0 }; }
-        if (cur.i < cur.ks.length) { try { cur.v[cur.ks[cur.i]] = cur.it[2][cur.ks[cur.i]](); } catch (e) { cur.bad = 1; } cur.i++; setTimeout(next, test ? 0 : 30); return; }
+        if (cur.pend && cur.pend.length) { try { if (!cur.pend[0]._f()) { delete cur.pend[0]._f; cur.pend.shift(); } } catch (e) { cur.bad = 1; cur.pend = []; } setTimeout(next, test ? 0 : 30); return; }
+        if (cur.i < cur.ks.length) { try { cur.v[cur.ks[cur.i]] = cur.it[2][cur.ks[cur.i]](); cur.pend = []; (function walk(x) { if (!x || typeof x !== 'object') return; if (x._f) { cur.pend.push(x); return; } for (var q in x) walk(x[q]); })(cur.v[cur.ks[cur.i]]); } catch (e) { cur.bad = 1; } cur.i++; setTimeout(next, test ? 0 : 30); return; }
         if (!cur.bad) put.push([cur.it[0] + '|' + cur.it[1], cur.v, cur.it[0]]); cur = null; next();
       })();
       function finish() {
@@ -2616,6 +2620,11 @@ function scenery(th) {   // just the sky, hills and ground: enough to draw the t
   while (p.i < p.sc) { if (p.st[p.i]() !== true) p.i++; }
   return p.s;
 }
+function sceneStep(th, ms) {   // build the scenery a few milliseconds at a time (the first screen of a first visit): true once the sky, hills and ground are all built
+  if (sceneReady(th)) return true; var p = planFor(th), t0 = performance.now();
+  while (p.i < p.sc) { if (p.st[p.i]() !== true) p.i++; if (performance.now() - t0 >= ms) break; }
+  return p.i >= p.sc;
+}
 function warm(th, front) {   // front: this stage is needed next (the retry after a death): it jumps the queue and the plans of other stages wait (their finished steps are kept)
   if (SET[th]) return; var i = QUEUE.indexOf(th);
   if (front) { planFor(th); QUEUE = [th]; return; }
@@ -3407,7 +3416,7 @@ function balBack(g, off, nt) { var P = party(nt); put(g, P.sky.c, 0, 0); layer(g
 function balGround(g, off, nt) { var F = party(nt).floor, x; for (x = px(-(off % 72)); x < W; x += 72) put(g, F.c, x, GY); }
 function balWarm(nt) { var i; if (nt && !BALWN) { BALWN = true; TASKQ.push(function () { party(true); }); } if (BALW) return; BALW = true; TASKQ.push(party); for (i = 0; i < BALC.length; i++) (function (i) { TASKQ.push(function () { balloonPic(i); }); })(i); TASKQ.push(waferPic); }
 
-return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
+return { layersOf: layersOf, sceneReady: sceneReady, sceneStep: sceneStep, get tlast() { return TLAST; },  tbmax: TBMAX, arena: { draw: arenaDraw, ready: function () { return !!ARN && ARN.ok >= ARN.n; } }, fightWarm: fightWarm, boss: boss, bossPic: bossPic, fxs: fxs, crown: crownDraw, setColors: setColors, pal: PAL, journeyTheme: JT, bal: { free: function () { PARTYN = null; BALWN = false; }, draw: balloon, back: balBack, ground: balGround, warm: balWarm, n: BALC.length, cols: BALC }, coin: coin, TK: TK, mg: { free: mgfree, bytes: function () { var n = 0, k; for (k in MGC) if (MGC[k] && MGC[k].c) n += MGC[k].c.width * MGC[k].c.height * 4; if (MGW) n += MGW.c.width * MGW.c.height * 4; if (MGCA) n += MGCA.c.width * MGCA.c.height * 4; return n; }, jungle: function (g, y) { if (!JTL) { g.fillStyle = '#17502a'; g.fillRect(0, 0, W, Math.max(0, y)); return; } for (var yy = y - 160; yy > -160; yy -= 160) put(g, JTL.c, 0, yy); }, draw: mgdraw, water: mgwater, caustic: mgcaustic, glints: mgglints, sea: mgsea, sprite: mgs, warm: mgwarm, done: mgdone }, life: life, warm: warm, pump: pump, spinPic: function (i) { return spinFrame(i).c; }, heroPic: function (e) { return heroPic(e).c; }, ready: function (th) { return !!SET[th]; }, pend: pend, track: track, order: ORDER, init: init, keep: keep, back: back, ground: ground, obstacle: obstacle, rects: rects, banana: banana, friend: friend, chimp: chimp, names: NAMES, groundP: GP, themes: DEF.length, kindsOf: function (th) { return DEF[th].kinds; }, nv: function (th) { return DEF[th].ts[0].nv; } };
 })();
 
 /*! save-kit 1.2.1 (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
@@ -3941,7 +3950,7 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.22.2026';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.22.2131';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 LFC Foundry';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -7388,7 +7397,7 @@ function onCtxBack() { ctxLost = false; TXC = {}; TXI = Object.create(null); TXN
 cv.addEventListener('contextlost', onCtxLost); cv.addEventListener('contextrestored', onCtxBack);
 /* P60: use the canvas box in real device pixels (within 2 px of our own, governor not lowering sharpness) */
 var dpcb = null;   
-if (window.ResizeObserver) { try { new ResizeObserver(function (L) { var b = L[0] && L[0].devicePixelContentBoxSize && L[0].devicePixelContentBoxSize[0]; if (!b) return; var n = { w: Math.round(b.inlineSize), h: Math.round(b.blockSize) }; if (dpcb && dpcb.w === n.w && dpcb.h === n.h) return; dpcb = n; if (n.w !== cv.width || n.h !== cv.height) { clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { render(); } catch (e) { logError('render', e); } }, 60); } }).observe(cv, { box: 'device-pixel-content-box' }); } catch (e) { dpcb = null; } }
+if (window.ResizeObserver) { try { new ResizeObserver(function (L) { var b = L[0] && L[0].devicePixelContentBoxSize && L[0].devicePixelContentBoxSize[0]; if (!b) return; var n = { w: Math.round(b.inlineSize), h: Math.round(b.blockSize) }; if (dpcb && dpcb.w === n.w && dpcb.h === n.h) return; dpcb = n; if (n.w !== cv.width || n.h !== cv.height) { clearTimeout(rzT); rzT = setTimeout(function () { resize(); try { if (renders > 0) render(); } catch (e) { logError('render', e); } }, 60);   /* before the first picture is on screen the picture loop draws it (a draw here would do the whole first-screen work in one go) */ } }).observe(cv, { box: 'device-pixel-content-box' }); } catch (e) { dpcb = null; } }
 var rzT = 0, rzRaf = 0;   // phones fire many resize events while the address bar slides: fit the box now (cheap), rebuild the picture once things are quiet
 function fitStage() { bkReset(); var cs = getComputedStyle(document.body), aw = Math.max(120, innerWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)), ah = Math.max(120, innerHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0)), s = Math.min(aw / W, ah / H); stageEl.style.width = Math.floor(W * s) + 'px'; stageEl.style.height = Math.floor(H * s) + 'px'; stageEl.style.setProperty('--u', s + 'px'); }
 addEventListener('resize', function () {
@@ -7512,7 +7521,7 @@ function padStep() {
 var awayMs = save.stats.runs > 0 && save.savedAt > 0 ? Date.now() - save.savedAt : 0;
 PicCache.start(function () {   // the title's big pictures may be put back from the browser's own storage first (at most a 150 ms wait; off where that is not quicker); then the game starts as it always did
 applyColors(); syncOpts(); resetWorld(); resize(); setBar(true); if (awayMs > 3 * 864e5) setTimeout(function () { toast('Welcome back! Tap, click or press Space to flap. P pauses. Settings is the gear.', 6000); }, 2500); ART.warm(shownTheme());
-requestAnimationFrame(frame); requestAnimationFrame(function () { try { LFCReport.mark('first-screen'); } catch (e) { } });
+firstScreenGo(function () { requestAnimationFrame(frame); requestAnimationFrame(function () { try { LFCReport.mark('first-screen'); } catch (e) { } }); });
 });   // the first stage's obstacle pieces are built in the background while the title shows
 if (loadNote) toast(loadNote);
 if (!storageOK) toast('This browser is not keeping progress. Use Save to copy your save code.');
@@ -7542,9 +7551,29 @@ function drawGap() {   // how long to leave the picture alone: only the Battery 
 }
 var LAYER = '', LAYERD = false, DPRFORCE = 0;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
+function firstScreenGo(go) {   // build the title's pictures in pieces of about 8 ms, one after another with no wait for the screen between them (a message to ourselves lets the browser breathe in between), then start the picture loop
+  var ch = null;
+  function pieces() { var ok; try { ok = state !== 'title' || firstScreenStep(0); } catch (e) { ok = true; } if (ok) { go(); return; } ch.port2.postMessage(0); }
+  if (typeof MessageChannel !== 'function') { go(); return; }
+  try { ch = new MessageChannel(); ch.port1.onmessage = pieces; } catch (e) { go(); return; }
+  ch.port2.postMessage(0);   // not at once: the rest of the page's code has to finish loading first
+}
+var FSW = null, FSI = 0;
+function firstScreenStep(t) {   // a first visit: the title's pictures are made in pieces of about 8 ms per screen refresh (the scenery, then the news strip, the title word and the leaderboard column), the later ones drawn into a scratch canvas so nothing shows early; true once all are ready and the title can be drawn in one cheap go
+  var o = ctx, steps, t0 = performance.now();
+  if (!ART.sceneStep(shownTheme(), 8)) return false;
+  steps = [function () { if (lbWant() !== LBT) lbApply(); }, function () { if (!opt('noticker')) drawTicker(); }, drawTitleWord];
+  if (!FSW) { FSW = document.createElement('canvas'); FSW.width = FSW.height = 8; FSW = FSW.getContext('2d'); }
+  while (FSI < steps.length && performance.now() - t0 < 8) {
+    FSW.setTransform(k, 0, 0, k, 0, 0); ctx = FSW;
+    try { steps[FSI++](); } catch (e) { logError('first-screen', e); } finally { ctx = o; }
+  }
+  return FSI >= steps.length;
+}
 function frame(t) {
   requestAnimationFrame(frame);
   if (!autoRun || dlHold) { last = t; return; }
+  if (renders === 0 && state === 'title' && !firstScreenStep(t)) { last = t; return; }   // a first visit: the scenery behind the title is built a few milliseconds per screen refresh (no single long freeze), and the title appears the moment it is ready
   var fs = performance.now(), ri = t - last, dt = Math.min(0.05, evenDt(ri) / 1000 || 0), p0 = REC ? fs : 0; last = t; acc += dt; wlSync(); govStep(ri, t); if (padOn || padTest) padStep();
   var sn = 0; try { if (STEPMODE) { sn = Math.ceil(acc / 0.0167 - 1e-6); if (sn > 0) { var sd = acc / sn; for (var si = 0; si < sn; si++) update(sd); acc = 0; } } else while (acc >= CFG.step) { update(CFG.step); acc -= CFG.step; sn++; } var p1 = REC ? performance.now() : 0, still = washA <= 0 && ((state === 'paused' && resT < 0) || (state === 'mini' && MG && MG.paused)); if (!(still && stillDrawn) && !(t - lastDraw < drawGap())) { renders++; lastDraw = t; render(); stillDrawn = still; if (washA > 0) { ctx.globalAlpha = washA; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } }   /* a paused game does not change: draw it once, then rest (saves battery and heat); the Battery saver draws at most every 28 ms */ if (renders > 0 && PicCache.boot) PicCache.end(); if (TEXTQ.length) { var tq = TEXTQ.shift(); delete TXP[tq[3]]; textPic(tq[0], tq[1], tq[2]); }  if (renders > 1) pumpFrame(fs); /* background art building only when this frame was cheap (or every 4th frame at the latest), so a slow phone is not made slower right when it struggles */ if (REC) REC(t, dt, p1 - p0, performance.now() - p1); } catch (e) { logError('frame', e); acc = 0; softFail(e); }
 }
