@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.10.22.2219 (beta)
+
+- The first time the game opens on a device, Fancy's first face is now drawn in small steps too, so the opening stays smooth.
+
 ## 2026.10.22.2131 (beta)
 
 - The first time the game opens on a device, the title is built in small pieces so the page never freezes for one long moment; the title can appear a little later.
