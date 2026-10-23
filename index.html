@@ -567,7 +567,7 @@ textarea{width:100%;height:calc(96*var(--u));font:calc(12*var(--u))/1.3 ui-monos
   return { version: VERSION, start: start, frameStats: frameStats, speedVerdict: speedVerdict, errorsMarkdown: errorsMarkdown };
 });
 
-var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2025' });
+var LFCReport = FieldReport.start({ name: 'fancy-banana', version: '2026.10.22.2026' });
 
 /* sprite-baker 1.7.0 (API 1), LEAN BUILD without: baking, mesh, ramps, rotation, shapes, sheets. Made by modules/sprite-baker/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
 var SpriteBaker = (function () {
@@ -955,7 +955,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SpriteBake
    instead of drawing them again. Nothing leaves the device. It is used only where reading back was measured to be quicker than drawing on this device (the last visit's read-back time against its drawing time), it asks the page
    for nothing but a short wait at start (150 ms at most, then everything is drawn the usual way), and every failure just means "draw it". The pixels come back exactly as they were saved. Copyright (c) 2026 LFC Foundry. MIT licensed. */
 var PicCache = (function () {
-  var SIG = '6aa0efa568', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
+  var SIG = 'defc2761da', DBN = 'lfc-fancy-pics', SK = 'fancyPicStat', KEEP = 6, hash = location.hash, test = /[#&]test\b/.test(hash), forced = /[#&]test-cache\b/.test(hash), mem = {}, queue = [], hits = {}, rec = {}, mism = 0, checked = 0,
     stat = null, on = false, boot = true, builtMs = 0, readMs = -1, late = false, started = 0, ran = false, db = null, api, haveIDB = false, doneW = null;
   try { stat = JSON.parse(localStorage.getItem(SK) || 'null'); } catch (e) { stat = null; }
   if (!stat || stat.s !== SIG) stat = { s: SIG, b: 0, r: -1, v: 0 };
@@ -3870,68 +3870,78 @@ return { layersOf: layersOf, sceneReady: sceneReady, get tlast() { return TLAST;
   };
   return EvenDt;
 });
-/* quality-governor 1.2.0 (API 1), LEAN BUILD without: control, errors, flipGuard, graceStart, options, stallRules, stats. Made by modules/frame-kit/lean.py; the cut parts are missing on purpose. MIT License, Copyright (c) 2026 LFC Foundry. https://github.com/lfcfoundry/JS-modules */
+
+/*! fx-governor 1.1.1 (API 1), steps the effects down when the screen cannot keep up and never back up behind the player (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.QualityGovernor = factory();
-})(typeof self !== 'undefined' ? self : typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  else root.FxGovernor = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  function pick(v, d) { return v === undefined || v === null ? d : v; }
-  var BASE_PERIOD = 16.7;
-  var SLOW_RATIO = 22 / BASE_PERIOD;
-  var FAST_RATIO = 18.5 / BASE_PERIOD;
-  function QualityGovernor(opts) {
-    var o = opts || {};
-   this.levels = 5;
-    this.onChange = typeof o.onChange === 'function' ? o.onChange : null;
-   this.expectedPeriod = BASE_PERIOD; this.slowAbove = 22; this.fastBelow = 18.5; this.smoothing = 0.06; this.slowFrames = 100; this.downDelay = 3000; this.fastMs = 10000; this.upDelay = 10000; this.maxGap = 100;
-   this._level = 0;
-    this._ema = this.expectedPeriod;
-    this._slow = 0;
-    this._fast = 0;
-   this._changedAt = 0;
-    this._lastNow = null;
+  var LINE_SHARE = 0.6;
+  function num(v, def) { return typeof v === 'number' && isFinite(v) ? v : def; }
+  function pos(v, def) { v = num(v, def); return v > 0 ? v : def; }
+  function create(o) {
+    o = o || {};
+    var levels = o.levels && o.levels.length ? o.levels : ['full', 'lite', 'calm'], idx = Math.max(0, levels.indexOf(o.start || levels[0]));
+    var windowMs = pos(o.windowMs, 3000), gapMs = pos(o.gapMs, 250), startAfterMs = Math.max(0, num(o.startAfterMs, 0));
+    var strikes = Math.max(1, Math.floor(num(o.strikes, 2)));
+    var longGaps = Math.max(1, Math.floor(num(o.longGaps, 3))), severe = num(o.severe, 0.5);
+    var period = num(o.expectedPeriod, 0);
+    var minFps = o.minFps != null && num(o.minFps, null) !== null ? o.minFps : (period > 0 ? LINE_SHARE * 1000 / period : 36);
+    var maxAuto = Math.min(levels.length - 1, Math.max(0, num(o.maxAuto, levels.length - 2)));
+    var frames = 0, t0 = 0, last = 0, slow = 0, chosen = false, raf = 0, running = false, armed = !o.waitForReady, warmFrom = 0, longRun = 0;
+    function safe(fn, a, b) { try { fn(a, b); } catch (e) {} }
+    function done() { return chosen || idx >= maxAuto; }
+    function frame(t) {
+      if (done()) return;
+      var gap = last ? t - last : 0; last = t;
+      longRun = gap > gapMs ? longRun + 1 : 0;
+      if (!armed) return;
+      if (startAfterMs > 0) {
+        if (!warmFrom) warmFrom = t;
+        if (t - warmFrom < startAfterMs) { t0 = 0; slow = 0; return; }
+      }
+      if ((typeof document !== 'undefined' && document.hidden) || (gap > gapMs && longRun < longGaps)) { t0 = 0; slow = 0; }
+      if (!t0) { t0 = t; frames = 0; return; }
+      frames++;
+      if (t - t0 < windowMs) return;
+      var fps = frames * 1000 / (t - t0);
+      t0 = t; frames = 0;
+      slow = fps < minFps ? slow + (fps < minFps * severe ? strikes : 1) : 0;
+      if (o.onSample) safe(o.onSample, fps);
+      if (slow >= strikes && idx < maxAuto) {
+        idx++; slow = 0;
+        if (o.onChange) safe(o.onChange, levels[idx], fps);
+      }
+    }
+    function schedule() { if (!raf && typeof requestAnimationFrame === 'function') raf = requestAnimationFrame(loop); }
+    function cancel() { if (raf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf); raf = 0; }
+    function loop(t) {
+      raf = 0;
+      if (!running) return;
+      safe(frame, t);
+      if (running && !done()) schedule();
+    }
+    return {
+      frame: frame,
+      start: function () { if (running) return; running = true; if (!done()) schedule(); },
+      stop: function () { running = false; cancel(); },
+      choose: function (level) { var i = levels.indexOf(level); if (i < 0) return; chosen = true; idx = i; cancel(); },
+      release: function (level) { var i = levels.indexOf(level); if (i >= 0) idx = i; chosen = false; t0 = 0; slow = 0; last = 0; if (running && !done()) schedule(); },
+      ready: function () { armed = true; warmFrom = 0; t0 = 0; slow = 0; last = 0; },
+      get level() { return levels[idx]; },
+      get minFps() { return minFps; },
+      get resting() { return running && done(); }
+    };
   }
-  Object.defineProperty(QualityGovernor.prototype, 'level', { get: function () { return this._level; }, configurable: true });
-  QualityGovernor.prototype.frame = function (gapMs, nowMs) {
-    this._lastNow = nowMs;
-   if (!(gapMs > 0) || gapMs > this.maxGap) { this._slow = 0; return; }
-    this._ema += (gapMs - this._ema) * this.smoothing;
-    if (this._ema > this.slowAbove) {
-      this._slow++;
-      this._fast = 0;
-    } else {
-      this._slow = 0;
-      if (this._ema < this.fastBelow) this._fast += gapMs; else this._fast = 0;
-    }
-    if (this._slow >= this.slowFrames && this._level < this.levels - 1 && nowMs - this._changedAt > this.downDelay) {
-      this._move(this._level + 1, nowMs, 1);
-    } else if (
-     this._level > 0
-    ) {
-     var m = 1;
-      if (this._fast > this.fastMs * m && nowMs - this._changedAt > this.upDelay * m) this._move(this._level - 1, nowMs, -1);
-    }
-  };
-  QualityGovernor.prototype._move = function (to, now, kind) {
-    var from = this._level;
-    this._level = to;
-    this._changedAt = now;
-    this._slow = 0;
-    this._fast = 0;
-    if (to > from) this._ema = this.expectedPeriod;
-    if (to !== from && this.onChange) {
-     this.onChange(to, from);
-    }
-  };
-  return QualityGovernor;
+  return { create: create };
 });
 
 (function () {
 'use strict';
 
 var PHASE = 'beta';
-var STAMP = '2026.10.22.2025';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
+var STAMP = '2026.10.22.2026';   // set by build.py: date plus Eastern time, YYYY.MM.DD.HHMM
 var NAME = 'Fancy, the Banana';
 var COPYRIGHT = 'Copyright \u00a9 2026 LFC Foundry';
 var FORGED = 'Forged by LFC Foundry \u2022 MIT Licensed';
@@ -7516,10 +7526,11 @@ function qApply() {
   fxMax = qLvl >= 1 ? 36 : 70; ART.lite = qLvl >= 2; var d = qLvl >= 4 ? 1 : qLvl >= 3 ? 1.5 : 2;
   if (d !== dprMax) { dprMax = d; try { resize(); render(); } catch (e) { logError('render', e); } }
 }
-var gov = new QualityGovernor({ onChange: function (to, from) { qLvl = to; qApply(); if (to > from && qLvl >= 2 && !qHint && !opt('saver')) { qHint = true; toast('This screen is working hard. Settings has a Battery saver that makes it lighter.', 5000); } } });   // QualityGovernor: the lean build of quality-governor from JS-modules (smallparts.js)
+var gov = FxGovernor.create({ levels: [0, 1, 2, 3, 4], maxAuto: 4, onChange: function (to) { var from = qLvl; qLvl = to; qApply(); if (to > from && qLvl >= 2 && !qHint && !opt('saver')) { qHint = true; toast('This screen is working hard. Settings has a Battery saver that makes it lighter.', 5000); } } });   // FxGovernor: the lean build of fx-governor from JS-modules (fxgovernor.js): two slow 3-second stretches in a row (under 36 FPS) step the effects down one level, and it never steps back up by itself
 function govStep(ri, t) {
   if (!govOn) return;
-  gov.frame(document.hidden || (state !== 'play' && state !== 'mini') ? 0 : ri, t);   // a gap of 0 only ends the slow streak (paused, hidden tab or another screen)
+  if (document.hidden || (state !== 'play' && state !== 'mini')) return;   // only play frames are counted: a pause, a hidden tab or another screen leaves a long gap, and a long gap restarts the count
+  gov.frame(t);
 }
 var artDown = 0;
 function softFail(e) {   // a canvas could not be made (memory ran out): build the art a notch less sharp instead of leaving a black screen
