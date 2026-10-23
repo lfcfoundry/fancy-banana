@@ -149,11 +149,12 @@ def main():
     sbk = (ROOT / "spritebaker.js").read_text(encoding="utf-8")
     wsb = (ROOT / "wasmbaker.js").read_text(encoding="utf-8")   # sprite-baker 1.7.0 WebAssembly fill add-on (JS-modules), comments removed; see AGENTS.md
     parts = (ROOT / "smallparts.js").read_text(encoding="utf-8")   # four small pieces from JS-modules, lean builds (see AGENTS.md)
+    tgd = (ROOT / "tabguard.js").read_text(encoding="utf-8")   # tab-guard from JS-modules: the second open copy is told at once (see AGENTS.md)
     fxg = (ROOT / "fxgovernor.js").read_text(encoding="utf-8")   # fx-governor 1.1.1 from JS-modules, comments removed: steps the effects down when frames are slow, never back up (see AGENTS.md)
     pck = (ROOT / "piccache.js").read_text(encoding="utf-8")   # keeps the title screen's big pictures in the browser between visits (see AGENTS.md)
     frp = (ROOT / "fieldreport.js").read_text(encoding="utf-8")   # field-report 1.0.2 from JS-modules, comments removed: the hidden speed report and error log (five quick taps in the top-left corner); it comes FIRST so start-up errors are caught
     frp = frp + "\nvar LFCReport = FieldReport.start({ name: 'fancy-banana', version: '__STAMP__' });\n"
-    js = frp + "\n" + sbk + "\n" + wsb + "\n" + pck + "\n" + art + "\n" + savekit + "\n" + parts + "\n" + fxg + "\n" + game
+    js = frp + "\n" + sbk + "\n" + wsb + "\n" + pck + "\n" + art + "\n" + savekit + "\n" + parts + "\n" + tgd + "\n" + fxg + "\n" + game
     check_js(js)
     sig = hashlib.sha256(js.encode("utf-8")).hexdigest()[:10]   # names this exact code: saved pictures from any other build are dropped
     if "__PCSIG__" not in js:

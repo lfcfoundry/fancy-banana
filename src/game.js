@@ -243,13 +243,15 @@ function putOldBack() {
   save = back; persist(); syncOpts(); refreshCode(); syncUp(); say('Your old game is back: ' + describe(save) + '. The one you had before is kept; press the button again to swap back.');
 }
 /* P09: another tab wrote the save: stop saving here and say so */
-function otherTabWrote() {
+function otherTabWrote(msg) {
   if (otherTab) return;
-  otherTab = true; $('tabWarn').hidden = false;
+  otherTab = true; $('tabWarn').hidden = false; if (typeof msg === 'string') $('tabWarn').firstChild.textContent = msg;
   if (inRun()) onHidden();
 }
 kit.onOtherTab(otherTabWrote);   // another tab changed (or cleared) the save
-$('bReload').addEventListener('click', function () { location.reload(); });
+var tabG = null;
+if (location.hash !== '#test') { try { tabG = TabGuard.start({ name: 'fancy-banana-open', backForwardCache: true, onTakeOver: function () { location.reload(); }, onTwin: function () { otherTabWrote('Fancy is already open in another tab, so saving is paused here to protect that game.'); } }); } catch (e) { } }   // the second open copy is told when it opens, not only after the first one saves (the test pages open several copies at once, so they skip it)
+$('bReload').addEventListener('click', function () { if (tabG && tabG.supported && !tabG.holding) tabG.takeOver(); else location.reload(); });   // Reload makes this copy the one in charge (the other copy is told to stop saving), then reloads
 function blockedByTab() { if (!otherTab) return false; say('Saving is paused because the game changed in another tab. Reload this page first.'); return true; }
 function copyText(t, done) {   // to the clipboard; if the browser says no, a short-lived text box does it
   var fb = function () { var ta = document.createElement('textarea'), ok = false; ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:absolute;left:-999px;top:0'; stageEl.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } stageEl.removeChild(ta); done(ok); };
