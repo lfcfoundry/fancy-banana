@@ -38,7 +38,7 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 ## Ask the owner first (use the pop-up question, not a guess)
 
 - Anything that changes how the game feels: difficulty, flap strength, speed, scoring, prices, what a stage contains.
-- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 718,000 bytes, player 443,000 bytes) or adds a feature that costs size. Say what it costs, after packing.
+- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 900,000 bytes, player 600,000 bytes, raised on 2026-10-19 by the owner: size ceilings no longer hold back speed-ups, but a raise is still reported) or adds a feature that costs size. Say what it costs, after packing.
 - Anything that changes the save format (`bf1` and its backups) or what is stored on the device.
 - Anything that adds a network request, a library, sound, or a new permission.
 - Adding, removing or renaming a secret, an unlock or a price in the hidden parts of the game.
@@ -59,7 +59,7 @@ The owner pays for every run and waits on it. Use the smallest check that covers
 
 Never run the two browsers at the same time on this machine: Firefox's timing checks fail every time. `build.py` stamps the page with the current time; pin it with `STAMP=2026.10.14.0004 python3 build.py` for a repeatable build. Report the real time and the CPU time of every run.
 
-**Test browsers (standing rule, 2026-10-17).** Test only with the browsers on the `browsers` branch of the private knowledge-base repository, one at a time, and label every result with its version. Re-read that branch's README before each test run, because versions can change and browsers can be added or removed. At this writing they are Firefox 158.0 (the binary reports 158.0b5), ungoogled Chromium 155.0.8059.39-1 and WebKitGTK 2.52.6 with GNOME Web 46.5. **Every release's `changelog.md` entry ends with `*Tested: ...*` naming the browsers and versions that checked that build (write "not recorded" for anything unknown, and never guess), and the "Tested with" table in `README.md` is updated when the set of browsers changes.**
+**Test browsers (standing rule, 2026-10-17).** Test only with the browsers on the `browsers` branch of the private knowledge-base repository, one at a time, and label every result with its version. Re-read that branch's README before each test run, because versions can change and browsers can be added or removed. At this writing they are Firefox 158.0 (the binary reports 158.0b5), ungoogled Chromium 155.0.8059.39-1 and WebKitGTK 2.52.6. GNOME Web 46.5 was dropped from all testing on 2026-10-24 (owner rule), so builds from 2026.10.24 on are not checked in it; older results in `README.md` still name it. **Every release's `changelog.md` entry ends with `*Tested: ...*` naming the browsers and versions that checked that build (write "not recorded" for anything unknown, and never guess), and the "Tested with" table in `README.md` is updated when the set of browsers changes.**
 
 **Faster, trustworthy testing:** follow the universal QA and browser-testing guide at `build-notes/qa/QA-AND-BROWSER-TESTING-UNIVERSAL-GUIDE.md` in the private knowledgebase-single-file repo (print the real browser version on line 1 of every run; targeted checks while working; full run once when the design is final).
 
