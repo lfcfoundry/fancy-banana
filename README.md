@@ -49,6 +49,7 @@ Every release is checked in real browsers, one at a time. The table lists the br
 | 2026.10.16.1651 | not run | not run | Text-only fix, rebuilt from source and compared byte for byte with the live page. |
 | 2026.10.16.2201 | 153 for the title screen before release; ungoogled Chromium 155.0.8059.39: 91 of 91 checks after release | 158.0b5: 26 of 26 checks (third run; two timing checks failed first) | Copyright change. |
 | Rule from 2026.10.17 | Ungoogled Chromium 155.0.8059.39 | Firefox 158.0 | Plus WebKitGTK 2.52.6 and GNOME Web 46.5. Only these browsers, one at a time, versions labeled. |
+| Rule from 2026.10.24 | Ungoogled Chromium 155.0.8059.39 | Firefox 158.0 | WebKitGTK 2.52.6 only. GNOME Web is no longer tested; the rows below from before this date keep their results. |
 | 2026.10.22.1855 | Ungoogled Chromium 155.0.8059.39: 91 of 91 checks | Firefox 158.0: 26 of 26 checks | Plus WebKitGTK 2.52.6: 3 of 3 and GNOME Web 46.5: 3 of 3, and the saved-pictures check 4 of 4. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.2025 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
 | 2026.10.22.2026 | Ungoogled Chromium 155.0.8059.39: full checks green | Firefox 158.0: full checks green | Plus WebKitGTK 2.52.6 and GNOME Web 46.5: opened with no script errors. Pictures compared with the previous build in all four browsers: 100.000% identical. |
@@ -75,7 +76,7 @@ The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780
 - **Made by LFC Foundry.** Game design, code and art are by the maker, published under the name LFC Foundry. The title screen credits LFC Foundry and the page header links to github.com/lfcfoundry.
 - **No third-party code or art in the game.** There are no libraries, fonts or image files in `index.html`; the screenshots above were taken from the game itself.
 - **Reusable pieces.** Where a piece of the game's code has been published as a module, it lives in [JS-modules](https://github.com/lfcfoundry/JS-modules) under the same MIT license.
-- **Testing tools and browsers.** Checks are driven with Puppeteer and Playwright (Firefox and Chromium) and with WebDriver (WebKitGTK and GNOME Web). The browsers are Firefox (MPL 2.0), ungoogled-chromium (BSD-3-Clause), WebKitGTK (LGPL-2 and BSD-2) and GNOME Web (GPL-3+); each keeps its own license. Versions used are listed under [Tested with](#tested-with).
+- **Testing tools and browsers.** Checks are driven with Puppeteer and Playwright (Firefox and Chromium) and with WebDriver (WebKitGTK; GNOME Web until 2026.10.24). The browsers are Firefox (MPL 2.0), ungoogled-chromium (BSD-3-Clause), WebKitGTK (LGPL-2 and BSD-2) and, until 2026.10.24, GNOME Web (GPL-3+); each keeps its own license. Versions used are listed under [Tested with](#tested-with).
 - **License.** MIT; see [LICENSE](LICENSE).
 
 © 2026 LFC Foundry. Released under the [MIT License](LICENSE).
