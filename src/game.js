@@ -2908,7 +2908,15 @@ function fs(fill) { ctx.fillStyle = fill; ctx.fill(); ctx.stroke(); }
 var TXC = {}, TXI = Object.create(null), TXN = 0, TXF = 0;   // cache of text pictures; TXF counts drawn frames so the cache can drop only pictures nobody has used for a while
 var TEXTQ = [], TXP = {};   // outlined text built one per frame (a lazy request is queued and drawn from the next frame on): a card full of new text no longer lands on one frame
 (function () { [[64, '#ffffff'], [22, '#ffffff'], [20, '#ffffff'], [32, '#ffffff'], [24, '#ffffff'], [24, '#ffd93b'], [16, '#ffffff'], [14, '#ffffff']].forEach(function (p) { '0123456789'.split('').forEach(function (c) { var key = p[0] + '|' + p[1] + '|' + c; TXP[key] = 1; TEXTQ.push([c, p[0], p[1], key]); }); }); })();   // the digits are built early, one per frame
-(function () { [['Ready', '#ff6b81'], ['Set', '#ffd93b'], ['GO!', '#7be07b']].forEach(function (p) { var key = '72|' + p[1] + '|' + p[0]; TXP[key] = 1; TEXTQ.push([p[0], 72, p[1], key]); }); })();   // Ready, Set, Go are built early too
+(function () { [['Ready', '#ff6b81'], ['Set', '#ffd93b'], ['GO!', '#7be07b']].forEach(function (p) { var key = '72|' + p[1] + '|' + p[0]; TXP[key] = 1; TEXTQ.push([p[0], 72, p[1], key]); }); })();
+(function () {   // words the first run needs mid-play (the Oh no card, the launch words, the stage counter): built early, one per frame, so no frame pays for a card full of new text
+  function q(text, size, fill) { var key = size + '|' + fill + '|' + text; if (!TXP[key]) { TXP[key] = 1; TEXTQ.push([text, size, fill, key]); } }
+  function chars(text, size, fill) { text.split('').forEach(function (c) { q(c, size, fill); }); }
+  '0123456789'.split('').forEach(function (c) { q(c, 52, '#ffd93b'); });
+  q('Tap to launch!', 28, '#ffffff'); q('Go!', 28, '#7be07b'); q('WHOOSH!', 34, '#ffd93b');
+  q('Oh no! Bonk!', 30, '#ffffff'); q('Gates you flew through', 14, '#ffffff'); q('Try again!', 22, '#ffffff'); q('Space: try again', 13, '#ffffff');
+  chars('Your best: .', 16, '#ffffff'); chars('Stage +', 14, '#ffffff'); chars('New best!', 22, '#ffd93b');
+})();   // Ready, Set, Go are built early too
 /*TEST_HOOK_START*/ var TXT = {}; /*TEST_HOOK_END*/
 function textPic(text, size, fill, lazy) {   // a picture already built is found through TXI (fill, then size, then text) without making a key string every call
   var ix = TXI[fill], e = ix && ix[size], key;
@@ -2917,7 +2925,7 @@ function textPic(text, size, fill, lazy) {   // a picture already built is found
   key = size + '|' + fill + '|' + text; e = TXC[key];
   if (e) { e.u = TXF; txIndex(e, fill, size, text); return e; }
   if (lazy) { if (!TXP[key]) { TXP[key] = 1; TEXTQ.push([text, size, fill, key]); } return null; }
-  if (TXN > 220) txTrim();
+  if (TXN > 320) txTrim();
   var c = document.createElement('canvas'), g2, pad = Math.ceil(size * 0.2) + 2, kk = k > 0 ? k : 1, w;
   g2 = c.getContext('2d', CRF); g2.font = '800 ' + size + 'px ' + FONT; w = g2.measureText(text).width;
   e = { c: c, w: w, pad: pad, h: Math.ceil(size * 1.4) + pad * 2 }; c.width = Math.ceil((w + pad * 2) * kk); c.height = Math.ceil(e.h * kk);
