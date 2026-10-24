@@ -6,7 +6,7 @@ Rebuild (needs Python 3.9 or newer and esbuild 0.28.2):
 
 ```
 cd src
-ESBUILD=/path/to/esbuild STAMP=2026.10.23.0013 QA_NOPACK=1 python3 build.py
+ESBUILD=/path/to/esbuild STAMP=2026.10.23.2236 QA_NOPACK=1 python3 build.py
 cmp dist/bananafly.html ../index.html     # no output means the same file, byte for byte
 ```
 

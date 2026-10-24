@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.10.23.2236 (beta)
+
+- The "Oh no!" card, the launch words and the stage counter no longer cause a small hiccup the first time they appear in a run. Nothing looks different.
+
 ## 2026.10.23.0013 (beta)
 
 - If the game is already open in another tab or window, the new one now says so as soon as it opens and does not save over the other game. Its Reload button makes that copy the one in charge.
