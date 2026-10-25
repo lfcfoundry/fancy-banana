@@ -6,23 +6,23 @@ Copyright (c) 2026 LFC Foundry. Released under the MIT License (see `LICENSE`).
 
 **Why it exists.** A game anyone can open anywhere, silent and comfortable (calm mode, slower speeds, left-handed layout), and one of LFC Foundry's open-source single-file games; some of its code is published as reusable pieces in JS-modules. The README says the same in plain words for players.
 
-This page is an index: it says where things are, which rules are fixed, and what to ask the owner before doing. Details live in the files it points to. `python3 qa/docs_drift.py` checks that this page still matches the files (see "Keeping this page true").
+This page is an index: it says where things are, which rules are fixed, and what to ask the owner before doing. The editable source and rebuild instructions are in `src/README.md`.
 
 ## Where things are
 
-The public repository (`fancy-banana`) holds only the built game (`index.html`), `changelog.md`, `README.md`, `screenshots/` and `tools/hooks/`. The source is kept in the owner's working folder, and the paths below are in that folder, not in the repository. If you only have the repository, you can read and test `index.html`, but a change you make there will be lost on the next build; ask the owner for the source first.
+The public repository contains the built game (`index.html`) and its readable source under `src/`. Edit the source files, not `index.html`; `src/README.md` gives the rebuild command. The QA scripts and hand-offs described below are maintained outside this public checkout and are not available unless the owner supplies that working folder.
 
 | What | Where |
 |---|---|
-| Page shell, styles, panels | `head.html` |
-| Game code | `game.js` (plus `art.js` for the pictures that are drawn by code) |
-| Joins the three files into the page | `build.py` (outputs in `dist/`) |
+| Page shell, styles, panels | `src/head.html` |
+| Game code | `src/game.js` (plus `src/art.js` for the pictures that are drawn by code) |
+| Joins the source files into the page | `src/build.py` (outputs in `src/dist/`) |
 | Release history, one row per build (the full, technical one) | `CHANGELOG.md` in the working folder, and the copy kept in the private knowledge base at `changelogs-full/fancy-banana/CHANGELOG-full.md`. Write the full entry there for every release. The repository's `changelog.md` is the short, player-facing one |
 | Latest hand-off for a new session | the newest `HANDOFF-fancy-the-banana-*.md` |
 | What the game taught us | the lessons and foundation documents, filed in the private knowledge base under research/2026-10-16-fancy-banana-archive (with the research, audits, QA efficiency notes and all earlier handoffs) |
-| Checks | `qa/` (`qa.py` quick tier, `smoke.py`, `ffsmoke.mjs`, `fuzzkit-adapter.js` with `fuzzkit.sh`, `packed.py`) |
+| Checks | The owner's QA working folder; the QA scripts are not included in this public checkout |
 
-Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/`. The build removes it from the player copy, so never rely on `window.__bf` in shipped code.
+Test code in `src/game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/`. The build removes it from the player copy, so never rely on `window.__bf` in shipped code.
 
 ## Fixed rules
 
@@ -38,7 +38,7 @@ Test code in `game.js` sits between `/*TEST_HOOK_START*/` and `/*TEST_HOOK_END*/
 ## Ask the owner first (use the pop-up question, not a guess)
 
 - Anything that changes how the game feels: difficulty, flap strength, speed, scoring, prices, what a stage contains.
-- Anything that raises a size ceiling (`CEILINGS` in `build.py`: full 900,000 bytes, player 600,000 bytes, raised on 2026-10-19 by the owner: size ceilings no longer hold back speed-ups, but a raise is still reported) or adds a feature that costs size. Say what it costs, after packing.
+- Anything that raises a size ceiling (`CEILINGS` in `src/build.py`: full 900,000 bytes, player 600,000 bytes, raised on 2026-10-19 by the owner: size ceilings no longer hold back speed-ups, but a raise is still reported) or adds a feature that costs size. Say what it costs, after packing.
 - Anything that changes the save format (`bf1` and its backups) or what is stored on the device.
 - Anything that adds a network request, a library, sound, or a new permission.
 - Adding, removing or renaming a secret, an unlock or a price in the hidden parts of the game.
@@ -67,7 +67,7 @@ Never run the two browsers at the same time on this machine: Firefox's timing ch
 
 ## Keeping this page true
 
-`python3 qa/docs_drift.py` fails when: a file or command named in backticks on this page, in `README.md` or in the newest hand-off does not exist; a version-stamp placeholder is left in a document; a number on this page (the 91 checks, the two size ceilings, the size of the player copy) disagrees with `qa/counts.json`, `build.py` or `dist/sizes.json`; or the copy of this page in the repository differs from this one. Run it before every push, and when you change this page, copy it to the repository.
+The documentation-drift checker and QA result files are maintained in the owner's working folder, not in this public checkout. Before running a command named here, confirm its script is present in the supplied working folder. Keep the source paths and build instructions aligned with `src/README.md`.
 
 ## Moving knowledge between sessions
 
