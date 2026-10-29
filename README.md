@@ -1,10 +1,28 @@
-# Fancy, the Banana (beta)
+<div align="center">
 
-**What it is.** A silent, one-tap, side-scrolling arcade game. You guide Fancy, a small flying banana in a hero mask and scarf, through the gaps and free his banana friends from Evil Prince Chimp.
+# Fancy, the Banana
 
-**How it does it.** The whole game is one HTML file that runs in any modern browser on a laptop or a phone: no install, no sign-in, no network requests, and it works offline. It is plain HTML canvas and JavaScript with no libraries and no image files; all of the art is drawn by code when the game starts. One tap, click or Space press flaps, and physics runs at a fixed 120 steps a second.
+**A silent, one-tap flying banana arcade game. Free the banana friends from Evil Prince Chimp.**
 
-**Play it: https://lfcfoundry.github.io/fancy-banana/**
+[**Play it now**](https://lfcfoundry.github.io/fancy-banana/) · [**Source code**](https://github.com/lfcfoundry/fancy-banana)
+
+![beta](https://img.shields.io/badge/beta-informational) ![MIT](https://img.shields.io/badge/MIT-informational) ![no sound](https://img.shields.io/badge/no%20sound-informational) ![works offline](https://img.shields.io/badge/works%20offline-informational)
+
+</div>
+
+## What it is and how it works
+
+Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps of a side-scrolling course. One tap, click or Space press flaps. The whole game is one HTML file in plain canvas and JavaScript, with no libraries and no image files; all the art is drawn by code when the game starts.
+
+## Why it exists
+
+A game anyone can open anywhere: one tap and no sound, so it works where sound is not welcome, with nothing to install and nothing leaving your device. Comfort is built in, and some of its code is shared as modules in [JS-modules](https://github.com/lfcfoundry/JS-modules).
+
+## Highlights
+
+| One tap | Made to be comfortable | Stages and a water level | Offline, no tracking |
+|---|---|---|---|
+| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No sign-in and no network requests. Progress is saved in your browser. |
 
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
@@ -13,12 +31,6 @@
   <img src="screenshots/water-level.jpg" width="150" alt="Chimp's Navy, the water bonus level">
   <img src="screenshots/fruit-garden.jpg" width="150" alt="Stage 5, the Fruit Garden">
 </p>
-
-## Why it exists
-
-- **A game anyone can open anywhere.** One tap and no sound, so it works anywhere, including places where sound is not welcome, with nothing to install and nothing leaving your device.
-- **Comfortable by design.** Calm mode, slower game speeds, a left-handed layout and no flashing are built in (see [Made to be comfortable](#made-to-be-comfortable)).
-- **A home for single-file games.** It is one of [LFC Foundry](https://github.com/lfcfoundry)'s open-source single-file games and apps, and some of its code has been cut into reusable pieces in [JS-modules](https://github.com/lfcfoundry/JS-modules) so other games can use it.
 
 **Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed in each version is in [changelog.md](changelog.md), a short list of what you will notice.
 
