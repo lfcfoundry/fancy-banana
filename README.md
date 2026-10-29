@@ -1,26 +1,72 @@
-# Fancy, the Banana (beta)
+<div align="center">
 
-**What it is.** A silent, one-tap, side-scrolling arcade game. You guide Fancy, a small flying banana in a hero mask and scarf, through the gaps and free his banana friends from Evil Prince Chimp.
+# Fancy, the Banana
 
-**How it does it.** The whole game is one HTML file that runs in any modern browser on a laptop or a phone: no install, no sign-in, no network requests, and it works offline. It is plain HTML canvas and JavaScript with no libraries and no image files; all of the art is drawn by code when the game starts. One tap, click or Space press flaps, and physics runs at a fixed 120 steps a second.
+**A silent, one-tap flying banana arcade game. Free the banana friends from Evil Prince Chimp.**
 
-**Play it: https://lfcfoundry.github.io/fancy-banana/**
+[**Play it now**](https://lfcfoundry.github.io/fancy-banana/) · [**Source code**](https://github.com/lfcfoundry/fancy-banana)
+
+![beta](https://img.shields.io/badge/beta-informational) ![MIT](https://img.shields.io/badge/MIT-informational) ![no sound](https://img.shields.io/badge/no%20sound-informational) ![works offline](https://img.shields.io/badge/works%20offline-informational)
+
+</div>
+
+<p align="center"><img src="screenshots/logo.jpg" width="480" alt="Fancy, the Banana: Fancy, a small flying banana in a hero mask and scarf, beside the game's title logo"></p>
+
+## What it is and how it works
+
+Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps of a side-scrolling course. One tap, click or Space press flaps. The whole game is one HTML file in plain canvas and JavaScript, with no libraries and no image files; all the art is drawn by code when the game starts.
+
+## Why it exists
+
+A game anyone can open anywhere: one tap and no sound, so it works where sound is not welcome, with nothing to install and nothing leaving your device. Comfort is built in, and some of its code is shared as modules in [JS-modules](https://github.com/lfcfoundry/JS-modules).
+
+## Highlights
+
+| One tap | Made to be comfortable | Quiet by design | Stages and a water level | Offline, no tracking |
+|---|---|---|---|---|
+| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No sign-in and no network requests. Progress is saved in your browser. |
 
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
   <img src="screenshots/candy-shop.jpg" width="150" alt="Stage 1, the Candy Shop">
+  <img src="screenshots/jam-jar-pantry.jpg" width="150" alt="Stage 2, the Jam Jar Pantry">
+  <img src="screenshots/ice-cream-parlor.jpg" width="150" alt="Stage 3, the Ice Cream Parlor">
   <img src="screenshots/silverware-drawer.jpg" width="150" alt="Stage 4, the Silverware Drawer">
   <img src="screenshots/water-level.jpg" width="150" alt="Chimp's Navy, the water bonus level">
   <img src="screenshots/fruit-garden.jpg" width="150" alt="Stage 5, the Fruit Garden">
+  <img src="screenshots/upgrades.jpg" width="150" alt="The upgrade shop">
 </p>
 
-## Why it exists
-
-- **A game anyone can open anywhere.** One tap and no sound, so it works anywhere, including places where sound is not welcome, with nothing to install and nothing leaving your device.
-- **Comfortable by design.** Calm mode, slower game speeds, a left-handed layout and no flashing are built in (see [Made to be comfortable](#made-to-be-comfortable)).
-- **A home for single-file games.** It is one of [LFC Foundry](https://github.com/lfcfoundry)'s open-source single-file games and apps, and some of its code has been cut into reusable pieces in [JS-modules](https://github.com/lfcfoundry/JS-modules) so other games can use it.
-
 **Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed in each version is in [changelog.md](changelog.md), a short list of what you will notice.
+
+## Upgrades
+
+Spend banana credits (friends freed plus coins) in the shop: 15 upgrades with 30 levels, 1,635 credits for all of them. A few examples, shown as the game draws them in its shop:
+
+<p align="center"><img src="screenshots/shop-roomy-gaps.png" width="110" alt="The Roomy gaps tile from the upgrade shop"> <img src="screenshots/shop-gentle-fall.png" width="110" alt="The Gentle fall tile from the upgrade shop"> <img src="screenshots/shop-free-bounce.png" width="110" alt="The Free bounce tile from the upgrade shop"> <img src="screenshots/shop-banana-magnet.png" width="110" alt="The Banana magnet tile from the upgrade shop"> <img src="screenshots/shop-sweet-spot.png" width="110" alt="The Sweet spot tile from the upgrade shop"> <img src="screenshots/shop-potassium-power.png" width="110" alt="The Potassium Power tile from the upgrade shop"> <img src="screenshots/shop-second-wind.png" width="110" alt="The Second wind tile from the upgrade shop"> </p>
+
+| Upgrade | What it does | Levels and cost |
+|---|---|---|
+| Roomy gaps | Wider openings, +5 px per level | 3 levels, 10 to 30 credits |
+| Gentle fall | Fancy falls 6% slower per level | 3 levels, 10 to 30 credits |
+| Free bounce | Bounce off the ground or an obstacle and fly on, once per run per level | 2 levels, 25 and 50 credits |
+| Banana magnet | Gold bananas fly to Fancy from farther away, +35% reach per level | 3 levels, 15 to 45 credits |
+| Sweet spot | A wider PERFECT zone in the middle of every gap, +25% per level | 3 levels, 20 to 60 credits |
+| Potassium Power! | Hold when three or more gates line up and Fancy glides straight through, a bit faster | 1 level, 120 credits |
+| Second wind | Once per run, a crash restarts the stage you are in | 1 level, 100 credits |
+
+## By the numbers
+
+| | |
+|---|---|
+| Physics | Fixed, 120 steps a second |
+| Size | One file, about 500 KB, no libraries and no image files |
+| Network | No requests, no sign-in, no trackers |
+| Frame work | Median 0.4 ms, under 2 ms for 99% of frames (Chromium, phone-size view) |
+| Memory | Flat over 10 minutes of play (Chromium) |
+| Checked | Chromium, Firefox and WebKitGTK for every release |
+
+Measured on build 2026.10.23.2236.
 
 ## How to play
 
@@ -36,7 +82,7 @@
 
 ## Made to be comfortable
 
-Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-handed layout, large buttons and text, a battery saver, full screen, a pause button (or the P key), game controller support, and no sound or music at all. Progress is saved in your browser; use **Save** to copy a save code or file and move to another device.
+The game has no sound and no music, ever, so there are no sudden sounds and nothing depends on hearing. Every cue is something you see, and the whole game is played by touch with one tap, a click or the Space key, which leaves less to take in at once and can be easier on players who find noise and busy screens tiring. Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-handed layout, large buttons and text, a battery saver, full screen, a pause button (or the P key), game controller support, and no sound or music at all. Progress is saved in your browser; use **Save** to copy a save code or file and move to another device.
 
 ## Tested with
 
