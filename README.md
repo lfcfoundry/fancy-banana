@@ -22,9 +22,9 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 
 ## Highlights
 
-| One tap | Made to be comfortable | Stages and a water level | Offline, no tracking |
-|---|---|---|---|
-| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No sign-in and no network requests. Progress is saved in your browser. |
+| One tap | Made to be comfortable | Quiet by design | Stages and a water level | Offline, no tracking |
+|---|---|---|---|---|
+| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No sign-in and no network requests. Progress is saved in your browser. |
 
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
@@ -41,7 +41,9 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 
 ## Upgrades
 
-Spend banana credits (friends freed plus coins) in the shop: 15 upgrades with 30 levels, 1,635 credits for all of them. A few examples:
+Spend banana credits (friends freed plus coins) in the shop: 15 upgrades with 30 levels, 1,635 credits for all of them. A few examples, shown as the game draws them in its shop:
+
+<p align="center"><img src="screenshots/shop-roomy-gaps.png" width="110" alt="The Roomy gaps tile from the upgrade shop"> <img src="screenshots/shop-gentle-fall.png" width="110" alt="The Gentle fall tile from the upgrade shop"> <img src="screenshots/shop-free-bounce.png" width="110" alt="The Free bounce tile from the upgrade shop"> <img src="screenshots/shop-banana-magnet.png" width="110" alt="The Banana magnet tile from the upgrade shop"> <img src="screenshots/shop-sweet-spot.png" width="110" alt="The Sweet spot tile from the upgrade shop"> <img src="screenshots/shop-potassium-power.png" width="110" alt="The Potassium Power tile from the upgrade shop"> <img src="screenshots/shop-second-wind.png" width="110" alt="The Second wind tile from the upgrade shop"> </p>
 
 | Upgrade | What it does | Levels and cost |
 |---|---|---|
@@ -80,7 +82,7 @@ Measured on build 2026.10.23.2236.
 
 ## Made to be comfortable
 
-Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-handed layout, large buttons and text, a battery saver, full screen, a pause button (or the P key), game controller support, and no sound or music at all. Progress is saved in your browser; use **Save** to copy a save code or file and move to another device.
+The game has no sound and no music, ever, so there are no sudden sounds and nothing depends on hearing. Every cue is something you see, and the whole game is played by touch with one tap, a click or the Space key, which leaves less to take in at once and can be easier on players who find noise and busy screens tiring. Calm mode (no flashes, shake or zoom), game speed from 100% down to 60%, left-handed layout, large buttons and text, a battery saver, full screen, a pause button (or the P key), game controller support, and no sound or music at all. Progress is saved in your browser; use **Save** to copy a save code or file and move to another device.
 
 ## Tested with
 
