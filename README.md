@@ -10,6 +10,8 @@
 
 </div>
 
+<p align="center"><img src="screenshots/logo.jpg" width="480" alt="Fancy, the Banana: Fancy, a small flying banana in a hero mask and scarf, beside the game's title logo"></p>
+
 ## What it is and how it works
 
 Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps of a side-scrolling course. One tap, click or Space press flaps. The whole game is one HTML file in plain canvas and JavaScript, with no libraries and no image files; all the art is drawn by code when the game starts.
