@@ -27,12 +27,42 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
   <img src="screenshots/candy-shop.jpg" width="150" alt="Stage 1, the Candy Shop">
+  <img src="screenshots/jam-jar-pantry.jpg" width="150" alt="Stage 2, the Jam Jar Pantry">
+  <img src="screenshots/ice-cream-parlor.jpg" width="150" alt="Stage 3, the Ice Cream Parlor">
   <img src="screenshots/silverware-drawer.jpg" width="150" alt="Stage 4, the Silverware Drawer">
   <img src="screenshots/water-level.jpg" width="150" alt="Chimp's Navy, the water bonus level">
   <img src="screenshots/fruit-garden.jpg" width="150" alt="Stage 5, the Fruit Garden">
+  <img src="screenshots/upgrades.jpg" width="150" alt="The upgrade shop">
 </p>
 
 **Status: beta.** The game is feature-complete and being polished and tested, so small things still change between versions. What changed in each version is in [changelog.md](changelog.md), a short list of what you will notice.
+
+## Upgrades
+
+Spend banana credits (friends freed plus coins) in the shop: 15 upgrades with 30 levels, 1,635 credits for all of them. A few examples:
+
+| Upgrade | What it does | Levels and cost |
+|---|---|---|
+| Roomy gaps | Wider openings, +5 px per level | 3 levels, 10 to 30 credits |
+| Gentle fall | Fancy falls 6% slower per level | 3 levels, 10 to 30 credits |
+| Free bounce | Bounce off the ground or an obstacle and fly on, once per run per level | 2 levels, 25 and 50 credits |
+| Banana magnet | Gold bananas fly to Fancy from farther away, +35% reach per level | 3 levels, 15 to 45 credits |
+| Sweet spot | A wider PERFECT zone in the middle of every gap, +25% per level | 3 levels, 20 to 60 credits |
+| Potassium Power! | Hold when three or more gates line up and Fancy glides straight through, a bit faster | 1 level, 120 credits |
+| Second wind | Once per run, a crash restarts the stage you are in | 1 level, 100 credits |
+
+## By the numbers
+
+| | |
+|---|---|
+| Physics | Fixed, 120 steps a second |
+| Size | One file, about 500 KB, no libraries and no image files |
+| Network | No requests, no sign-in, no trackers |
+| Frame work | Median 0.4 ms, under 2 ms for 99% of frames (Chromium, phone-size view) |
+| Memory | Flat over 10 minutes of play (Chromium) |
+| Checked | Chromium, Firefox and WebKitGTK for every release |
+
+Measured on build 2026.10.23.2236.
 
 ## How to play
 
