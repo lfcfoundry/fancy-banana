@@ -10,7 +10,7 @@ This page is an index: it says where things are, which rules are fixed, and what
 
 ## Where things are
 
-The public repository contains the built game (`index.html`) and its readable source under `src/`. Edit the source files, not `index.html`; `src/README.md` gives the rebuild command. The QA scripts and hand-offs described below are maintained outside this public checkout and are not available unless the owner supplies that working folder.
+The public repository contains the built game (`play/index.html`) and its readable source under `src/`. Edit the source files, not `index.html`; `src/README.md` gives the rebuild command. The QA scripts and hand-offs described below are maintained outside this public checkout and are not available unless the owner supplies that working folder.
 
 | What | Where |
 |---|---|

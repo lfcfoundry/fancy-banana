@@ -4,7 +4,7 @@
 
 **A silent, one-tap flying banana arcade game. Free the banana friends from Evil Prince Chimp.**
 
-[**Play it now**](https://lfcfoundry.github.io/fancy-banana/) · [**Source code**](https://github.com/lfcfoundry/fancy-banana)
+[**Play it now**](https://lfcfoundry.github.io/fancy-banana/play/) · [**Source code**](https://github.com/lfcfoundry/fancy-banana)
 
 ![beta](https://img.shields.io/badge/beta-informational) ![MIT](https://img.shields.io/badge/MIT-informational) ![no sound](https://img.shields.io/badge/no%20sound-informational) ![works offline](https://img.shields.io/badge/works%20offline-informational)
 
@@ -127,16 +127,16 @@ The maker also checks by hand on a Windows 11 laptop (Ryzen 7 8845HS, Radeon 780
 
 ## Technical notes
 
-- The whole game is one HTML file: no install, no sign-in, no network requests, nothing leaves your device, and it works offline. Open `index.html` in any modern browser on a laptop or a phone.
+- The whole game is one HTML file: no install, no sign-in, no network requests, nothing leaves your device, and it works offline. Open `play/index.html` in any modern browser on a laptop or a phone.
 - It uses plain HTML canvas and JavaScript with no libraries. There are no image files in the game: all of its art is drawn by code when it starts and built in small background steps so play stays smooth.
 - Physics runs at a fixed 120 steps a second and the picture is drawn where things will be when it is shown. Test builds run in Firefox (used as the stress test), ungoogled Chromium and WebKitGTK; see [Tested with](#tested-with).
 - Version numbers look like `2026.10.10.2346`: year, month, day and the time (US Eastern). The current one is shown under the title on the title screen.
-- This repository holds the built game (`index.html`), its readable [source and rebuild steps](src/README.md), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
+- This repository holds the built game (`play/index.html`), its readable [source and rebuild steps](src/README.md), the [changelog](changelog.md), the screenshots above, [notes for AI assistants](AGENTS.md) and the commit hooks in `tools/hooks/`.
 
 ## Credits and attributions
 
 - **Made by LFC Foundry.** Game design, code and art are by the maker, published under the name LFC Foundry. The title screen credits LFC Foundry and the page header links to github.com/lfcfoundry.
-- **No third-party code or art in the game.** There are no libraries, fonts or image files in `index.html`; the screenshots above were taken from the game itself.
+- **No third-party code or art in the game.** There are no libraries, fonts or image files in `play/index.html`; the screenshots above were taken from the game itself.
 - **Reusable pieces.** Where a piece of the game's code has been published as a module, it lives in [JS-modules](https://github.com/lfcfoundry/JS-modules) under the same MIT license.
 - **Testing tools and browsers.** Checks are driven with Puppeteer and Playwright (Firefox and Chromium) and with WebDriver (WebKitGTK; GNOME Web until 2026.10.24). The browsers are Firefox (MPL 2.0), ungoogled-chromium (BSD-3-Clause), WebKitGTK (LGPL-2 and BSD-2) and, until 2026.10.24, GNOME Web (GPL-3+); each keeps its own license. Versions used are listed under [Tested with](#tested-with).
 - **License.** MIT; see [LICENSE](LICENSE).
