@@ -24,9 +24,9 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 
 ## Highlights
 
-| One tap | Made to be comfortable | Quiet by design | Stages and a water level | Free and private |
-|---|---|---|---|---|
-| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser. |
+| One tap | Easy to learn | Made to be comfortable | Quiet by design | Stages and a water level | Free and private |
+|---|---|---|---|---|---|
+| Tap, click or press Space. Fixed physics at 120 steps a second. | A ? button on the title screen opens a picture-by-picture How to play. No forced tutorial: tap start whenever you like. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser. |
 
 ## Free, private and open
 
@@ -82,6 +82,8 @@ Spend banana credits (friends freed plus coins) in the shop: 15 upgrades with 30
 Measured on build 2026.10.23.2236.
 
 ## How to play
+
+The game has a built-in guide: tap the **?** button on the title screen for a picture-by-picture How to play (flapping, stages, coins, Chimp's Navy, pause and controller tips). There is no forced tutorial, so you can start right away.
 
 - **Tap, click or press Space** to flap. Fly through the gates; touch an obstacle or the ground and the run ends.
 - Every ten gates is a new stage, and each stage clear sets five banana friends free.
