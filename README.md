@@ -8,7 +8,7 @@
 
 ![beta](https://img.shields.io/badge/beta-informational) ![MIT](https://img.shields.io/badge/MIT-informational) ![no sound](https://img.shields.io/badge/no%20sound-informational) ![works offline](https://img.shields.io/badge/works%20offline-informational)
 
-**No ads · no accounts · no data sent anywhere · no microtransactions · fully open source · single player · works offline · works in any modern browser**
+**No ads · no accounts · no data sent anywhere · no microtransactions · nothing to install, no admin rights, no know-how needed · fully open source · single player · works offline · works in any modern browser**
 
 </div>
 
@@ -34,6 +34,7 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 - **No accounts.** No sign-in and no profile. Progress is saved in your own browser; Save gives you a code or file to keep or move.
 - **No data sent anywhere.** Zero network requests: none were made during 15 seconds of play when checked in Chromium. Nothing leaves your device.
 - **No microtransactions.** Banana credits are earned by playing (friends freed plus coins). Nothing in the game is for sale.
+- **Nothing to install.** No install, no administrative rights and no special computing knowledge. Open the page and tap; or save the one file and open it in any modern browser.
 - **Fully open source.** MIT license. The readable source is in src/ in this repository, with the steps to rebuild the game.
 - **Works offline.** Once the page has opened, or after you save the file, it needs no connection. There is no background download or offline install, so the first open needs a connection unless you already have the file.
 - **Single player.** One player on one device. No online play, chat or leaderboards, and nothing to unlock with other people.
