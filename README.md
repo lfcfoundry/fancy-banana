@@ -8,6 +8,8 @@
 
 ![beta](https://img.shields.io/badge/beta-informational) ![MIT](https://img.shields.io/badge/MIT-informational) ![no sound](https://img.shields.io/badge/no%20sound-informational) ![works offline](https://img.shields.io/badge/works%20offline-informational)
 
+**No ads · no accounts · no data sent anywhere · no microtransactions · fully open source · single player · works offline · works in any modern browser**
+
 </div>
 
 <p align="center"><img src="screenshots/logo.jpg" width="480" alt="Fancy, the Banana: Fancy, a small flying banana in a hero mask and scarf, beside the game's title logo"></p>
@@ -22,9 +24,20 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 
 ## Highlights
 
-| One tap | Made to be comfortable | Quiet by design | Stages and a water level | Offline, no tracking |
+| One tap | Made to be comfortable | Quiet by design | Stages and a water level | Free and private |
 |---|---|---|---|---|
-| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No sign-in and no network requests. Progress is saved in your browser. |
+| Tap, click or press Space. Fixed physics at 120 steps a second. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser. |
+
+## Free, private and open
+
+- **No ads.** Nothing to watch or skip. The game has no libraries and makes no network requests, so there is nowhere for an ad to come from.
+- **No accounts.** No sign-in and no profile. Progress is saved in your own browser; Save gives you a code or file to keep or move.
+- **No data sent anywhere.** Zero network requests: none were made during 15 seconds of play when checked in Chromium. Nothing leaves your device.
+- **No microtransactions.** Banana credits are earned by playing (friends freed plus coins). Nothing in the game is for sale.
+- **Fully open source.** MIT license. The readable source is in src/ in this repository, with the steps to rebuild the game.
+- **Works offline.** Once the page has opened, or after you save the file, it needs no connection. There is no background download or offline install, so the first open needs a connection unless you already have the file.
+- **Single player.** One player on one device. No online play, chat or leaderboards, and nothing to unlock with other people.
+- **Easy on any modern browser.** Chromium, Firefox and WebKitGTK are tested for every release. The game fits screens from 320 x 568 up to 2560 x 1440 in all three, and it needs no install.
 
 <p align="center">
   <img src="screenshots/title.jpg" width="150" alt="The title screen">
