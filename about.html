@@ -87,24 +87,22 @@ footer a{margin-right:16px}
 .up p{margin:4px 0 8px;color:var(--muted);font-size:15px;line-height:1.45}
 .pips{font:600 13px var(--mono);color:var(--muted)}
 
-.logoband{padding-block:44px 8px;text-align:center}
-.logoband img{display:block;margin:0 auto;width:min(560px,100%);height:auto;border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 30px #0f2a4733}
-.logoband p{margin:12px 0 0;font-size:14px;color:var(--muted)}
-@media (prefers-reduced-motion:no-preference){.logoband img{animation:bob 4.5s ease-in-out infinite}}
+@media (prefers-reduced-motion:no-preference){.logo-h img{animation:bob 4.5s ease-in-out infinite}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .promise{background:var(--soft);border-bottom:1px solid var(--line);padding-block:16px}
-.promise ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center}
+.promise ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:flex-start}
 .promise li{font:700 15px var(--display);padding:7px 14px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--fg)}
 .promise li:before{content:"\2713";color:var(--good);margin-right:7px}
+.logo-h{margin:34px 0 0;text-align:left}.logo-h img{display:block;width:clamp(240px,36vw,420px);height:auto;border-radius:16px;border:1px solid #35557a;box-shadow:0 10px 30px #0000004d}
+.logo-h p{margin:10px 0 0;font-size:14px;color:var(--hero-muted)}
 body{margin:0}</style>
 <header class="hero"><div class="wrap">
 <nav class="nav"><b>LFC Foundry</b><a href="https://lfcfoundry.github.io/fancy-banana/">Play it now</a><a href="https://github.com/lfcfoundry/fancy-banana">Source code</a><a href="https://github.com/lfcfoundry">All projects</a></nav>
 <h1>Fancy, the Banana</h1><p class="pitch">A silent, one-tap flying banana arcade game. Free the banana friends from Evil Prince Chimp.</p><div class="btns">
 <a class="btn" href="https://lfcfoundry.github.io/fancy-banana/">Play it now</a>
 <a class="btn alt" href="https://github.com/lfcfoundry/fancy-banana">Source code</a>
-</div><div class="badges"><span class="badge">beta</span><span class="badge">MIT</span><span class="badge">no sound</span><span class="badge">works offline</span></div></div></header>
+</div><div class="badges"><span class="badge">beta</span><span class="badge">MIT</span><span class="badge">no sound</span><span class="badge">works offline</span></div><div class="logo-h"><img src="screenshots/logo.jpg" width="1050" height="365" alt="Fancy, the Banana: Fancy, a small flying banana in a hero mask and scarf, beside the game's title logo"><p>The title screen, drawn by the game itself.</p></div></div></header>
 <section class="promise" aria-label="Our promises"><div class="wrap"><ul><li>No ads</li><li>No accounts</li><li>No data sent anywhere</li><li>No microtransactions</li><li>Nothing to install</li><li>No admin rights</li><li>No know-how needed</li><li>Fully open source</li><li>Single player</li><li>Works offline</li><li>Any modern browser</li></ul></div></section>
-<section class="logoband"><div class="wrap"><img src="screenshots/logo.jpg" width="1050" height="365" alt="Fancy, the Banana: Fancy, a small flying banana in a hero mask and scarf, beside the game's title logo"><p>The title screen, drawn by the game itself.</p></div></section>
 <section><div class="wrap"><h2>What it is and how it works</h2><p class="lead">Guide Fancy, a small flying banana in a hero mask and scarf, through the gaps of a side-scrolling course. One tap, click or Space press flaps. The whole game is one HTML file in plain canvas and JavaScript, with no libraries and no image files; all the art is drawn by code when the game starts.</p></div></section>
 <section><div class="wrap"><h2>Why it exists</h2><p class="lead">A game anyone can open anywhere: one tap and no sound, so it works where sound is not welcome, with nothing to install and nothing leaving your device. Comfort is built in, and some of its code is shared as modules in <a href="https://github.com/lfcfoundry/JS-modules">JS-modules</a>.</p></div></section>
 <section><div class="wrap"><h2>Highlights</h2><div class="tiles"><div class="tile"><h3>One tap</h3><p>Tap, click or press Space. Fixed physics at 120 steps a second.</p></div><div class="tile"><h3>Easy to learn</h3><p>A ? button on the title screen opens a picture-by-picture How to play. No forced tutorial: tap start whenever you like.</p></div><div class="tile"><h3>Made to be comfortable</h3><p>Calm mode, game speed down to 60%, left-handed layout, no flashing.</p></div><div class="tile"><h3>Stages and a water level</h3><p>Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp&#x27;s Navy, the Fruit Garden and Prince Chimp&#x27;s Jungle Kingdom.</p></div><div class="tile"><h3>Quiet by design</h3><p>No sound or music at all. Everything is seen and touched: bright, readable pictures and a one-tap answer. Less to take in at once.</p></div><div class="tile"><h3>Free and private</h3><p>No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser.</p></div></div></div></section>
