@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. A developer version with more detail is in [CHANGELOG-DEV.md](CHANGELOG-DEV.md). The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.10.31.1730 (beta)
+
+- On a screen that is struggling to keep up (the game's quality control has already stepped down twice), the far-off hills are no longer drawn, which makes each picture about 17% quicker on a phone we tested. Other screens look exactly the same.
+
 ## 2026.10.31.1405 (beta)
 
 - Your progress now survives a browser crash or a force-quit: every save is also written to the browser's strict database, and the game picks up the newer copy when it opens. In our test the old build lost the last change in both Chrome and Firefox; the new one kept it. Nothing looks different.

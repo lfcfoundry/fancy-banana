@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.10.31.1730 (beta)
+
+### Quick
+`back()` skips the far hill band when `ART.lite` is on (quality level 2 or more). Normal screens are unchanged. Garden (jungle) stages are not affected.
+
+### Details
+Phone (Chrome 156, 8 cores, 412x892 at 2.9x, early-stop A/B): far hills off is 0.83 of the time per frame (range 0.68 to 0.86, 4 rounds; 6.54 to 4.88 ms; lower is faster). All three bands off: 0.79 (0.71 to 0.95, noisy). Free running both held 60 FPS. Cloud timing of level 0 vs 2 was inconclusive (Chromium 155 1.00, Firefox 158 0.97 on stage 4), so the phone number is the evidence. Ratio-2 check (Chromium 155): 0.53 to 1.44 M canvas pixels (2.7x).
+
+### Deep
+Chosen by Jawad on a card (drop far hills on slow devices only). The Fruit Garden's extra per-frame cost is not scenery: with the same setup draw plus step is 8.18 ms (stage 4) vs 8.59 ms (stage 5); the two stamps per jungle layer are one visible plus one mostly off-screen picture. Pictures: full vs level 2 on stage 4 are kept by the maker.
+
 ## 2026.10.31.1405 (beta)
 
 ### Quick
