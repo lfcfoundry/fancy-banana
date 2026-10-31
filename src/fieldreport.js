@@ -1,15 +1,18 @@
-/*! field-report 1.0.2 (API 1), the hidden speed report and error log (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
+/*! field-report 1.1.0 (API 1), the hidden speed report and error log (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.FieldReport = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var VERSION = '1.0.2';
+
+  var VERSION = '1.1.0';
+
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function stamp(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); }
   function r1(x) { return Math.round(x * 10) / 10; }
   function clip(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   function one(s) { return String(s).replace(/\s+/g, ' ').replace(/\|/g, '/'); }
+
   function frameStats(dts) {
     var n = dts.length, s = { frames: n, fps: 0, low1: 0, slowest: [], over33: 0, over50: 0, over100: 0, ms: 0 }, i, sum = 0, sorted, k;
     if (!n) return s;
@@ -23,6 +26,7 @@
     for (i = n - 1; i >= 0 && s.slowest.length < 5; i--) s.slowest.push(sorted[i]);
     return s;
   }
+
   function speedVerdict(st, tasks, startupMs, target) {
     var t = target || 60, lines = [], grade, worstTask = 0, i;
     for (i = 0; i < tasks.length; i++) if (tasks[i].ms > worstTask) worstTask = tasks[i].ms;
@@ -37,6 +41,7 @@
     if (startupMs && startupMs > 3000) lines.push('The first paint came after ' + Math.round(startupMs) + ' ms, which feels slow on a phone.');
     return { grade: grade, text: lines.join(' ') };
   }
+
   function errorsMarkdown(head, entries, dropped) {
     var out = head.slice(0), kinds = {}, i, e, n = 0;
     for (i = 0; i < entries.length; i++) { e = entries[i]; n += e.count; kinds[e.kind] = (kinds[e.kind] || 0) + e.count; }
@@ -52,6 +57,7 @@
     }
     return out.join('\n');
   }
+
   function start(o) {
     o = o || {};
     var win = typeof window !== 'undefined' ? window : null, doc = typeof document !== 'undefined' ? document : null;
@@ -61,16 +67,28 @@
     var now = function () { return perf && perf.now ? perf.now() : Date.now(); };
     var t0 = now(), stopped = false;
     var fr = { version: VERSION, supported: !!(win && doc) };
+
     var ring = typeof Float32Array === 'function' ? new Float32Array(keep) : new Array(keep), rn = 0, rw = 0, last = 0, raf = 0, hidden = false;
+    function note(ts) { if (last && !hidden) { var d = ts - last; if (d > 0 && d < 5000) { ring[rw] = d; rw = (rw + 1) % keep; if (rn < keep) rn++; } } last = ts; }
     function frame(ts) {
-      raf = 0; if (stopped) return;
-      if (last && !hidden) { var d = ts - last; if (d > 0 && d < 5000) { ring[rw] = d; rw = (rw + 1) % keep; if (rn < keep) rn++; } }
-      last = ts;
+      raf = 0; if (stopped || !framesOn) return;
+      note(ts);
       raf = win.requestAnimationFrame(frame);
     }
     function framesNow() { var a = [], i, from = rn < keep ? 0 : rw; for (i = 0; i < rn; i++) a.push(ring[(from + i) % keep]); return a; }
     function onVis() { hidden = doc.visibilityState === 'hidden'; last = 0; }
-    if (fr.supported && o.frames !== false && typeof win.requestAnimationFrame === 'function') { raf = win.requestAnimationFrame(frame); doc.addEventListener('visibilitychange', onVis); }
+
+    var mode = o.frames === false ? 'off' : o.frames === 'play' || o.frames === 'external' ? o.frames : 'own', framesOn = false, hasRaf = !!win && typeof win.requestAnimationFrame === 'function';
+    function framesStart() {
+      if (framesOn || stopped || !fr.supported || mode === 'off' || (mode !== 'external' && !hasRaf)) return;
+      framesOn = true; last = 0; hidden = doc.visibilityState === 'hidden'; doc.addEventListener('visibilitychange', onVis);
+      if (mode !== 'external') raf = win.requestAnimationFrame(frame);
+    }
+    function framesStop() { if (!framesOn) return; framesOn = false; if (raf && win.cancelAnimationFrame) win.cancelAnimationFrame(raf); raf = 0; last = 0; doc.removeEventListener('visibilitychange', onVis); }
+    fr.frames = function (on) { if (on === false) framesStop(); else framesStart(); return framesOn; };
+    fr.frame = function (ts) { if (mode === 'external' && framesOn && !stopped) note(typeof ts === 'number' ? ts : now()); };
+    if (mode === 'own' || mode === 'external') framesStart();
+
     var tasks = [], marks = [], longs = [], po = null;
     function addTask(nm, ms, kind) { if (tasks.length >= 300) tasks.shift(); tasks.push({ name: String(nm), ms: ms, kind: kind || 'app', at: now() - t0 }); }
     fr.mark = function (nm) { marks.push({ name: String(nm), at: now() - t0 }); };
@@ -82,6 +100,7 @@
         po.observe({ type: 'longtask', buffered: true });
       }
     } catch (e) { po = null; }
+
     var errs = [], dropped = 0, undoConsole = [];
     function addErr(kind, text, stack) {
       var at = now() - t0, i;
@@ -114,6 +133,7 @@
       }
     }
     function safeJson(a) { try { return JSON.stringify(a); } catch (e) { return String(a); } }
+
     function deviceLines() {
       var n = typeof navigator === 'object' && navigator ? navigator : {}, sc = win && win.screen ? win.screen : {};
       return ['- Browser: ' + one(n.userAgent || 'not available'),
@@ -161,6 +181,7 @@
     };
     fr.errorsText = function () { return errorsMarkdown(head('Error log'), errs.map(function (e) { return e; }), dropped); };
     fr.errors = function () { return errs.map(function (e) { return { kind: e.kind, text: e.text, count: e.count, at: e.at }; }); };
+
     function save(kind) {
       var text = kind === 'speed' ? fr.speedText() : fr.errorsText(), file = name + '-' + (kind === 'speed' ? 'speed' : 'errors') + '-' + stamp(new Date()) + '.md';
       if (typeof o.onSave === 'function') { try { o.onSave(text, file, kind); } catch (e) {  } return { text: text, file: file, saved: 'handler' }; }
@@ -178,6 +199,7 @@
     }
     fr.saveSpeed = function () { return save('speed'); };
     fr.saveErrors = function () { return save('errors'); };
+
     var panel = null, status = null;
     function el(tag, css, text) { var e = doc.createElement(tag), k; for (k in css) if (Object.prototype.hasOwnProperty.call(css, k)) e.style[k] = css[k]; if (text != null) e.textContent = text; return e; }
     function showText(text) {
@@ -213,6 +235,7 @@
       if (typeof o.onClose === 'function') { try { o.onClose(); } catch (e) {  } }
     };
     fr.isOpen = function () { return !!panel; };
+
     var hits = [];
     function inSpot(x, y) {
       var w = win.innerWidth, h = win.innerHeight, left = corner.indexOf('left') >= 0, top = corner.indexOf('top') >= 0;
@@ -226,11 +249,12 @@
       if (hits.length >= needTaps) { hits.length = 0; fr.open(); }
     }
     if (fr.supported) win.addEventListener('pointerdown', onDown, true);
+
     fr.stop = function () {
       if (stopped) return; stopped = true;
       if (raf && win.cancelAnimationFrame) win.cancelAnimationFrame(raf);
       if (fr.supported) {
-        doc.removeEventListener('visibilitychange', onVis); win.removeEventListener('error', onError, true); win.removeEventListener('unhandledrejection', onRej);
+        framesStop(); win.removeEventListener('error', onError, true); win.removeEventListener('unhandledrejection', onRej);
         doc.removeEventListener('securitypolicyviolation', onCsp); win.removeEventListener('pointerdown', onDown, true);
       }
       undoConsole.forEach(function (u) { u(); }); undoConsole = [];
@@ -239,5 +263,6 @@
     };
     return fr;
   }
+
   return { version: VERSION, start: start, frameStats: frameStats, speedVerdict: speedVerdict, errorsMarkdown: errorsMarkdown };
 });

@@ -2,8 +2,8 @@
  * save-kit.js: safe localStorage saves, a rolling backup slot, and checksummed copy-paste save codes.
  * Part of JS-modules, https://github.com/lfcfoundry/JS-modules
  * Copyright (c) 2026 LFC Foundry. MIT License (see LICENSE at the repository root).
- * Version 1.2.1 (API 1)
- * LEAN BUILD without: autosave, compact, migrate, nativeBase64, persist, raw, skipUnchanged, stageImport, twoTap. Made by modules/save-kit/lean.py; the cut parts are missing on purpose.
+ * Version 1.4.0 (API 1)
+ * LEAN BUILD without: autosave, compact, large, migrate, nativeBase64, persist, raw, skipUnchanged, stageImport, twoTap. Made by modules/save-kit/lean.py; the cut parts are missing on purpose.
  *
  * What it gives you
  *  - validate(): rebuilds a state object from untrusted data using a field schema. Every field falls back on its own, so one
@@ -44,9 +44,10 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  var trusted = false;
   var BAD_KEYS = { '__proto__': 1, 'constructor': 1, 'prototype': 1 };
-  var DEFAULT_MAX_KEYS = 1000;        // most names kept in one 'counts' field
-  var DEFAULT_MAX_BYTES = 262144;     // biggest unpacked save a code may hold: 256 KiB
+  var DEFAULT_MAX_KEYS = 1000;
+  var DEFAULT_MAX_BYTES = 262144;
   var TOO_BIG = 'That code is too big to open. Copy only the code and try again.';
   var DAMAGED = 'That code is damaged.';
   var INCOMPLETE = 'That code is not complete. Copy the whole code and try again.';
@@ -62,34 +63,31 @@
     return { type: m[1] || 'raw', max: m[2] ? +m[2] : undefined };
   }
 
-
-  // Rebuilds one field's value from untrusted data; `d` is the default used when the value is missing or broken.
   function cleanField(spec, v, d) {
     spec = norm(spec);
     switch (spec.type) {
       case 'num': return isNum(v) ? v : d;
       case 'int': return isNum(v) ? Math.min(Math.floor(v), spec.max == null ? Number.MAX_SAFE_INTEGER : spec.max) : d;
       case 'flag': return v === 1 ? 1 : v === 0 ? 0 : (d === 1 ? 1 : 0);
-      case 'str': return typeof v === 'string' && v.length <= (spec.max || 200) ? v : (d == null ? '' : d);
+      case 'str': return typeof v === 'string' && v.length <= (spec.max === 0 ? 0 : spec.max || 200) ? v : (d == null ? '' : d);
       case 'counts':
-        var out = bag(), kept = 0, maxKeys = spec.maxKeys > 0 ? spec.maxKeys : DEFAULT_MAX_KEYS;
-        if (!isObj(v)) v = d;   // a missing or broken field starts from its default (1.0.0 always gave an empty map here)
+        var out = bag(), kept = 0, maxKeys = spec.maxKeys === 0 ? 0 : spec.maxKeys > 0 ? spec.maxKeys : DEFAULT_MAX_KEYS;
+        if (!isObj(v)) v = d;
         if (!isObj(v)) return out;
-        var ks = Object.keys(v), cap = spec.max || 1e6, i, k, n;
+        var ks = Object.keys(v), cap = spec.max === 0 ? 0 : spec.max || 1e6, i, k, n;
         for (i = 0; i < ks.length; i++) {
           k = ks[i];
           if (BAD_KEYS[k] || k.length > 200 || kept >= maxKeys) continue;
           n = v[k];
-          if (typeof n === 'number' && isFinite(n) && n > 0) { out[k] = Math.min(Math.floor(n), cap); kept++; }
+          if (cap > 0 && typeof n === 'number' && isFinite(n) && n > 0) { out[k] = Math.min(Math.floor(n), cap); kept++; }
         }
         return out;
       default: return d;
     }
   }
 
-  // validate(schema, defaults, untrusted) -> a new, clean state object. Fields not in the schema are dropped.
   function validate(schema, defaults, input) { return validateWith(fieldsOf(schema), defaults, input); }
-  // The field rules read once: [name, normalized rule] pairs (create() keeps them, so a save or load does not parse the rules again).
+
   function fieldsOf(schema) {
     var ks = Object.keys(schema), f = [], i;
     for (i = 0; i < ks.length; i++) f.push([ks[i], norm(schema[ks[i]])]);
@@ -105,13 +103,11 @@
     return out;
   }
 
-  // isSound(state, keys): true when every listed numeric field that is present is a sound number.
   function isSound(state, keys) {
     for (var i = 0; i < keys.length; i++) { var v = state[keys[i]]; if (v !== undefined && !isNum(v)) return false; }
     return true;
   }
 
-  // countsSound(v): true when v is not a map, or every value in the map is a finite number >= 0 (a NaN written to storage comes back as null).
   function countsSound(v) {
     if (!isObj(v)) return true;
     var ks = Object.keys(v);
@@ -119,16 +115,12 @@
     return true;
   }
 
-  // ---- codes ----
-  // FNV-1a, 32 bit. style: 'padded36' (default, always 7 base-36 characters, so words pasted after a code are not swallowed), 'plain36' (base 36 with
-  // no leading zeros, 1 to 7 characters) or 'hex8' (8 hex characters). The last two exist to read and write the codes of games that predate save-kit.
   function checksum(t, style) {
     var h = 0x811c9dc5;
     for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
     return style === 'hex8' ? ('00000000' + h.toString(16)).slice(-8) : style === 'plain36' ? h.toString(36) : ('0000000' + h.toString(36)).slice(-7);
   }
-  // Base64 without padding, URL-safe. Uses the browser's own Uint8Array.toBase64/fromBase64 when it has them (Chrome 140, Firefox 133,
-  // Safari 18.2), else the loops below.
+
   function toB64(bytes) {
     var bin = '';
     for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
@@ -140,7 +132,7 @@
     for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
     return out;
   }
-  var squeezes = null;   // asked once per page: building two streams on every export and import was wasted work
+  var squeezes = null;
   function canSqueeze() {
     if (squeezes === null) { try { new CompressionStream('deflate-raw'); new DecompressionStream('deflate-raw'); squeezes = true; } catch (e) { squeezes = false; } }
     return squeezes;
@@ -149,8 +141,7 @@
     var out = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
     return new Response(out).arrayBuffer().then(function (b) { return new Uint8Array(b); });
   }
-  // Unpacks deflate-raw bytes, reading the output in pieces; gives up (rejects TOO_BIG) as soon as the output passes `limit`,
-  // so a tiny code that expands about 1000 to 1 is cut off early instead of filling memory.
+
   function inflate(bytes, limit) {
     return new Promise(function (resolve, reject) {
       var reader, chunks = [], total = 0;
@@ -173,17 +164,68 @@
   }
   function escapeRe(t) { return t.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&'); }
 
-  // ---- the store ----
-  // create({ key, schema, defaults, soundKeys, prefix, storage, maxCodeBytes, maxCodeChars, backupEveryMs })
-  //   key: localStorage key. schema/defaults: see validate(). soundKeys: numeric fields that must be sound to write a save
-  //   (default: every 'num'/'int' field; every value inside a 'counts' field is always checked too). prefix: 2 capital letters + digit for codes,
-  //   default 'SK1'. maxCodeBytes: biggest save a code may unpack to (default 262144 = 256 KiB). maxCodeChars: longest pasted text
-  //   importCode() will look at (default about 4/3 of maxCodeBytes plus 1024, so 350549). storage: any object with getItem/setItem.
+  function durableMirror(name, given) {
+    var idb = given !== undefined ? given : typeof indexedDB !== 'undefined' ? indexedDB : null, dbp = null, busy = false, pend = null, waiters = [], boot;
+    function db() {
+      if (!dbp) dbp = new Promise(function (ok) {
+        if (!idb) { ok(null); return; }
+        try {
+          var rq = idb.open(name, 1);
+          rq.onupgradeneeded = function () { rq.result.createObjectStore('slots'); };
+          rq.onsuccess = function () { var d = rq.result; d.onversionchange = d.onclose = function () { try { d.close(); } catch (e) {} dbp = null; }; ok(d); };
+          rq.onerror = rq.onblocked = function () { dbp = null; ok(null); };
+        } catch (e) { dbp = null; ok(null); }
+      });
+      return dbp;
+    }
+    function read() {
+      return db().then(function (d) {
+        return new Promise(function (ok) {
+          if (!d) { ok(null); return; }
+          try { var rq = d.transaction('slots', 'readonly').objectStore('slots').get('main'); rq.onsuccess = function () { ok(rq.result || null); }; rq.onerror = function () { ok(null); }; } catch (e) { ok(null); }
+        });
+      });
+    }
+    function done(r) { var w = waiters; waiters = []; for (var i = 0; i < w.length; i++) w[i](r); }
+    function run() {
+      if (busy || !pend) return;
+      busy = true;
+      var job = pend; pend = null;
+      boot.then(db).then(function (d) {
+        return new Promise(function (ok) {
+          if (!d) { ok(false); return; }
+          try {
+            var t = d.transaction('slots', 'readwrite', { durability: 'strict' });
+            t.objectStore('slots').put(job, 'main');
+            t.oncomplete = function () { ok(true); }; t.onerror = t.onabort = function () { ok(false); };
+          } catch (e) { ok(false); }
+        });
+      }).then(function (r) { busy = false; if (pend) run(); else done(r); });
+    }
+    boot = read();
+    return {
+      boot: boot,
+      write: function (t, at) { pend = { t: t, n: t.length, at: at }; run(); },
+      flushed: function () { return !busy && !pend ? Promise.resolve(true) : new Promise(function (ok) { waiters.push(ok); }); }
+    };
+  }
+
+  function durableCopy(name, o) {
+    var m = durableMirror(String(name || 'save-kit-durable'), o && 'indexedDB' in o ? o.indexedDB : undefined);
+    return {
+      write: function (text, seq) { if (typeof text === 'string' && isNum(seq)) m.write(text, seq); },
+      newer: function (seq) {
+        return m.boot.then(function (r) { return r && typeof r.t === 'string' && r.t.length === r.n && isNum(r.at) && r.at > (isNum(seq) ? seq : -Infinity) ? { text: r.t, seq: r.at } : null; }, function () { return null; });
+      },
+      flushed: m.flushed
+    };
+  }
+
   function create(o) {
     o = o || {};
     var key = o.key, schema = o.schema || {}, defaults = o.defaults || {}, prefix = o.prefix || 'SK1';
     var storage = o.storage || null;
-    if (!storage) { try { storage = typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { storage = null; } }   // touching localStorage can throw when storage is blocked
+    if (!storage) { try { storage = typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { storage = null; } }
     var maxBytes = o.maxCodeBytes > 0 ? o.maxCodeBytes : DEFAULT_MAX_BYTES;
     var maxChars = o.maxCodeChars > 0 ? o.maxCodeChars : Math.ceil(maxBytes * 4 / 3) + 1024;
     var fields = fieldsOf(schema);
@@ -194,11 +236,12 @@
     var style = o.codeCheck;
     var off = false, backupAt = 0, backupEvery = o.backupEveryMs == null ? 60000 : o.backupEveryMs;
     var stamp = o.stamp || 'seen', bak = o.backupKey || key + '-backup', damaged = o.damagedKey || '', after = typeof o.afterValidate === 'function' ? o.afterValidate : null;
-    var orphan = o.readBackupWithoutMain !== false;   // false: a missing main slot never brings back a leftover backup
+    var orphan = o.readBackupWithoutMain !== false;
+
+    var mirror = o.durable ? durableMirror(o.durable === true ? 'save-kit-durable:' + key : String(o.durable), o.indexedDB) : null, loadedAt = null;
 
     function upgrade(raw) { return raw; }
 
-    // How many fields hold a broken number (numbers in soundKeys, and values inside counts fields).
     function badFields(x) {
       var n = 0, i, v;
       for (i = 0; i < soundKeys.length; i++) { v = x[soundKeys[i]]; if (v !== undefined && !isNum(v)) n++; }
@@ -206,48 +249,47 @@
       return n;
     }
     function soundState(x) { return isObj(x) && badFields(x) === 0; }
-    function textOf(slot) { try { return storage.getItem(slot); } catch (e) { return undefined; } }   // null = empty slot, undefined = storage refused
+    function textOf(slot) { try { return storage.getItem(slot); } catch (e) { return undefined; } }
+    var plainText = new WeakSet(), hasRaw = kinds('raw').length > 0;
     function parseSlot(t) {
       try {
         var x = JSON.parse(t || 'null');
-        if (isObj(x)) return x;
+        if (isObj(x)) { if (hasRaw && t.indexOf('__proto__') < 0 && t.indexOf('constructor') < 0 && t.indexOf('prototype') < 0) plainText.add(x); return x; }
       } catch (e) {}
       return null;
     }
     function readSlot(slot) { return parseSlot(textOf(slot)); }
-    // Schema check, then the game's own afterValidate(clean, raw) if there is one: it may change `clean` in place, return a replacement object, or return
-    // false/null to refuse the save. A hook that throws is ignored (the schema-checked state is used). Returns null when refused.
+
     function finish(raw) {
-      var c = validateWith(fields, defaults, upgrade(raw)), r;
+      var c, r, was = trusted;
+      trusted = plainText.has(raw) && !(typeof migrate !== 'undefined' && migrate && version && isNum(raw.v) && raw.v < version);
+      try { c = validateWith(fields, defaults, upgrade(raw)); } finally { trusted = was; }
       if (!after) return c;
       try { r = after(c, raw); } catch (e) { return c; }
       return r === false || r === null ? null : isObj(r) ? r : c;
     }
     var api = {
       validate: function (input) { return validateWith(fields, defaults, input); },
-      // Returns a clean state rebuilt from the better slot (the main slot unless the backup has fewer broken numbers), else null.
-      // With damagedKey, main-slot text that was not used (unreadable, refused by afterValidate, or worse than the backup) is copied there first.
+
       load: function () {
         try {
           var mt = textOf(key), a = parseSlot(mt), b = null, first, second, out = null, used = null;
           if (mt === null && !orphan) return null;
-          if (!a || badFields(a) > 0) b = readSlot(bak);   // a sound main slot can never lose to the backup, so only read the backup when it could matter
+          if (!a || badFields(a) > 0) b = readSlot(bak);
           if (a || b) {
             first = !b ? a : !a ? b : (badFields(b) < badFields(a) ? b : a);
             out = finish(first); used = first;
-            if (!out) {   // refused by afterValidate: try the other slot
+            if (!out) {
               second = first === a ? (b || readSlot(bak)) : a;
               out = second ? finish(second) : null; used = second;
             }
           }
           if (damaged && mt && (!a || used !== a)) { try { storage.setItem(damaged, mt); } catch (e) {} }
+          loadedAt = used && isNum(used[stamp]) ? used[stamp] : 0;
           return out;
         } catch (e) { return null; }
       },
-      // Writes the state. Returns false (and writes nothing) if a number is broken, saving is switched off, or storage fails.
-      // Returns true when the main slot was written, even if the backup write failed (the backup is tried again next time).
-      // With the skipUnchangedMs option, a save whose fields are all the same as the last written one (only `seen` differs) is not written
-      // again until that many ms have passed; save(state, true) always writes.
+
       save: function (state, force) {
         try {
           if (off || !storage || !soundState(state)) return false;
@@ -255,8 +297,9 @@
           state[stamp] = now;
           var txt = JSON.stringify(state);
           storage.setItem(key, txt);
+          if (mirror) mirror.write(txt, now);
           if (Date.now() - backupAt > backupEvery) {
-            try { storage.setItem(bak, txt); backupAt = Date.now(); } catch (e) { /* storage full: the main slot is safe */ }
+            try { storage.setItem(bak, txt); backupAt = Date.now(); } catch (e) {  }
           }
           return true;
         } catch (e) {
@@ -264,10 +307,28 @@
         }
       },
       forceBackupNext: function () { backupAt = 0; },
-      // Switches saving off (true) or on (false). Used while a loaded save waits for a page reload, so the old game can't overwrite it.
+
+      recover: function () {
+        if (!mirror) return Promise.resolve(null);
+        return mirror.boot.then(function (rec) {
+          try {
+            if (off || !rec || typeof rec.t !== 'string' || rec.t.length !== rec.n) return null;
+            var base = loadedAt;
+            if (base === null) { var l = readSlot(key); base = l && isNum(l[stamp]) ? l[stamp] : 0; }
+            if (isNum(rec.at) && rec.at <= base) return null;
+            var x = parseSlot(rec.t);
+            if (!x || badFields(x) > 0 || !isNum(x[stamp]) || x[stamp] <= base) return null;
+            var out = finish(x);
+            if (out) { try { storage.setItem(key, rec.t); } catch (e) {} }
+            return out;
+          } catch (e) { return null; }
+        });
+      },
+
+      flushed: function () { return mirror ? mirror.flushed() : Promise.resolve(false); },
+
       pause: function (v) { off = v !== false; },
-      // -> Promise<string> like 'SK1z.<data>.<check>' (z = squeezed, p = plain; whichever is shorter). Rejects with a message (string)
-      //    when there is no state, a number is broken, or the save is bigger than maxCodeBytes. Never throws.
+
       exportCode: function (state) {
         try {
           if (!isObj(state)) return Promise.reject('There is nothing to make a code from yet.');
@@ -282,8 +343,7 @@
           return deflate(raw).then(function (b) { var z = toB64(b); return z.length < plain.length ? done('z', z) : done('p', plain); }, function () { return done('p', plain); });
         } catch (e) { return Promise.reject('This save could not be turned into a code.'); }
       },
-      // -> Promise<clean state>; rejects with a short human-readable message (string). Never throws.
-      //    Refuses text longer than maxCodeChars, and stops unpacking when the result passes maxCodeBytes.
+
       importCode: function (text) {
         try {
           var t = String(text == null ? '' : text);
@@ -307,13 +367,11 @@
           }).catch(function (e) { throw typeof e === 'string' ? e : DAMAGED; });
         } catch (e) { return Promise.reject(DAMAGED); }
       },
-      // Calls cb(cleanState, event) when ANOTHER tab of this site changes the save (the browser never tells the tab that wrote it), or
-      // cb(null, event) when it removed the save. Use it to stop an old tab from overwriting newer progress: pause(true) and offer a reload.
-      // Returns a function that stops listening. Does nothing outside a browser.
+
       onOtherTab: function (cb) {
         if (typeof window === 'undefined' || !window.addEventListener || typeof cb !== 'function') return function () {};
         function on(e) {
-          if (e.key !== null && e.key !== key) return;   // key null: the other tab cleared all storage
+          if (e.key !== null && e.key !== key) return;
           if (e.storageArea && storage && e.storageArea !== storage) return;
           var x = null, clean = null;
           try { x = e.newValue == null ? null : JSON.parse(e.newValue); } catch (err) {}
@@ -327,9 +385,10 @@
     return api;
   }
 
-
   return {
-    create: create, validate: validate, isSound: isSound,
+    create: create,
+    durableCopy: durableCopy,
+    validate: validate, isSound: isSound,
     checksum: checksum, toBase64Url: toB64, fromBase64Url: fromB64,
     bag: bag, has: has
   };
