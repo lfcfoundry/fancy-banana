@@ -3608,8 +3608,10 @@ function softFail(e) {   // a canvas could not be made (memory ran out): build t
   if (!/canvas-memory|null/.test(String(e && e.message)) || artDown >= 3 || CFG.artScaleMax <= 1) return;
   artDown++; CFG.artScaleMax = Math.max(1, CFG.artScaleMax * 0.75); artK = 0; try { resize(); } catch (e2) { }
 }
+var idleAt = performance.now();   // last touch, key or mouse move
+['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'].forEach(function (n) { window.addEventListener(n, function () { idleAt = performance.now(); }, { capture: true, passive: true }); });
 function drawGap() {   // how long to leave the picture alone: only the Battery saver now. Windows and the Oops card used to throttle it (about 8 and 15 pictures a second) on the idea that nobody sees it change, but the scenery shows round a window's edge and keeps moving, so it looked like a crawl
-  return opt('saver') ? 28 : 0;
+  return opt('saver') || (state === 'title' && performance.now() - idleAt > 30000) ? 28 : 0;   // the title screen rests at the Battery saver's pace after 30 s with nobody touching it (about 35 pictures a second); any touch, key or mouse move brings the full pace back at once. Windows are not throttled (see above)
 }
 var LAYER = '', LAYERD = false, DPRFORCE = 0;   // Test Lab: '' normal, 'wc' = will-change, 'z' = translateZ (own compositor layer for the canvas)
 var STEPMODE = 0, PACE = [0, 0, 0, 0, 0];   // STEPMODE 1 (Test Lab only): one even step per screen refresh instead of fixed 1/120 s steps; PACE counts physics steps per drawn frame
