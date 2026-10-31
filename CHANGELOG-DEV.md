@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.10.31.1326 (beta)
+
+### Quick
+The title screen redraws at the Battery saver's pace (28 ms between pictures) after 30 s with no touch, key or mouse move; any input restores full pace. Windows and cards are not throttled.
+
+### Details
+`drawGap()` returns 28 when the Battery saver is on or when `state === 'title'` and 30 s have passed since the last pointerdown, pointermove, keydown, touchstart or wheel (one capture-phase passive listener each). Game code run inside animation-frame callbacks per second at about 38 s idle, old to new: ungoogled Chromium 155.0.8059.39 22.7 to 16.7 ms, Firefox 158.0 190 to 97 ms, WebKitGTK 2.52.6 23.6 to 23.6 ms (noisy: 46 to 31 ms at 4 s). Callbacks stay 100-120 a second; only the drawing is skipped.
+
+### Deep
+Round 13 measured 217 ms of main-thread time a second after 60 s idle on the title (whole page, Chromium). The metric here is only the game's own callback time, so it is smaller. Throttling windows and cards was tried earlier and removed because the scenery shows round a window's edge and read as a crawl; this change touches the title state only and reuses the pace already accepted for the Battery saver. Gamepad-only idling is not counted as input, but any pad press on the title leaves the title within seconds. Owner approved by card.
+
 ## 2026.10.31.0846 (beta)
 
 ### Quick
