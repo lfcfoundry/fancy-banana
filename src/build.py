@@ -154,31 +154,39 @@ def main():
     pck = (ROOT / "piccache.js").read_text(encoding="utf-8")   # keeps the title screen's big pictures in the browser between visits (see AGENTS.md)
     frp = (ROOT / "fieldreport.js").read_text(encoding="utf-8")   # field-report 1.0.2 from JS-modules, comments removed: the hidden speed report and error log (five quick taps in the top-left corner); it comes FIRST so start-up errors are caught
     frp = frp + "\nvar LFCReport = FieldReport.start({ name: 'fancy-banana', version: '__STAMP__' });\n"
-    js = frp + "\n" + sbk + "\n" + wsb + "\n" + pck + "\n" + art + "\n" + savekit + "\n" + parts + "\n" + tgd + "\n" + fxg + "\n" + game
+    groups = [frp + "\n" + sbk + "\n" + wsb, pck + "\n" + art, savekit + "\n" + parts + "\n" + tgd + "\n" + fxg, game]   # the player copy is shipped as four script blocks, one per group, so the browser compiles them as separate short tasks (no start freeze over 50 ms); top-level names are not renamed, so the blocks share one scope exactly as one block did
+    js = "\n".join(groups)
     check_js(js)
     sig = hashlib.sha256(js.encode("utf-8")).hexdigest()[:10]   # names this exact code: saved pictures from any other build are dropped
     if "__PCSIG__" not in js:
         fail("piccache.js has no __PCSIG__ placeholder")
     js = js.replace("__PCSIG__", sig)
+    groups = [g.replace("__PCSIG__", sig) for g in groups]
     st = stamp()
     if not re.fullmatch(r"\d{4}\.\d{2}\.\d{2}\.\d{4}", st):
         fail("bad version stamp " + st)
     if "__STAMP__" not in js:
         fail("game.js has no __STAMP__ placeholder")
     js = js.replace("__STAMP__", st)
+    groups = [g.replace("__STAMP__", st) for g in groups]
     DIST.mkdir(exist_ok=True)
 
     full = head + "<script>\n" + js + "\n</script>\n</body>\n</html>\n"
     (DIST / "bananafly.full.html").write_text(full, encoding="utf-8")
-    player_js = re.sub(r"/\*TEST_HOOK_START\*/.*?/\*TEST_HOOK_END\*/", "", js, flags=re.S)
+    strip_hooks = lambda x: re.sub(r"/\*TEST_HOOK_START\*/.*?/\*TEST_HOOK_END\*/", "", x, flags=re.S)
+    player_blocks = [strip_hooks(g) for g in groups]
+    player_js = "\n".join(player_blocks)
     if "__bf" in player_js:
         fail("test hooks leaked into the player copy")
     esb = find_esbuild()
     if esb:
-        r = subprocess.run([esb, "--minify", "--target=es2020"], input=player_js, capture_output=True, text=True)
-        if r.returncode != 0:
-            fail("esbuild: " + r.stderr[:300])
-        player_js = r.stdout
+        player_blocks = []
+        for g in [strip_hooks(g) for g in groups]:
+            r = subprocess.run([esb, "--minify", "--target=es2020"], input=g, capture_output=True, text=True)
+            if r.returncode != 0:
+                fail("esbuild: " + r.stderr[:300])
+            player_blocks.append(r.stdout.strip())
+        player_js = "\n".join(player_blocks)
         how = "esbuild full minify"
     else:
         how = "NO esbuild found; comments and blank lines only"
@@ -198,7 +206,7 @@ def main():
             print("terser did not help or failed; using the esbuild output for the packed copy", r.stderr[:200])
     check_js(packed_js)
     packed_player = re.sub(r">\s+<", "><", minify_css(head) + "<script>" + packed_js.strip() + "</script></body></html>\n")
-    player = minify_css(head) + "<script>" + player_js.strip() + "</script></body></html>\n"
+    player = minify_css(head) + "".join("<script>" + b + "</script>" for b in player_blocks) + "</body></html>\n"
     player = re.sub(r">\s+<", "><", player)
     (DIST / "bananafly.html").write_text(player, encoding="utf-8")
 

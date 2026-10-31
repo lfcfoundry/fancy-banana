@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.10.31.0846 (beta)
+
+### Quick
+The player file ships its script as four blocks (helpers, art and picture cache, small parts, game) instead of one, so the browser's compile of the 500 KB file is four short tasks. Same code, same look; the file is 5 KB smaller.
+
+### Details
+build.py minifies each group on its own (top-level names are not renamed in a classic script, so the blocks share one scope exactly as before) and writes four script tags. Start-up in Chromium 155: the single 60-80 ms task is gone (every block under 50 ms) and first paint moves from a median 132 ms to 84 ms (9 loads, alternating old and new). Firefox 158: first paint 137 vs 131 ms, page ready 109 vs 104 ms (equal within noise). WebKitGTK 2.52.6 (15 loads): page ready 27 vs 20 ms, first paint 38 vs 29 ms. File 499,274 to 494,284 bytes (gzip 176,342 to 174,591). Rebuild with the steps in src/README.md; the picture-cache signature is still computed from the whole script before the split, so cached pictures behave as before.
+
+### Deep
+Profile first: the 60-80 ms start task is native "program" time, the browser compiling the script, not game setup and not the wasm. The file is 7 top-level statements, two of them huge (game 237 KB, art 182 KB), so a split can only fall at those boundaries. Lazy-compile hints do nothing here because every wrapper runs at once and inner functions are already compiled lazily; the only inline data is a 10 KB base64 string (the wasm), and the art file is drawing code, not data, so moving it to a data block would not cut compile work. Look check at 412x892 after 2.5 s: no script errors in any browser; the title animates, so pictures never match exactly even old against old (97.6% Chromium, 92.1% Firefox, 66.4% WebKitGTK); old against new was 97.3%, 95.7% and 75.5%, inside that noise. Tested with Firefox 158.0, ungoogled Chromium 155.0.8059.39-1 and WebKitGTK 2.52.6, one at a time.
+
 ## 2026.10.31 (docs and one color, PR 26 and 27)
 
 ### Quick
