@@ -1,6 +1,10 @@
 # What's new
 
-A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
+A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. A developer version with more detail is in [CHANGELOG-DEV.md](CHANGELOG-DEV.md). The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
+
+## 2026.10.31 (beta)
+
+- The "You won" title is a darker orange-brown, so it is easier to read. Nothing else in the game changed.
 
 ## 2026.10.23.2236 (beta)
 
