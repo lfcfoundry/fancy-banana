@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.10.31.1405 (beta)
+
+### Quick
+save-kit 1.4.0 with `durable: true` (and `kit.recover()` right after `load()`) keeps a strict IndexedDB copy of every save; field-report 1.1.0 in `frames: 'external'` mode takes frames from the game's own loop. Animation-frame callbacks drop from about 120 to 60 a second.
+
+### Details
+Kill test (change one setting, SIGKILL the browser 250 ms later, reopen the same profile): old build lost the save entirely in ungoogled Chromium 155.0.8059.39 and Firefox 158.0 (twice in Chromium); new build kept it in both. `recover()` is applied only while the game is still on the title with no window open. Start-up (9 loads, median, old to new): Chromium page ready 96 to 107 ms and first paint 108 to 96 ms; Firefox 98 to 100 ms and 143 to 135 ms; WebKitGTK 2.52.6 (15 loads) 28 to 23 ms and 41 to 34 ms. Animation-frame callbacks at 4 s: Chromium 120 to 59 a second, Firefox 108 to 56, WebKitGTK 85 to 41; game code time in them 31.2 to 29.4, 180.8 to 175 and 33.4 to 29.2 ms a second. Size 494,515 to 497,670 bytes.
+
+### Deep
+The vendored copies are lean builds (save-kit: autosave, compact, migrate, nativeBase64, persist, raw, skipUnchanged, stageImport, twoTap and large cut; durable kept) with comments removed, as before. The recorder's own frame loop was the second callback seen in round 13; the game loop now calls `LFCReport.frame(t)` and the module's loop is off. A WebKitGTK first-paint reading of 30 vs 40 ms in a 9-load run reversed in a 15-load run (41 vs 34 ms), so it is noise. Chromium page-ready +11 ms sits inside run scatter. Approved by Jawad on the code thread's card (save-kit durable on in Fancy and Pineapple).
+
 ## 2026.10.31.1326 (beta)
 
 ### Quick

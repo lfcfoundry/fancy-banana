@@ -83,7 +83,7 @@ function tryParse(t) { try { return JSON.parse(t); } catch (e) { return null; } 
 
 var loadNote = '';
 /* The shared save-kit (savekit.js, from JS-modules) does the reading, the writing, the spare slot, the kept-aside bad text, the save codes and the other-tab warning. Its slots and codes are exactly the ones this game has always used (bf1, bf1-bak, bf1-damaged, BF1z./BF1p. with an 8-character check), so every old save and code still opens. cleanSave below stays the game's own rules and runs on every save the kit reads. */
-var kit = SaveKit.create({ key: K.main, prefix: 'BF1', codeCheck: 'hex8', backupKey: K.bak, damagedKey: K.damaged, readBackupWithoutMain: false, stamp: 'savedAt', backupEveryMs: CFG.backupEverySecs * 1000, maxCodeBytes: 2e6,
+var kit = SaveKit.create({ key: K.main, prefix: 'BF1', codeCheck: 'hex8', backupKey: K.bak, damagedKey: K.damaged, readBackupWithoutMain: false, stamp: 'savedAt', backupEveryMs: CFG.backupEverySecs * 1000, maxCodeBytes: 2e6, durable: true,
   afterValidate: function (clean, raw) { return cleanSave(raw); } });   // (no schema: cleanSave checks every field; a refused save sends the kit to the spare slot)
 function loadSave() {
   var main = sget(K.main), s = kit.load();   // a leftover spare never resurrects a game that has no main save
@@ -92,6 +92,7 @@ function loadSave() {
   return defaultSave();
 }
 var save = loadSave();
+kit.recover().then(function (n) { if (n && state === 'title' && !panelOpen()) { save = n; try { syncOpts(); refreshCode(); syncUp(); } catch (e) { logError('recover', e); } } }, function () { });   // after a crash or kill the browser may have lost the last few seconds of localStorage writes; the strict IndexedDB copy (null almost always) brings them back, only while still on the title
 var otherTab = false;   // P09: another tab wrote the save, so this tab stops saving (a banner offers Reload)
 var noSave = false;   // noSave is only switched on by checks
 function persist() {
@@ -3636,6 +3637,7 @@ function firstScreenStep(t) {   // a first visit: the title's pictures are made 
 }
 function frame(t) {
   requestAnimationFrame(frame);
+  LFCReport.frame(t);   // the speed report's frame recorder rides this loop (one animation-frame callback, not two)
   if (!autoRun || dlHold) { last = t; return; }
   if (renders === 0 && state === 'title' && !firstScreenStep(t)) { last = t; return; }   // a first visit: the scenery behind the title is built a few milliseconds per screen refresh (no single long freeze), and the title appears the moment it is ready
   var fs = performance.now(), ri = t - last, dt = Math.min(0.05, evenDt(ri) / 1000 || 0), p0 = REC ? fs : 0; last = t; acc += dt; wlSync(); govStep(ri, t); if (padOn || padTest) padStep();

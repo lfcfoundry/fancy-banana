@@ -153,7 +153,7 @@ def main():
     fxg = (ROOT / "fxgovernor.js").read_text(encoding="utf-8")   # fx-governor 1.1.1 from JS-modules, comments removed: steps the effects down when frames are slow, never back up (see AGENTS.md)
     pck = (ROOT / "piccache.js").read_text(encoding="utf-8")   # keeps the title screen's big pictures in the browser between visits (see AGENTS.md)
     frp = (ROOT / "fieldreport.js").read_text(encoding="utf-8")   # field-report 1.0.2 from JS-modules, comments removed: the hidden speed report and error log (five quick taps in the top-left corner); it comes FIRST so start-up errors are caught
-    frp = frp + "\nvar LFCReport = FieldReport.start({ name: 'fancy-banana', version: '__STAMP__' });\n"
+    frp = frp + "\nvar LFCReport = FieldReport.start({ name: 'fancy-banana', version: '__STAMP__', frames: 'external' });\n"
     groups = [frp + "\n" + sbk + "\n" + wsb, pck + "\n" + art, savekit + "\n" + parts + "\n" + tgd + "\n" + fxg, game]   # the player copy is shipped as four script blocks, one per group, so the browser compiles them as separate short tasks (no start freeze over 50 ms); top-level names are not renamed, so the blocks share one scope exactly as one block did
     js = "\n".join(groups)
     check_js(js)
