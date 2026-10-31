@@ -1692,7 +1692,7 @@ function layersOf(th) {   // the sky and the three hill bands as plain pictures 
   if (!s.sky || !s.sky.c || !f || !f.c || !m || !m.c || !t || !t.c) return null;
   return { K: K, sky: s.sky.c, bands: [{ L: f, f: .27 }, { L: m, f: .56 }, { L: t, f: .56 }] };
 }
-function back(g, th, dist) { var s = scenery(th); put(g, s.sky.c, 0, 0); if (th === JT) { layerJ(g, s.far, dist * .27); layerJ(g, s.mid, dist * .56); layerJ(g, s.top, dist * .56); return; } layer(g, s.far, dist * .27); layer(g, s.mid, dist * .56); layer(g, s.top, dist * .56); }
+function back(g, th, dist) { var s = scenery(th); put(g, s.sky.c, 0, 0); if (th === JT) { layerJ(g, s.far, dist * .27); layerJ(g, s.mid, dist * .56); layerJ(g, s.top, dist * .56); return; } if (!ART.lite) layer(g, s.far, dist * .27); layer(g, s.mid, dist * .56); layer(g, s.top, dist * .56); }   // the quality governor's second step down (a struggling screen) skips the far hills; a normal screen draws them
 function ground(g, th, off) { var s = scenery(th), P = GP[th]; if (th === JT) { s.ground.y = GY; layerJ(g, s.ground, off); return; } for (var x = -(off % P); x < W; x += P) putX(g, s.ground.c, x, GY); }
 function edgeRows(o) {   // which pixel rows of a finished tile hold the picture (the first and the last): needed to close the one-pixel gaps that rounding can leave between stacked tiles
   var c = o.c, d = o.g.getImageData(0, 0, c.width, c.height).data, w0 = c.width, xs = [.35, .5, .65], i, y, x, a = c.height, b = -1;   // one read of the whole tile (each read can stall a phone's graphics chip), then look at three columns
