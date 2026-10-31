@@ -1,6 +1,6 @@
 # Source and rebuild
 
-`play/index.html` (the game) is the minified build, shipped as four script blocks (one per group in build.py), of the files in this folder. They are the readable source, with all comments, and they are what to edit.
+`play/index.html` (the game) is the minified build of the files in this folder, shipped as four script blocks (one per group in build.py). They are the readable source, with all comments, and they are what to edit.
 
 Rebuild (needs Python 3.9 or newer and esbuild 0.28.2):
 
