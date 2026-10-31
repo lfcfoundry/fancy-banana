@@ -17,6 +17,7 @@ The public repository contains the built game (`play/index.html`) and its readab
 | Page shell, styles, panels | `src/head.html` |
 | Game code | `src/game.js` (plus `src/art.js` for the pictures that are drawn by code) |
 | Joins the source files into the page | `src/build.py` (outputs in `src/dist/`) |
+| Developer changelog (Quick, Details, Deep per version; public) | `CHANGELOG-DEV.md` in the repo; add an entry with each release |
 | Release history, one row per build (the full, technical one) | `CHANGELOG.md` in the working folder, and the copy kept in the private knowledge base at `changelogs-full/fancy-banana/CHANGELOG-full.md`. Write the full entry there for every release. The repository's `changelog.md` is the short, player-facing one |
 | Latest hand-off for a new session | the newest `HANDOFF-fancy-the-banana-*.md` |
 | What the game taught us | the lessons and foundation documents, filed in the private knowledge base under research/2026-10-16-fancy-banana-archive (with the research, audits, QA efficiency notes and all earlier handoffs) |
