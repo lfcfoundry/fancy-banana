@@ -24,9 +24,9 @@ A game anyone can open anywhere: one tap and no sound, so it works where sound i
 
 ## Highlights
 
-| One tap | Easy to learn | Made to be comfortable | Quiet by design | Stages and a water level | Free and private |
-|---|---|---|---|---|---|
-| Tap, click or press Space. Fixed physics at 120 steps a second. | A ? button on the title screen opens a picture-by-picture How to play. No forced tutorial: tap start whenever you like. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser. |
+| One tap | Easy to learn | Made to be comfortable | Quiet by design | Stages and a water level | Free and private | Your progress survives a crash | Easy on slow phones |
+|---|---|---|---|---|---|---|---|
+| Tap, click or press Space. Fixed physics at 120 steps a second. | A ? button on the title screen opens a picture-by-picture How to play. No forced tutorial: tap start whenever you like. | Calm mode, game speed down to 60%, left-handed layout, no flashing. | No sound or music at all: everything is seen and touched, with less to take in at once. | Candy Shop, Jam Jar Pantry, Ice Cream Parlor, Silverware Drawer, Chimp's Navy, the Fruit Garden and Prince Chimp's Jungle Kingdom. | No ads, accounts or purchases, and nothing sent anywhere. Progress is saved in your browser. | Every save is also kept in the browser's strict database, so a force-quit or crash right after a change did not lose it in our Chromium and Firefox kill tests. | A phone we tested drew a frame in about 6.5 ms of a 16.7 ms budget and held 60 FPS. If a screen struggles, quality steps down by itself and the far hills are dropped; other screens look the same. |
 
 ## Free, private and open
 
