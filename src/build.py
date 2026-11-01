@@ -119,7 +119,15 @@ def pack(player_html, head):
     return page, "LZMA, raw bytes"
 
 
+def check_wide(text, what, ok=()):
+    """Chromium stores a page's whole text at 2 bytes per character once it holds one character above U+00FF, so none may get in (use \\u in JS, a CSS escape in CSS, &#x..; in markup)."""
+    bad = sorted({c for c in text if ord(c) > 0xFF and ord(c) not in ok})
+    if bad:
+        fail(what + " has a character above U+00FF: " + ", ".join("U+%04X" % ord(c) for c in bad))
+
+
 def check_js(js):
+    check_wide(js, "script")
     if re.search(r"</script", js, re.I):
         fail("game.js contains </script (any letter case)")
     if re.search(r"<!--[\s\S]*?<script", js, re.I) and "-->" not in js.split("<script", 1)[0].split("<!--", 1)[-1]:
@@ -142,6 +150,7 @@ def stamp():
 
 def main():
     head = (ROOT / "head.html").read_text(encoding="utf-8")
+    check_wide(head, "head.html")
     art = (ROOT / "art.js").read_text(encoding="utf-8")
     savekit = (ROOT / "savekit.js").read_text(encoding="utf-8")   # save-kit from JS-modules, lean build (see AGENTS.md)
     savekit = "/*! save-kit 1.2.1 (JS-modules, https://github.com/lfcfoundry/JS-modules). Copyright (c) 2026 LFC Foundry. MIT License. */\n" + re.sub(r"^/\*!.*?\*/\s*", "", savekit, count=1, flags=re.S)   # the long header comment stays in savekit.js, not in the page

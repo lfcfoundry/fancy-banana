@@ -2,6 +2,14 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.11.01.0300 (beta)
+
+### Quick
+Three in-code characters above U+00FF are now `\u` escapes (curly apostrophe in art.js, ellipsis in fieldreport.js, star in game.js), and `build.py` fails on any other character above U+00FF in the scripts or head. The three license-header emoji are removed (the plain words stay; owner's choice on the round 33 card), so the check covers everything above U+00FF. Landing page apostrophes are `&#x2019;`.
+
+### Details
+Research round 33: one such character makes Chromium store the whole page's text at 2 bytes per character. File size is unchanged (497,680 bytes); the saving is in memory (page text stored at 1 byte per character instead of 2 in Chromium).
+
 ## 2026.10.31.1730 (beta)
 
 ### Quick
