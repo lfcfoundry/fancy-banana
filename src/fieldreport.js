@@ -10,7 +10,7 @@
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function stamp(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); }
   function r1(x) { return Math.round(x * 10) / 10; }
-  function clip(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+  function clip(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '\u2026' : s; }
   function one(s) { return String(s).replace(/\s+/g, ' ').replace(/\|/g, '/'); }
 
   function frameStats(dts) {

@@ -1955,7 +1955,7 @@ var SHORE = [   // the beach is painted in small steps (the warm-up runs one per
   },
   function (g) {   // the lettering, and the small sign that hangs from the gate
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-    var t1 = 'Prince Chimp’s Tropical Jungle Island', sz = 17; g.font = '800 17px ' + FONT; sz = Math.min(17, 17 * 292 / g.measureText(t1).width); g.font = '800 ' + sz.toFixed(1) + 'px ' + FONT;
+    var t1 = 'Prince Chimp\u2019s Tropical Jungle Island', sz = 17; g.font = '800 17px ' + FONT; sz = Math.min(17, 17 * 292 / g.measureText(t1).width); g.font = '800 ' + sz.toFixed(1) + 'px ' + FONT;
     g.strokeStyle = '#3a2a4d'; g.lineWidth = 4; g.strokeText(t1, 180, 238); g.fillStyle = lg(g, 0, 229, 0, 247, [[0, '#fffbe0'], [.5, '#ffe9a0'], [1, '#ffc94a']]); g.fillText(t1, 180, 238);
     g.strokeStyle = '#6a4220'; g.lineWidth = 1.6; [[152, 160, 154, 170], [208, 160, 206, 170]].forEach(function (c) { g.beginPath(); g.moveTo(c[0], c[1]); g.lineTo(c[2], c[3]); g.stroke(); });
     wood(g, 124, 170, 112, 26, '#e8b878', '#b07a3a', 8);

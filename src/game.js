@@ -2876,7 +2876,7 @@ function tickList() {   // the headlines: the story, the news, and rumors that h
   for (i = 0; i < 5; i++) o.push(RUMOR_B[(save.stats.runs * 3 + i * 2) % RUMOR_B.length]);   // five of the eleven rumors, a different five now and then (the strip must stay short enough for one picture)
   return o;
 }
-var TSEP = '   ★   ';
+var TSEP = '   \u2605   ';
 var TKS = null, TKK = 0;   // the headlines drawn once into one long strip; each frame copies the visible part (text drawing is slow in Firefox)
 function tickerStrip() {
   var kk = k, c = document.createElement('canvas'), g2, i, x = 0;
