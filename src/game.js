@@ -2966,7 +2966,13 @@ function bkPart(th, i) {   // one picture of a stage's layers per call (0 the sk
   var li = ART.layersOf(th), cpl = stageEl.clientWidth / W, K, r = bkCache[th] || (bkCache[th] = { els: [], bands: [] }), e, c, n, j, b;
   if (!li || r.els[i]) return !!li; K = li.K;
   if (i === 0) { e = document.createElement('canvas'); e.width = li.sky.width; e.height = li.sky.height; e.getContext('2d').drawImage(li.sky, 0, 0); e.style.top = '0px'; e.style.width = (li.sky.width / K * cpl) + 'px'; e.style.height = (li.sky.height / K * cpl) + 'px'; e.style.willChange = 'auto'; r.els[0] = e; return true; }
-  b = li.bands[i - 1]; c = b.L.c; n = Math.ceil(W * K / c.width) + 1;
+  b = li.bands[i - 1];
+  if (b.L.ch) {   // the garden: one journey, no wrap-around. Its screen-wide pieces (the very canvases the canvas path stamps, so no extra memory) sit side by side in a box that slides
+    e = document.createElement('div'); e.style.top = (Math.round(b.L.y * K) / K * cpl) + 'px'; e.style.height = (b.L.ch[0].height / K * cpl) + 'px'; e.style.width = (b.L.P * cpl) + 'px';
+    for (j = 0; j < b.L.ch.length; j++) { c = b.L.ch[j]; c.style.cssText = 'will-change:auto;position:absolute;top:0;left:' + (j * W * cpl) + 'px;width:' + (c.width / K * cpl) + 'px;height:' + (c.height / K * cpl) + 'px'; e.appendChild(c); }
+    r.els[i] = e; r.bands[i - 1] = { el: e, pc: 0, mx: Math.max(0, b.L.P - W), f: b.f }; return true;
+  }
+  c = b.L.c; n = Math.ceil(W * K / c.width) + 1;
   e = document.createElement('canvas'); e.width = c.width * n; e.height = c.height; for (j = 0; j < n; j++) e.getContext('2d').drawImage(c, j * c.width, 0);
   e.style.top = (Math.round(b.L.y * K) / K * cpl) + 'px'; e.style.width = (e.width / K * cpl) + 'px'; e.style.height = (c.height / K * cpl) + 'px';
   r.els[i] = e; r.bands[i - 1] = { el: e, pc: c.width / K, f: b.f }; return true;
@@ -2981,17 +2987,17 @@ function bkBuild(th) {   // put this stage's layers on the page (building what t
 function bkNext() { return themeOf(stage + 1); }
 function bkPre() {   // between frames of play: build the next stage's layers one picture per frame, once its scenery exists
   var th = bkNext(), r, i;
-  if (th === bkTh || th === ART.journeyTheme || !ART.sceneReady(th)) return;
+  if (th === bkTh || !ART.sceneReady(th)) return;
   r = bkCache[th]; if (r && r.els.length >= 4 && r.els[3]) return;
   for (i = 0; i < 4; i++) if (!(bkCache[th] && bkCache[th].els[i])) { bkPart(th, i); return; }
 }
-function bkWant(th) { return BKMODE && state === 'play' && !BAL && !FT && ftStill < 0.01 && !mirOn() && nightA <= 0.01 && zoomK <= 1.001 && punchT <= 0 && flipSX() === 1 && !cssF && th !== ART.journeyTheme; }   // never on a backward stage: turning the canvas over by CSS while the page layers sit under it froze the picture in Firefox (the owner's pantry-to-ice-cream crash)
+function bkWant(th) { return BKMODE && state === 'play' && !BAL && !FT && ftStill < 0.01 && !mirOn() && nightA <= 0.01 && zoomK <= 1.001 && punchT <= 0 && flipSX() === 1 && !cssF; }   // never on a backward stage: turning the canvas over by CSS while the page layers sit under it froze the picture in Firefox (the owner's pantry-to-ice-cream crash)
 function bkDraw(th, d) {
   var i, o, cpl, x;
   if (th !== bkTh && !bkBuild(th)) { bkHide(); return false; }
   if (!bkOn) { bkOn = true; bkEl.hidden = false; bkLast = []; }
   cpl = stageEl.clientWidth / W; bkPre();
-  for (i = 0; i < bkBands.length; i++) { o = (d * bkBands[i].f) % bkBands[i].pc; x = (-o * cpl).toFixed(3); if (bkLast[i] !== x) { bkLast[i] = x; bkBands[i].el.style.transform = 'translate3d(' + x + 'px,0,0)'; } }
+  for (i = 0; i < bkBands.length; i++) { o = bkBands[i].pc ? (d * bkBands[i].f) % bkBands[i].pc : Math.max(0, Math.min(d * bkBands[i].f, bkBands[i].mx)); x = (-o * cpl).toFixed(3); if (bkLast[i] !== x) { bkLast[i] = x; bkBands[i].el.style.transform = 'translate3d(' + x + 'px,0,0)'; } }
   ctx.clearRect(0, 0, W, H); return true;
 }
 function drawBack() { if (BAL) { bkHide(); ART.bal.back(ctx, dist, BAL.night); return; } if (ftStill >= 0.5) { bkHide(); crowd.time = time; if (ART.arena.draw(ctx, crowd)) return; } var th = shownTheme(); if (bkWant(th) && bkDraw(th, bd(th))) return; bkHide(); ART.back(ctx, th, bd(th)); }

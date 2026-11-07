@@ -1687,8 +1687,8 @@ function layerJ(g, L, off) {   // the garden's long journey pictures: screen-wid
 }   // the garden's long journey pictures
 function sceneReady(th) { return !!SET[th] || !!(PLAN[th] && PLAN[th].i >= PLAN[th].sc); }   // the sky, hills and ground of this stage are built (asking for layersOf then costs nothing)
 function layersOf(th) {   // the sky and the three hill bands as plain pictures (for a browser that slides them itself); null where the stage is built differently
-  if (th === JT) return null;
   var s = scenery(th), f = s.far, m = s.mid, t = s.top;
+  if (th === JT) return (s.sky && s.sky.c && f && f.ch && m && m.ch && t && t.ch) ? { K: K, sky: s.sky.c, bands: [{ L: f, f: .27 }, { L: m, f: .56 }, { L: t, f: .56 }] } : null;   // the garden's bands are screen-wide pieces (ch), not one picture (c)
   if (!s.sky || !s.sky.c || !f || !f.c || !m || !m.c || !t || !t.c) return null;
   return { K: K, sky: s.sky.c, bands: [{ L: f, f: .27 }, { L: m, f: .56 }, { L: t, f: .56 }] };
 }
