@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.11.07.1110 (beta)
+
+### Quick
+`ART.layersOf` now returns the Garden's sky and three bands (their screen-wide `ch` pieces), `bkPart` puts the pieces in a sliding box (`#bk div`), and `bkWant` / `bkPre` no longer skip the journey theme. Firefox only (`BKMODE`); Chromium and WebKit draw on the canvas as before.
+
+### Details
+Laptop (Firefox 160, 16 cores, 1536x960 at 1.25x, early-stop A/B, 4 rounds): the old way is 213% of the page layers (range 193 to 234%; 5.03 vs 2.77 ms per frame; lower is faster). Free running both held 60 FPS (median 16.7 ms). Cloud Firefox 158 (4 cores): 2.60 vs 1.50 ms, and the old way dropped frames (slowest 5% of gaps 33.3 vs 17.2 ms). Look: page layers vs canvas at the same distance differ in 1.2% of pixels on stage 5 (max channel difference 57 of 255) against 0.5% (max 25) on stage 4, which already ships this way.
+
+### Deep
+The pieces are the same canvases the canvas path stamps, so no extra memory; each is set to `will-change: auto` and only the box carries the transform. The first cloud timings (2x swings) were wrong because the test banana died and drew a different way; the tester now holds `state` at play. Owner decided on a card.
+
 ## 2026.11.01.0300 (beta)
 
 ### Quick
