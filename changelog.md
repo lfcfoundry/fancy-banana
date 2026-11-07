@@ -2,6 +2,10 @@
 
 A short list of what you will notice in each version, newest first. The version number is shown under the title on the title screen. A developer version with more detail is in [CHANGELOG-DEV.md](CHANGELOG-DEV.md). The full technical changelog (numbers and the browsers each build was tested in) is kept by the maker outside this page.
 
+## 2026.11.07.1110 (beta)
+
+- In Firefox, the Fruit Garden's sky and hills now glide as separate layers, as the other stages already do. On a Firefox laptop each picture takes less than half as long to draw in the Garden. The picture can differ from before by a hair at some edges. Other browsers are unchanged.
+
 ## 2026.11.01.0300 (beta)
 
 - A small behind-the-scenes cleanup: the game file no longer holds the few special characters that made Chrome store the whole page at double size in memory. Nothing looks different.
