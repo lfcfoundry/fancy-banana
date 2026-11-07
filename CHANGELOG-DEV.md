@@ -2,6 +2,17 @@
 
 What changed in each version, newest first, for developers, in three depths: Quick (what changed and whether anything breaks), Details (the main numbers and how it was checked) and Deep (the full record: design reasons, measurements, tests). Players read [changelog.md](changelog.md). Versions before 2026.10.22 were recorded per build; the older ones are grouped here by day.
 
+## 2026.11.08.0100 (beta)
+
+### Quick
+`drawTrail()` joins consecutive segments with the same colour step (`qa`, 24 levels) into one path and strokes it once with `trailStroke(qa)` (width steps with the level too). The rainbow trail keeps the old per-segment drawing.
+
+### Details
+Trail draw per frame (section timer, cloud, lower is faster): Firefox 158 0.393 to 0.317 ms (0.81x); Chromium 155 0.017 to 0.015 ms (0.88x). About 0.08 ms in Firefox, half a percent of a 16.7 ms frame. Pictures at 2x: 15,434 of 1,470,016 pixels differ (max channel difference 118 of 255), along the trail only. Loads clean in Chromium 155, Firefox 158 and WebKitGTK 2.52.6; ratio-2 check (Chromium) 0.53 to 1.44 M canvas pixels.
+
+### Deep
+Owner shipped it on a card after the recommendation to skip it (small gain, slight look change). Overlaps between segments of one step are no longer drawn twice (so a translucent trail is a hair lighter at joints), and the width is the step width instead of the exact per-segment width. Pictures: before left, after right in the maker's project files.
+
 ## 2026.11.07.1110 (beta)
 
 ### Quick

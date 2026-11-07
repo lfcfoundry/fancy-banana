@@ -3118,10 +3118,22 @@ function bunchPic() { if (!BUNCH || BUNCH.kk !== k) { var c = document.createEle
 function rollNow() { return state === 'play' && spinT > 0 ? spinPhase() : state === 'play' && celT > 0 ? (1 - celT / CFG.celSecs) * 6.2832 : -1; }   // Fancy's roll about his long axis (the football spiral and the win roll), or -1
 function drawBuddies(ey, pass) { var sw = clamp(-vy / 3000, -0.2, 0.2) + Math.sin(time * 3.2) * 0.04, ph = rollNow(), c = ph >= 0 ? Math.cos(ph) : 1; if ((ph >= 0 && Math.sin(ph) > 0 ? 1 : 0) !== pass) return; ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); ctx.translate(-30, -4); if (ph >= 0) ctx.scale(1, Math.abs(c) < 0.04 ? 0.04 : c); ctx.rotate(-0.3 + sw); ctx.drawImage(bunchPic(), -30 * BUNCH_S, -46 * BUNCH_S, 60 * BUNCH_S, 80 * BUNCH_S); ctx.restore(); }   // worn like a rucksack on his back; in a roll the whole pack turns about Fancy's long axis with him (squashing edge-on, flipping over, passing behind and in front of his body)
 function bunchStrap(ey) { var ph = rollNow(), c = ph >= 0 ? Math.cos(ph) : 1; if (c < 0.05) return; ctx.save(); ctx.translate(bx, by + ey); ctx.rotate(angle); if (ph >= 0) { ctx.translate(0, -5); ctx.scale(1, c); ctx.translate(0, 5); } ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-19, -9); ctx.quadraticCurveTo(-9, 3, -13, 13); ctx.strokeStyle = INK; ctx.lineWidth = 3.8; ctx.stroke(); ctx.strokeStyle = '#8a4e20'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }   // the strap across his middle (it goes round the back of the body for half of a roll)
+function trailStroke(qa) { ctx.strokeStyle = TRC1[qa]; ctx.lineWidth = 4 + qa / 24 * 22; ctx.stroke(); ctx.strokeStyle = TRC2[qa]; ctx.lineWidth = 2 + qa / 24 * 8; ctx.stroke(); }
 function drawTrail() {
   var n = trail.length, i, p, q, a, pw = state === 'launch' ? clamp((launchT / CFG.launchSecs - 0.12) / 0.4, 0, 1) : state === 'play' ? 0.25 + 0.75 * clamp(boost / CFG.boostV + kCh, 0, 1) : 0, qa;
   if (n < 2 || pw <= 0) return;
   ctx.lineCap = 'round'; var rb = rainOn();
+  if (!rb) {   // segments with the same colour step share one path and one pair of strokes (width steps with the colour: 24 levels), which is far fewer draw calls
+    var lastQ = -1;
+    for (i = 1; i < n; i++) {
+      p = trail[i - 1]; q = trail[i]; a = 1 - q.t / 0.5; if (a <= 0) continue;
+      qa = Math.round(a * pw * 24);
+      if (qa !== lastQ) { if (lastQ >= 0) trailStroke(lastQ); ctx.beginPath(); lastQ = qa; }
+      ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+    }
+    if (lastQ >= 0) trailStroke(lastQ);
+    ctx.lineCap = 'butt'; drawEmpTrail(pw); return;
+  }
   for (i = 1; i < n; i++) {
     p = trail[i - 1]; q = trail[i]; a = 1 - q.t / 0.5; if (a <= 0) continue;
     qa = Math.round(a * pw * 24);
